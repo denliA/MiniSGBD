@@ -14,7 +14,7 @@ FileList getList(DBParams *p) {
     strcat(path, p->DBPath);
     strcat(path, LISTNAME);
     
-    file = fopen(path, 'r');
+    file = fopen(path, "r");
     if (file == NULL) { // if the file does not exist yet (the DB was never initialized)
         fl.list = NULL;
         return fl; 
@@ -23,9 +23,9 @@ FileList getList(DBParams *p) {
     unsigned char byte;
     fread(&byte, 1, 1, file);
     
-    if(byte != DBParams->maxPagesPerFile) {
+    if(byte != p->maxPagesPerFile) {
         fprintf(stderr, "E: [DiskManager] expected %hhu max pages per file for the DB storage, got %hhu in path %s\n",
-                DBParams->maxPagesPerFile, file_max_pages_per_file, p->DBPath);
+                p->maxPagesPerFile, byte, p->DBPath);
         exit(-1);
     }
     
@@ -37,7 +37,7 @@ FileList getList(DBParams *p) {
         if(status == 0)
             continue;
         if(fl.nfiles == fl.size)
-            fl.list = (PagesStatus *) realloc( sizeof(PagesStatus) * (size+=DEF_ALLOC_LIST) );
+            fl.list = (PagesStatus *) realloc( fl.list, sizeof(PagesStatus) * (fl.size+=DEF_ALLOC_LIST) );
         fl.list[fl.nfiles++] = byte;
     }
     
@@ -54,22 +54,21 @@ FileList initList(void) {
     return fl;
 }
 
-size_t addFile(FileList fl) {
+uint32_t addFile(FileList fl) {
     if(fl.nfiles == fl.size)
-            fl.list = (PagesStatus *) realloc( sizeof(PagesStatus) * (size+=DEF_ALLOC_LIST) );
-    fl.list[nfiles++] = 0;
+            fl.list = (PagesStatus *) realloc( fl.list, sizeof(PagesStatus) * (fl.size+=DEF_ALLOC_LIST) );
+    fl.list[fl.nfiles++] = 0;
 }
 
 void saveList(FileList fl, DBParams *p) {
     FILE *file;
-    FileList fl;
     
     char *path = (char *) malloc(strlen(p->DBPath) + strlen(LISTNAME) + 1);
     path[0] = '\0';
     strcat(path, p->DBPath);
     strcat(path, LISTNAME);
     
-    file = fopen(path, 'w');
+    file = fopen(path, "w");
     
     for(int i = 0; i<fl.nfiles; i++) {
         fwrite(&(fl.list[i]), 1, 1, file);

@@ -1,5 +1,6 @@
 
-
+#include <stdlib.h>
+#include <stdio.h>
 #include "DiskManager.h"
 #include "FileList.h"
 #include "DBParams.h"
@@ -50,24 +51,25 @@ void DesallocPage(PageId pi) { // todo: ajouter warning si on désalloue un truc
 
 void ReadPage(PageId pi, uint8_t *buffer) { //todo : gestion d'erreurs ?
     char *file_name = getFilePath(params.DBPath, pi.FileIdx);
-    FILE *file = fopen(file_name, 'r');
+    FILE *file = fopen(file_name, "r");
     fseek(file, pi.PageIdx * params.pageSize, SEEK_SET);
-    fread(buffer, 1, pi.pageSize, file);
+    fread(buffer, 1, params.pageSize, file);
     fclose(file);
 }
 
 void WritePage(PageId pi, const uint8_t *buffer) {
 	char *file_name = getFilePath(params.DBPath, pi.FileIdx);
-    FILE *file = fopen(file_name, 'w');
+    FILE *file = fopen(file_name, "w");
     fseek(file, pi.PageIdx * params.pageSize, SEEK_SET);
-    fwrite(buffer, 1, pi.pageSize, file);
+    fwrite(buffer, 1, params.pageSize, file);
     fclose(file);
 }
 
 static uint32_t create_new_file(void) {
 	uint32_t next_file_id = addFile(filelist);
 	char *file_name = getFilePath(params.DBPath, next_file_id);
-	FILE *file = fopen(file_name, 'w');
+	FILE *file = fopen(file_name, "w");
+	void *tmp = calloc(params.pageSize, 1);
     fwrite(tmp, params.maxPagesPerFile, params.pageSize, file);
     fclose(file);
     free(tmp);
@@ -75,5 +77,3 @@ static uint32_t create_new_file(void) {
     fclose(file);
     return next_file_id;
 }
-
-

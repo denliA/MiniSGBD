@@ -2,7 +2,8 @@
 
 #include <stdio.h>
 
-#include <DiskManager/DBParams.h>
+#include "DiskManager/DBParams.h"
+#include "DiskManager/DiskManager.h"
 
 extern DBParams params;
 
