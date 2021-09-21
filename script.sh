@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 
-cc CODE/main.c -o bin/MiniSGBD
+make
 ./bin/MiniSGBD
