@@ -17,6 +17,7 @@ void initDiskManager(void) {
     if(filelist.list == NULL) { // le fichier n'existe pas encore
         filelist = initList();
     }
+    on_exit(endDiskManager, NULL);
 }
 
 PageId AllocPage(void) {
@@ -66,7 +67,7 @@ void WritePage(PageId pi, const uint8_t *buffer) {
 }
 
 static uint32_t create_new_file(void) {
-	uint32_t next_file_id = addFile(filelist);
+	uint32_t next_file_id = addFile(&filelist);
 	char *file_name = getFilePath(params.DBPath, next_file_id);
 	FILE *file = fopen(file_name, "w");
 	void *tmp = calloc(params.pageSize, 1);
@@ -74,6 +75,9 @@ static uint32_t create_new_file(void) {
     fclose(file);
     free(tmp);
     free (file_name);
-    fclose(file);
     return next_file_id;
+}
+
+void endDiskManager(int status, void *thing) {
+    saveList(filelist, &params);
 }

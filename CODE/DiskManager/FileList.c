@@ -3,15 +3,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include "FileList.h"
 
 FileList getList(DBParams *p) {
     FILE *file;
     FileList fl;
     
-    char *path = (char *) malloc(strlen(p->DBPath) + strlen(LISTNAME) + 1);
+    char *path = (char *) malloc(strlen(p->DBPath) + 1 + strlen(LISTNAME) + 1);
     path[0] = '\0';
     strcat(path, p->DBPath);
+    strcat(path, "/");
     strcat(path, LISTNAME);
     
     file = fopen(path, "r");
@@ -54,21 +56,25 @@ FileList initList(void) {
     return fl;
 }
 
-uint32_t addFile(FileList fl) {
-    if(fl.nfiles == fl.size)
-            fl.list = (PagesStatus *) realloc( fl.list, sizeof(PagesStatus) * (fl.size+=DEF_ALLOC_LIST) );
-    fl.list[fl.nfiles++] = 0;
+uint32_t addFile(FileList *fl) {
+    if(fl->nfiles == fl->size)
+            fl->list = (PagesStatus *) realloc( fl->list, sizeof(PagesStatus) * (fl->size+=DEF_ALLOC_LIST) );
+    fl->list[fl->nfiles++] = 0;
+    return fl->nfiles-1;
 }
 
 void saveList(FileList fl, DBParams *p) {
     FILE *file;
     
-    char *path = (char *) malloc(strlen(p->DBPath) + strlen(LISTNAME) + 1);
+    char *path = (char *) malloc(strlen(p->DBPath)+ 1 + strlen(LISTNAME) + 1);
     path[0] = '\0';
     strcat(path, p->DBPath);
+    strcat(path, "/");
     strcat(path, LISTNAME);
     
     file = fopen(path, "w");
+    
+    fwrite(&p->maxPagesPerFile, 1, 1, file);
     
     for(int i = 0; i<fl.nfiles; i++) {
         fwrite(&(fl.list[i]), 1, 1, file);
@@ -81,7 +87,7 @@ char *getFilePath(char *DBPath, uint32_t FileIdx) {
 	char *path = (char *) malloc( strlen(DBPath) + 2 + 9 + 3  +  1);
 	strcpy(path, DBPath);
 	strcat(path, "/F");
-	sprintf(path+strlen(path), "%u", FileIdx);
-	strcat(path, ".db");
+	sprintf(path+strlen(path), "%"PRIu32, FileIdx);
+	strcat(path, ".df");
 	return path; 
 }

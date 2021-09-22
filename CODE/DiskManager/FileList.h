@@ -22,7 +22,7 @@ typedef struct {
 
 FileList getList(DBParams *p);
 FileList initList(void);
-uint32_t addFile(FileList fl);
+uint32_t addFile(FileList *fl);
 void saveList(FileList fl, DBParams *p);
 char *getFilePath(char *DBPath, uint32_t FileIdx);
 
