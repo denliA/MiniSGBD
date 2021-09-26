@@ -17,7 +17,7 @@ void initDiskManager(void) {
     if(filelist.list == NULL) { // le fichier n'existe pas encore
         filelist = initList();
     }
-    on_exit(endDiskManager, NULL);
+    atexit(endDiskManager);
 }
 
 PageId AllocPage(void) {
@@ -78,6 +78,6 @@ static uint32_t create_new_file(void) {
     return next_file_id;
 }
 
-void endDiskManager(int status, void *thing) {
+void endDiskManager(void) {
     saveList(filelist, &params);
 }

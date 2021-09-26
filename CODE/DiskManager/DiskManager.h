@@ -10,6 +10,6 @@ PageId AllocPage(void);
 void ReadPage(PageId, uint8_t *);
 void WritePage(PageId, const uint8_t *);
 void DesallocPage(PageId);
-void endDiskManager(int status, void *thing);
+void endDiskManager(void);
 
 #endif
