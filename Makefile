@@ -1,5 +1,8 @@
 
-all : MiniSGBD clean
+all : MiniSGBD
+
+windows : MiniSGBD win_clean
+unix : clean
 
 MiniSGBD: main.o DiskManager.o FileList.o bin
 	gcc -o bin/MiniSGBD DiskManager.o FileList.o main.o
@@ -18,3 +21,6 @@ FileList.o:
 
 clean:
 	rm -f *.o
+
+win_clean:
+	del /F *.o
