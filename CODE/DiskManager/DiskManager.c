@@ -21,7 +21,6 @@ void initDiskManager(void) {
 }
 
 PageId AllocPage(void) {
-    char new_file_name[16] = "./F";
     FILE *f;
     PageId pid;
     uint32_t file;
@@ -67,10 +66,10 @@ void WritePage(PageId pi, const uint8_t *buffer) {
 }
 
 static uint32_t create_new_file(void) {
-	uint32_t next_file_id = addFile(&filelist);
-	char *file_name = getFilePath(params.DBPath, next_file_id);
-	FILE *file = fopen(file_name, "w");
-	void *tmp = calloc(params.pageSize, 1);
+    uint32_t next_file_id = addFile(&filelist);
+    char *file_name = getFilePath(params.DBPath, next_file_id);
+    FILE *file = fopen(file_name, "w");
+    void *tmp = calloc(params.pageSize, 1);
     fwrite(tmp, params.maxPagesPerFile, params.pageSize, file);
     fclose(file);
     free(tmp);
