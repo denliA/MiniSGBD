@@ -7,8 +7,8 @@
 
 void initDiskManager(void);
 PageId AllocPage(void);
-void ReadPage(PageId, uint8_t *);
-void WritePage(PageId, const uint8_t *);
+int ReadPage(PageId, uint8_t *);
+int WritePage(PageId, const uint8_t *);
 void DesallocPage(PageId);
 void endDiskManager(void);
 

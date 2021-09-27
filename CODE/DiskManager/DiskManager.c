@@ -49,20 +49,30 @@ void DesallocPage(PageId pi) { // todo: ajouter warning si on désalloue un truc
         MAKE_NOT_ALLOC(filelist, pi.FileIdx, pi.PageIdx);
 }
 
-void ReadPage(PageId pi, uint8_t *buffer) { //todo : gestion d'erreurs ?
+int ReadPage(PageId pi, uint8_t *buffer) { //todo : gestion d'erreurs ?
+    if (!IS_ALLOC(filelist, pi.FileIdx, pi.PageIdx)) {
+        fprintf(stderr, "E: [DiskManager] Demande de lecture d'une page non allouée (File %u, Page %u)\n", pi.FileIdx, pi.PageIdx);
+        return -1;
+    }
     char *file_name = getFilePath(params.DBPath, pi.FileIdx);
     FILE *file = fopen(file_name, "r");
     fseek(file, pi.PageIdx * params.pageSize, SEEK_SET);
     fread(buffer, 1, params.pageSize, file);
     fclose(file);
+    return 0;
 }
 
-void WritePage(PageId pi, const uint8_t *buffer) {
+int WritePage(PageId pi, const uint8_t *buffer) {
+    if (!IS_ALLOC(filelist, pi.FileIdx, pi.PageIdx)) {
+        fprintf(stderr, "E: [DiskManager] Demande d'écriture dans une page non allouée (File %u, Page %u)\n", pi.FileIdx, pi.PageIdx);
+        return -1;
+    }
 	char *file_name = getFilePath(params.DBPath, pi.FileIdx);
     FILE *file = fopen(file_name, "w");
     fseek(file, pi.PageIdx * params.pageSize, SEEK_SET);
     fwrite(buffer, 1, params.pageSize, file);
     fclose(file);
+    return 0;
 }
 
 static uint32_t create_new_file(void) {
