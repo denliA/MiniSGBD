@@ -9,8 +9,8 @@
 
 #define FLAG_ALLOC(pageid) (1 << pageid)
 #define IS_ALLOC(filelist, fileid, pageid) ( (filelist.list[fileid]) & FLAG_ALLOC(pageid) )
-#define MAKE_ALLOC(filelist, fileid, pageid) ( (filelist.list[fileid]) |= FLAG_ALLOC(pageid) )
-#define MAKE_NOT_ALLOC(filelist, fileid, pageid) ( (filelist.list[fileid]) &= ~FLAG_ALLOC(pageid) )
+#define MARK_ALLOC(filelist, fileid, pageid) ( (filelist.list[fileid]) |= FLAG_ALLOC(pageid) )
+#define MARK_NOT_ALLOC(filelist, fileid, pageid) ( (filelist.list[fileid]) &= ~FLAG_ALLOC(pageid) )
 
 typedef uint8_t PagesStatus;
 

@@ -28,7 +28,7 @@ PageId AllocPage(void) {
     for (file = 0; file < filelist.nfiles; file++) {
         for(int page=0; page<4; page++) {
             if ( !IS_ALLOC(filelist, file, page) ) {
-                MAKE_ALLOC(filelist, file, page);
+                MARK_ALLOC(filelist, file, page);
                 pid.FileIdx = file;
                 pid.PageIdx = page;
                 return pid;
@@ -38,7 +38,7 @@ PageId AllocPage(void) {
 
     create_new_file();
 
-    MAKE_ALLOC(filelist, file, 0);
+    MARK_ALLOC(filelist, file, 0);
     pid.FileIdx = file;
     pid.PageIdx = 0;
     return pid;
@@ -46,7 +46,7 @@ PageId AllocPage(void) {
 
 void DesallocPage(PageId pi) { // todo: ajouter warning si on désalloue un truc non alloué ou sur un fichier non existant ?
     if(pi.FileIdx < filelist.nfiles && pi.PageIdx < 4);
-        MAKE_NOT_ALLOC(filelist, pi.FileIdx, pi.PageIdx);
+        MARK_NOT_ALLOC(filelist, pi.FileIdx, pi.PageIdx);
 }
 
 int ReadPage(PageId pi, uint8_t *buffer) { //todo : gestion d'erreurs ?
