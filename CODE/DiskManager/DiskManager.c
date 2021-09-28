@@ -21,7 +21,6 @@ void initDiskManager(void) {
 }
 
 PageId AllocPage(void) {
-    char new_file_name[16] = "./F";
     FILE *f;
     PageId pid;
     uint32_t file;
