@@ -9,8 +9,9 @@ typedef struct _Frame{
     //Id de la page voulue dans la DB 
     PageId pageId;
     int pin_count;
-    unsigned dirty : 1;
+    //instant du dernier free
     unsigned long lastUnpin;
+    unsigned dirty : 1;  //il fait un seul bit
 } Frame;
     
 #endif
