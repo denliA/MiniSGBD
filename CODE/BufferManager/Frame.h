@@ -7,7 +7,7 @@ typedef struct _Frame{
     uint8_t *buffer;
     PageId pageId;
     int pin_count;
-    unsigned dirty : 1; //il fait un seul bit
+    unsigned dirty : 1;
 } Frame;
     
 #endif
