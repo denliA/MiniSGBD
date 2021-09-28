@@ -10,6 +10,7 @@ typedef struct _Frame{
     PageId pageId;
     int pin_count;
     unsigned dirty : 1;
+    unsigned long lastUnpin;
 } Frame;
     
 #endif
