@@ -39,7 +39,17 @@ void FreePage(PageId pageId, int valdirty){
 }
     
 
-    
+
+
+void FlushAll(){
+	for (int i=0;i<nframes;i++){
+		if (frames[i].dirty==1){
+			WritePage(frames[i].pageId,frames[i].buffer);
+	//...
+		}
+		//...//...
+	}
+}
 
 
 void initBufferManager(DBParams params, uint32_t memoire) {
