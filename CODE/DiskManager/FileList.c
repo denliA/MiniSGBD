@@ -26,7 +26,7 @@ FileList getList(DBParams *p) {
     fread(&byte, 1, 1, file);
     
     if(byte != p->maxPagesPerFile) {
-        fprintf(stderr, "E: [DiskManager] expected %hhu max pages per file for the DB storage, got %hhu in path %s\n",
+        fprintf(stderr, "E: [FileList] expected %hhu max pages per file for the DB storage, got %hhu in path %s\n",
                 p->maxPagesPerFile, byte, p->DBPath);
         exit(-1);
     }

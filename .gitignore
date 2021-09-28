@@ -1,4 +1,16 @@
 
+# executables et fichiers de TD de deniza
 bin/*
 TD/*
 
+# dossiers eclipse 
+.cproject
+.project
+.settings/*
+
+# fichiers de la base de données 
+DB/*
+~DB/dummy
+
+.DS_Store
+.filelist
