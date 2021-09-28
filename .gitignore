@@ -11,3 +11,6 @@ TD/*
 # fichiers de la base de données 
 DB/*
 ~DB/dummy
+
+.DS_Store
+.filelist
