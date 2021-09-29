@@ -20,6 +20,7 @@ uint8_t *GetPage(PageId pageId){
 			return frames[i].buffer;
 		}
 
+	//a faire: strategie de remplacement en cas de buffer plein
 
 	}
 }
@@ -58,7 +59,7 @@ void FlushAll(){
 		}
 		frames[i].pin_count=0;
 		free(frames[i].buffer);
-		//...//...
+
 
 	}
 }
