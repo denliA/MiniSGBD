@@ -13,7 +13,15 @@ static size_t nframes;
 static count = 0;
 
 uint8_t *GetPage(PageId pageId){
+	//vérifier si la page existe en mémoire
+	int i;
+	for (i=0;i<nframes;i++){
+		if (frames[i].pageId == pageId){
+			return frames[i].buffer;
+		}
 
+
+	}
 }
 
 void FreePage(PageId pageId, int valdirty){
@@ -45,9 +53,13 @@ void FlushAll(){
 	for (int i=0;i<nframes;i++){
 		if (frames[i].dirty==1){
 			WritePage(frames[i].pageId,frames[i].buffer);
-	//...
+			frames[i].dirty=0;
+
 		}
+		frames[i].pin_count=0;
+		free(frames[i].buffer);
 		//...//...
+
 	}
 }
 
