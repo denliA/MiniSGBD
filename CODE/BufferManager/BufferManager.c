@@ -16,11 +16,13 @@ uint8_t *GetPage(PageId pageId){
 	//vérifier si la page existe en mémoire
 	int i;
 	for (i=0;i<nframes;i++){
-		if (frames[i].pageId == pageId){
+		if (equalPageId(frames[i].pageId, pageId)){
 			return frames[i].buffer;
 		}
 
 	//a faire: strategie de remplacement en cas de buffer plein
+	// 1 - Methode MRU
+
 
 	}
 }
@@ -30,7 +32,7 @@ void FreePage(PageId pageId, int valdirty){
 	int i;
 	//recherche de la bonne case dans le tableau frames
 	for (i=0;i<nframes;i++){
-		if (frames[i].pageId == pageId){
+		if (equalPageId(frames[i].pageId, pageId)){
 			break;
 		}
 	}
@@ -75,4 +77,8 @@ void initBufferManager(DBParams params, uint32_t memoire) {
         frames[i].buffer = bpool;
         bpool += params.pageSize;
     }
+}
+
+int equalPageId(PageId p1, PageId p2){
+	return ((p1.FileIdx == p2.FileIdx) && (p1.PageIdx == p2.PageIdx));
 }
