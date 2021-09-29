@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "DiskManager.h"
-#include "FileList.h"
-#include "DBParams.h"
+#include "../DiskManager/DiskManager.h"
+#include "../DiskManager/FileList.h"
+#include "../DiskManager/DBParams.h"
 #include "Frame.h"
 #include "BufferManager.h"
 
@@ -34,7 +34,7 @@ void FreePage(PageId pageId, int valdirty){
 		}
 	}
 	if (i==nframes){ //page pas trouvée
-		fprintf(stderr, "Page de id %d pas trouvée",pageId);
+		fprintf(stderr, "Page de id %d pas trouvee",pageId);
 		return;
 	}
 	frames[i].pin_count--;
