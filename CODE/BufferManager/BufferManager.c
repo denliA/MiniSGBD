@@ -6,25 +6,37 @@
 #include "Frame.h"
 #include "BufferManager.h"
 
-//variable globale de buffer pool
+static Frame *findMRU(void); // stratégie MRU. Retourne la Frame contenant la page à décharger.
+static Frame *findLRU(void);
 
+//variable globale de buffer pool
 static Frame *frames;
 static size_t nframes;
 static count = 0;
+static Frame *lastFrame= NULL; // utilisé dans la stratégie MRU
 
 uint8_t *GetPage(PageId pageId){
-	//v�rifier si la page existe en m�moire
+	//vérifier si la page existe en mémoire
 	int i;
 	for (i=0;i<nframes;i++){
-		if (equalPageId(frames[i].pageId, pageId)){
+		if (equalPageId(frames[i].pageId, pageId))
 			return frames[i].buffer;
-		}
-
-	//a faire: strategie de remplacement en cas de buffer plein
-	// 1 - Methode MRU
-
-
 	}
+
+	// 1 - Methode MRU
+    Frame *replaced = findMRU();
+    if(replaced == NULL)  { // aucune frame disponible
+        return NULL;
+    }
+    
+    if (replaced->dirty == 1)
+        WritePage(replaced.pageId, replaced.buffer);
+    
+    replaced->pageId = pageId;
+    replaced->dirty = 0;
+    replaced->pin_count = 1;
+    return replaced.buffer;
+
 }
 
 void FreePage(PageId pageId, int valdirty){
@@ -35,15 +47,15 @@ void FreePage(PageId pageId, int valdirty){
 		if (equalPageId(frames[i].pageId, pageId)){
 			break;
 		}
-	}
-	if (i==nframes){ //page pas trouvée
+	}​
+	if (i==nframes){ //page pas trouvÃ©e
 		fprintf(stderr, "Page de id %d pas trouvee",pageId);
 		return;
 	}
 	frames[i].pin_count--;
 	if (frames[i].pin_count==0)
 		frames[i].lastUnpin=count;
-	//attention si l'ancienne valeur de dirty vaut 1, elle reste à 1
+	//attention si l'ancienne valeur de dirty vaut 1, elle reste Ã  1
 	if (frames[i].dirty==0)
 		frames[i].dirty=valdirty;
 
@@ -57,11 +69,9 @@ void FlushAll(){
 		if (frames[i].dirty==1){
 			WritePage(frames[i].pageId,frames[i].buffer);
 			frames[i].dirty=0;
-
 		}
 		frames[i].pin_count=0;
 		free(frames[i].buffer);
-
 
 	}
 }
@@ -81,4 +91,21 @@ void initBufferManager(DBParams params, uint32_t memoire) {
 
 int equalPageId(PageId p1, PageId p2){
 	return ((p1.FileIdx == p2.FileIdx) && (p1.PageIdx == p2.PageIdx));
+}
+
+Frame *findMRU() {
+    return lastFrame;
+}
+
+Frame *findLRU() {
+    long unsigned min_i = 0;
+    for(int i=1; i<nframes; i++) {
+        if(frames[i].pin_count == 0 && frames[i].lastUnpin < frames[min_i].lastUnpin)
+            min_i = i;
+    }
+    if (i==0 && frames[i].pin_count != 0) // pas de frame disponible
+        return NULL;
+    else
+        return frames+i;
+    } 
 }
