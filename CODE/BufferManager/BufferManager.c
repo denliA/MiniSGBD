@@ -8,11 +8,12 @@
 
 static Frame *findMRU(void); // stratégie MRU. Retourne la Frame contenant la page à décharger.
 static Frame *findLRU(void);
+int equalPageId(PageId p1, PageId p2);
 
 //variable globale de buffer pool
 static Frame *frames;
 static size_t nframes;
-static count = 0;
+static unsigned long count = 0;
 static Frame *lastFrame= NULL; // utilisé dans la stratégie MRU
 
 uint8_t *GetPage(PageId pageId){
@@ -30,12 +31,12 @@ uint8_t *GetPage(PageId pageId){
     }
     
     if (replaced->dirty == 1)
-        WritePage(replaced.pageId, replaced.buffer);
+        WritePage(replaced->pageId, replaced->buffer);
     
     replaced->pageId = pageId;
     replaced->dirty = 0;
     replaced->pin_count = 1;
-    return replaced.buffer;
+    return replaced->buffer;
 
 }
 
@@ -47,9 +48,9 @@ void FreePage(PageId pageId, int valdirty){
 		if (equalPageId(frames[i].pageId, pageId)){
 			break;
 		}
-	}​
-	if (i==nframes){ //page pas trouvÃ©e
-		fprintf(stderr, "Page de id %d pas trouvee",pageId);
+	}
+    if (i==nframes){ //page pas trouvÃ©e
+		fprintf(stderr, "Page de id <%d, %d> pas trouvee", pageId.FileIdx, pageId.PageIdx);
 		return;
 	}
 	frames[i].pin_count--;
@@ -99,7 +100,8 @@ Frame *findMRU() {
 
 Frame *findLRU() {
     long unsigned min_i = 0;
-    for(int i=1; i<nframes; i++) {
+    int i;
+    for(i=1; i<nframes; i++) {
         if(frames[i].pin_count == 0 && frames[i].lastUnpin < frames[min_i].lastUnpin)
             min_i = i;
     }
@@ -107,5 +109,4 @@ Frame *findLRU() {
         return NULL;
     else
         return frames+i;
-    } 
 }

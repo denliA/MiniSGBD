@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "../DiskManager/DiskManager.h"
-#include "../DiskManager/Filelist.h"
+#include "../DiskManager/FileList.h"
 DBParams params;
 static FileList filelist;
 
