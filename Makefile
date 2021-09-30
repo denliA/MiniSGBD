@@ -4,11 +4,12 @@ all : MiniSGBD Tests
 windows : MiniSGBD win_clean
 unix : clean
 
-MiniSGBD: main.o DiskManager.o FileList.o  bin
-	gcc -o bin/MiniSGBD bin/DiskManager.o bin/FileList.o  bin/main.o 
 
-Tests: Tests.o DiskManager.o FileList.o bin
-	gcc -o bin/Tests bin/DiskManager.o bin/FileList.o bin/Tests.o
+MiniSGBD: main.o DiskManager.o FileList.o BufferManager.o bin
+	gcc -o bin/MiniSGBD bin/DiskManager.o bin/FileList.o bin/BufferManager.o  bin/main.o 
+
+Tests: Tests.o DiskManager.o FileList.o BufferManager.o bin
+	gcc -o bin/Tests bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Tests.o
 
 bin:
 	- mkdir bin
