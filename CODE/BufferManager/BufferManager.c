@@ -28,13 +28,9 @@ uint8_t *GetPage(PageId pageId){
 
 	//lecture depuis le disque puis mise en m�moire de la page s'il y a une frame libre dispo
 	if (libre!=-1){
-		uint8_t * temp;
-		Frame * fTemp=calloc(1,sizeof(Frame));
-		ReadPage(pageId,temp);
-		fTemp->pageId=pageId;
-		fTemp->buffer=temp;
-		frames[libre]=fTemp;
-		return temp;
+	    frames[libre] = pageId;
+	    ReadPage(pageId, frames[libre].buffer);
+	    return frames[libre].buffer;
 	}
 
 	// 1 - Methode MRU
@@ -67,8 +63,10 @@ void FreePage(PageId pageId, int valdirty){
 		return;
 	}
 	frames[i].pin_count--;
-	if (frames[i].pin_count==0)
+	if (frames[i].pin_count==0) {
 		frames[i].lastUnpin=count;
+		lastFrame = &frames[i];
+	}
 	//attention si l'ancienne valeur de dirty vaut 1, elle reste Ã  1
 	if (frames[i].dirty==0)
 		frames[i].dirty=valdirty;
@@ -85,9 +83,8 @@ void FlushAll(){
 			frames[i].dirty=0;
 		}
 		frames[i].pin_count=0;
-		free(frames[i].buffer);
-
 	}
+	free(frames[0].buffer);
 }
 
 
