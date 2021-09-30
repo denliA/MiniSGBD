@@ -22,7 +22,7 @@ uint8_t *GetPage(PageId pageId){
 	for (i=0;i<nframes;i++){
 		if (equalPageId(frames[i].pageId, pageId))
 			return frames[i].buffer;
-		libre=i;
+		if (!frames[i].buffer)libre=i;
 	}
 
 	//lecture depuis le disque puis mise en mémoire de la page s'il y a une frame libre dispo
