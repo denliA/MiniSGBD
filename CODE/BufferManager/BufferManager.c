@@ -19,9 +19,22 @@ static Frame *lastFrame= NULL; // utilisé dans la stratégie MRU
 uint8_t *GetPage(PageId pageId){
 	//vérifier si la page existe en mémoire
 	int i;
+	int libre=-1;
 	for (i=0;i<nframes;i++){
 		if (equalPageId(frames[i].pageId, pageId))
 			return frames[i].buffer;
+		if (!frames[i].buffer)libre=i;
+	}
+
+	//lecture depuis le disque puis mise en m�moire de la page s'il y a une frame libre dispo
+	if (libre!=-1){
+		uint8_t * temp;
+		Frame * fTemp=calloc(1,sizeof(Frame));
+		ReadPage(pageId,temp);
+		fTemp->pageId=pageId;
+		fTemp->buffer=temp;
+		frames[libre]=fTemp;
+		return temp;
 	}
 
 	// 1 - Methode MRU
