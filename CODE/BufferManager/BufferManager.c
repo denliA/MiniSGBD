@@ -13,6 +13,7 @@ int equalPageId(PageId p1, PageId p2);
 //variable globale de buffer pool
 static Frame *frames;
 static size_t nframes;
+static size_t loaded_frames;
 static unsigned long count = 0;
 static Frame *lastFrame= NULL; // utilisé dans la stratégie MRU
 
@@ -20,17 +21,16 @@ uint8_t *GetPage(PageId pageId){
 	//vérifier si la page existe en mémoire
 	int i;
 	int libre=-1;
-	for (i=0;i<nframes;i++){
+	for (i=0;i<loaded_frames;i++){
 		if (equalPageId(frames[i].pageId, pageId))
 			return frames[i].buffer;
-		if (!frames[i].buffer)libre=i;
 	}
 
 	//lecture depuis le disque puis mise en m�moire de la page s'il y a une frame libre dispo
-	if (libre!=-1){
-	    frames[libre].pageId = pageId;
-	    ReadPage(pageId, frames[libre].buffer);
-	    return frames[libre].buffer;
+	if (loaded_frames < nframes){
+	    frames[loaded_frames].pageId = pageId;
+	    ReadPage(pageId, frames[loaded_frames].buffer);
+	    return frames[loaded_frames++].buffer;
 	}
 
 	// 1 - Methode MRU
@@ -98,6 +98,7 @@ void initBufferManager(DBParams params, uint32_t memoire) {
         frames[i].buffer = bpool;
         bpool += params.pageSize;
     }
+    loaded_frames = 0;
 }
 
 int equalPageId(PageId p1, PageId p2){
