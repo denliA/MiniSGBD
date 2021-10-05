@@ -25,12 +25,12 @@ void AddRelation(RelationInfo * rel,Catalog* cat){
 	//realloc si le tableau est rempli
 	if ((cat->cpt)>cat->sizeMax){
 		//si realloc echoue, il retourne NULL
-		RelationInfo* p = realloc(cat->tab,cat->sizeMax*2);
+		RelationInfo* p = realloc(cat->tab,(cat->sizeMax)+CAT_SIZE);
 		if (p == NULL){
 			fprintf( stderr, "Echec de réallocation de cat->tab");
 		}
 		cat->tab = p;
-		cat->sizeMax=(cat->sizeMax)*2;
+		cat->sizeMax=(cat->sizeMax)+CAT_SIZE;
 	}
 	cat->tab[cat->cpt] = rel;
 	cat->cpt++;
