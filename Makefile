@@ -5,11 +5,11 @@ windows : MiniSGBD win_clean
 unix : clean
 
 
-MiniSGBD: main.o DiskManager.o FileList.o BufferManager.o bin
-	gcc -o bin/MiniSGBD bin/DiskManager.o bin/FileList.o bin/BufferManager.o  bin/main.o 
+MiniSGBD: main.o DiskManager.o FileList.o BufferManager.o Frame.o bin
+	gcc -o bin/MiniSGBD bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Frame.o bin/main.o
 
-Tests: Tests.o DiskManager.o FileList.o BufferManager.o bin
-	gcc -o bin/Tests bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Tests.o
+Tests: Tests.o DiskManager.o FileList.o BufferManager.o Frame.o bin
+	gcc -o bin/Tests bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Frame.o bin/Tests.o
 
 bin:
 	- mkdir bin
@@ -22,6 +22,9 @@ DiskManager.o:
 
 BufferManager.o:
 	gcc -o bin/BufferManager.o -c CODE/BufferManager/BufferManager.c
+	
+Frame.o:
+	gcc -o bin/Frame.o -c CODE/BufferManager/Frame.c
 
 FileList.o:
 	gcc -o bin/FileList.o -c CODE/DiskManager/FileList.c

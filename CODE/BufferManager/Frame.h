@@ -10,8 +10,22 @@ typedef struct _Frame{
     PageId pageId;
     int pin_count;
     //instant du dernier free
-    unsigned long lastUnpin;
+    struct _unpinned_frame_list *unp;
     unsigned dirty : 1;  //il fait un seul bit
 } Frame;
-    
+
+typedef struct _unpinned_frame_list {
+    struct _unpinned_frame_list *prec;
+    Frame *frame;
+    struct _unpinned_frame_list *next;
+} UnpFrame;
+
+UnpFrame *initReplacementList(void);
+UnpFrame *lastElem(UnpFrame *list);
+UnpFrame *firstElem(UnpFrame *list);
+UnpFrame *insertUnpAfter(UnpFrame *origin, Frame *f);
+void delete_unp(UnpFrame *unp);
+
+#define isListEmpty(list) ( lastElem(list) == (list) )
+
 #endif

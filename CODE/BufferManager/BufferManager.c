@@ -15,20 +15,25 @@ static Frame *frames;
 static size_t nframes;
 static size_t loaded_frames;
 static unsigned long count = 0;
-static Frame *lastFrame= NULL; // utilisé dans la stratégie MRU
+static UnpFrame *replacement_list;
 
 uint8_t *GetPage(PageId pageId){
 	//vérifier si la page existe en mémoire
 	int i;
 	int libre=-1;
 	for (i=0;i<loaded_frames;i++){
-		if (equalPageId(frames[i].pageId, pageId))
+		if (equalPageId(frames[i].pageId, pageId)) {
+			frames[i].pin_count++;
+			if(frames[i].pin_count == 1)
+			    delete_unp(frames[i].unp);
 			return frames[i].buffer;
+		}
 	}
 
 	//lecture depuis le disque puis mise en m�moire de la page s'il y a une frame libre dispo
 	if (loaded_frames < nframes){
 	    frames[loaded_frames].pageId = pageId;
+	    frames[loaded_frames].pin_count = 1;
 	    ReadPage(pageId, frames[loaded_frames].buffer);
 	    return frames[loaded_frames++].buffer;
 	}
@@ -64,8 +69,7 @@ void FreePage(PageId pageId, int valdirty){
 	}
 	frames[i].pin_count--;
 	if (frames[i].pin_count==0) {
-		frames[i].lastUnpin=count;
-		lastFrame = &frames[i];
+		frames[i].unp = insertUnpAfter(lastElem(replacement_list), &frames[i]);
 	}
 	//attention si l'ancienne valeur de dirty vaut 1, elle reste Ã  1
 	if (frames[i].dirty==0)
@@ -99,6 +103,7 @@ void initBufferManager(DBParams params, uint32_t memoire) {
         bpool += params.pageSize;
     }
     loaded_frames = 0;
+    replacement_list = initReplacementList();
 }
 
 int equalPageId(PageId p1, PageId p2){
@@ -106,18 +111,21 @@ int equalPageId(PageId p1, PageId p2){
 }
 
 Frame *findMRU() {
-    return lastFrame;
+    if(isListEmpty(replacement_list)) {
+        return NULL;
+    }
+    UnpFrame *unp = lastElem(replacement_list);
+    Frame *ret = unp->frame;
+    delete_unp(unp);
+    return ret;
 }
 
 Frame *findLRU() {
-    long unsigned min_i = 0;
-    int i;
-    for(i=1; i<nframes; i++) {
-        if(frames[i].pin_count == 0 && frames[i].lastUnpin < frames[min_i].lastUnpin)
-            min_i = i;
-    }
-    if (i==0 && frames[i].pin_count != 0) // pas de frame disponible
+    if(isListEmpty(replacement_list)) {
         return NULL;
-    else
-        return frames+i;
+    }
+    UnpFrame *unp = firstElem(replacement_list);
+    Frame *ret = unp->frame;
+    delete_unp(unp);
+    return ret;
 }
