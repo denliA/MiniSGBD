@@ -31,7 +31,10 @@ FileList.o:
 
 Tests.o:
 	gcc -o bin/Tests.o -c CODE/Tests/Tests.c
-	
+
+Relation.o:
+	gcc -o bin/RelationInfo.o -c CODE/FileManager/RelationInfo.c
+
 clean:
 	rm -f bin/*.o
 
