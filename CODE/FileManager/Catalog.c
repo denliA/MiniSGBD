@@ -7,14 +7,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <RelationInfo.h>
+#include "Catalog.h"
 #define CAT_SIZE 100
-
-typedef struct _Catalog{
-	RelationInfo* tab;
-	int cpt;
-	int sizeMax;
-}Catalog;
 
 void Init(Catalog* cat){
 	cat->tab=(RelationInfo*)calloc(CAT_SIZE,sizeof(RelationInfo));
