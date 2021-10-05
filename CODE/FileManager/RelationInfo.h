@@ -13,5 +13,6 @@ typedef struct _RelInfo{
 }RelationInfo;
 
 void RelationInfoInit();
+void RelationInfoFinish();
 
 #endif
