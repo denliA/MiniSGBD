@@ -88,7 +88,7 @@ void FlushAll(){
 		}
 		frames[i].pin_count=0;
 	}
-	free(frames[0].buffer);
+	//free(frames[0].buffer);
 }
 
 
