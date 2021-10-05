@@ -45,13 +45,14 @@ PageId AllocPage(void) {
 }
 
 void DesallocPage(PageId pi) { // todo: ajouter warning si on désalloue un truc non alloué ou sur un fichier non existant ?
-    if(pi.FileIdx < filelist.nfiles && pi.PageIdx < 4);
+    if(pi.FileIdx < filelist.nfiles && pi.PageIdx < 4){
         MARK_NOT_ALLOC(filelist, pi.FileIdx, pi.PageIdx);
+    }
 }
 
 int ReadPage(PageId pi, uint8_t *buffer) { //todo : gestion d'erreurs ?
     if (!IS_ALLOC(filelist, pi.FileIdx, pi.PageIdx)) {
-        fprintf(stderr, "E: [DiskManager] Demande de lecture d'une page non allouée (File %u, Page %u)\n", pi.FileIdx, pi.PageIdx);
+        fprintf(stderr, "E: [DiskManager] Demande de lecture d'une page non allouee (File %u, Page %u)\n", pi.FileIdx, pi.PageIdx);
         return -1;
     }
     char *file_name = getFilePath(params.DBPath, pi.FileIdx);
@@ -64,7 +65,7 @@ int ReadPage(PageId pi, uint8_t *buffer) { //todo : gestion d'erreurs ?
 
 int WritePage(PageId pi, const uint8_t *buffer) {
     if (!IS_ALLOC(filelist, pi.FileIdx, pi.PageIdx)) {
-        fprintf(stderr, "E: [DiskManager] Demande d'écriture dans une page non allouée (File %u, Page %u)\n", pi.FileIdx, pi.PageIdx);
+        fprintf(stderr, "E: [DiskManager] Demande d'écriture dans une page non allouee (File %u, Page %u)\n", pi.FileIdx, pi.PageIdx);
         return -1;
     }
 	char *file_name = getFilePath(params.DBPath, pi.FileIdx);
