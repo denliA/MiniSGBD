@@ -7,6 +7,8 @@
 
 void RelationInfoInit(RelationInfo* rel){
 	rel->name=(char*)calloc(CHAR_SIZE,sizeof(char));
+	rel->nbCol;
+
 	rel->colNames=(char**)calloc(COLUMN_AMOUNT,sizeof(char*));
 	rel->colType=(char**)calloc(COLUMN_AMOUNT,sizeof(int*));
 
