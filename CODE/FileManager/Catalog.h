@@ -5,13 +5,20 @@
  *      Author: denli
  */
 
-#ifndef CODE_FILEMANAGER_CATALOG_H_
-#define CODE_FILEMANAGER_CATALOG_H_
+#ifndef CATALOG_H
+#define CATALOG_H
+#include "RelationInfo.h"
 
-class Catalog {
-public:
-	Catalog();
-	virtual ~Catalog();
-};
+typedef struct _Catalog{
+	RelationInfo* tab;
+	int cpt;
+	int sizeMax;
+}Catalog;
 
-#endif /* CODE_FILEMANAGER_CATALOG_H_ */
+void Init(Catalog* cat);
+
+void Finish(Catalog* cat);
+
+void AddRelation(RelationInfo * rel,Catalog* cat);
+
+#endif

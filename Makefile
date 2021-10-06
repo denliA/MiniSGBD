@@ -5,10 +5,10 @@ windows : MiniSGBD win_clean
 unix : clean
 
 
-MiniSGBD: main.o DiskManager.o FileList.o BufferManager.o Frame.o bin
+MiniSGBD: bin main.o DiskManager.o FileList.o BufferManager.o Frame.o 
 	gcc -o bin/MiniSGBD bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Frame.o bin/main.o
 
-Tests: Tests.o DiskManager.o FileList.o BufferManager.o Frame.o bin
+Tests: bin Tests.o DiskManager.o FileList.o BufferManager.o Frame.o
 	gcc -o bin/Tests bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Frame.o bin/Tests.o
 
 bin:
