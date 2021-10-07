@@ -97,7 +97,7 @@ void initBufferManager(DBParams params, uint32_t memoire) {
     
     nframes = memoire / params.pageSize;
     frames = (Frame *) calloc(nframes, sizeof(Frame));
-    bpool = (uint8_t *) malloc(params.pageSize);
+    bpool = (uint8_t *) malloc(nframes*params.pageSize);
     for(size_t i=0; i<nframes; i++) {
         frames[i].buffer = bpool;
         bpool += params.pageSize;
@@ -110,7 +110,8 @@ int equalPageId(PageId p1, PageId p2){
 	return ((p1.FileIdx == p2.FileIdx) && (p1.PageIdx == p2.PageIdx));
 }
 
-Frame *findMRU() {
+Frame *findMRU() {Votre branche est à jour avec 'origin/master'.
+
     if(isListEmpty(replacement_list)) {
         return NULL;
     }
