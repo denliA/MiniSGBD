@@ -80,7 +80,7 @@ static uint32_t create_new_file(void) {
     uint32_t next_file_id = addFile(&filelist);
     char *file_name = getFilePath(params.DBPath, next_file_id);
     FILE *file = fopen(file_name, "w");
-    void *tmp = calloc(params.pageSize, 1);
+    void *tmp = calloc(params.pageSize, 4);
     fwrite(tmp, params.maxPagesPerFile, params.pageSize, file);
     fclose(file);
     free(tmp);
