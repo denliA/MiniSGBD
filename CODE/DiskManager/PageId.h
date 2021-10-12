@@ -10,4 +10,7 @@ typedef struct _PageId {
     unsigned PageIdx:2;
 } PageId;
 
+
+#define PAGEID_SIZ 5
+ 
 #endif
