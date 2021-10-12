@@ -5,24 +5,33 @@
 #define CHAR_SIZE 51
 #define COLUMN_AMOUNT 256
 
-void RelationInfoInit(RelationInfo* rel){
-	rel->name=(char*)calloc(CHAR_SIZE,sizeof(char));
-	rel->nbCol;
+extern DBParams params;
 
-	rel->colNames=(char**)calloc(COLUMN_AMOUNT,sizeof(char*));
-	rel->colType=(char**)calloc(COLUMN_AMOUNT,sizeof(int*));
-
-	for (int i=0;i<COLUMN_AMOUNT;i++){
-		rel->colNames[i]=(char*)calloc(CHAR_SIZE,sizeof(char));
-		rel->colType[i]=(int*)calloc(1,sizeof(int));
-	}
-
+void RelationInfoInit(RelationInfo* rel, char *name, uint32_t nbCol, char **colNames, Type *colTypes, PageId headerPage) {
+	rel->name=name;
+	rel->nbCol = nbCol;
+	rel->colNames=colNames;
+	rel->colTypes = colTypes;
+    rel->headerPage = headerPage;
+    
+    rel->size = 0;
+    rel->colOffset = (size_t *) malloc( (sizeof *colOffset) * nbCol );
+    for(int i = 0; i<nbCol; i++) {
+        rel->colOffset[i] = size;
+        size += colTypes[i].type == T_INT ? sizeof(int32_t) : colTypes[i].type == T_FLOAT ? sizeof(float) : colTypes[i].stringSize;
+    }
+    
+    unsigned int pageSize = params.pageSize;
+    pageSize -= 2*PAGEID_SIZ;
+    
+    rel->slotCount = pageSize / (rel->size + 1);
 }
 
 void RelationInfoFinish(RelationInfo* rel){
-	for (int i=0;i< COLUMN_AMOUNT;i++){
+	for (int i=0;i< rel->size;i++){
 		free(rel->colNames[i]);
-		free(rel->colType[i]);
 	}
 	free(rel->name);
+	free(rel->colTypes);
+	free(rel->colOffset);
 }
