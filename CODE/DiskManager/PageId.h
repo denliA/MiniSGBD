@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define equalPageId(p1, p2) (((p1).FileIdx == (p2).FileIdx) && ((p1).PageIdx == (p2).PageIdx))
+
 typedef struct _PageId {
     uint32_t FileIdx;
     unsigned PageIdx:2;

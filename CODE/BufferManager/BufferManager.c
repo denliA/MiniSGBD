@@ -89,10 +89,6 @@ void initBufferManager(DBParams params, uint32_t memoire) {
     }
 }
 
-int equalPageId(PageId p1, PageId p2){
-	return ((p1.FileIdx == p2.FileIdx) && (p1.PageIdx == p2.PageIdx));
-}
-
 Frame *findMRU() {
     return lastFrame;
 }
