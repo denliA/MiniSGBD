@@ -8,19 +8,34 @@
 
 static Frame *findMRU(void); // stratégie MRU. Retourne la Frame contenant la page à décharger.
 static Frame *findLRU(void);
+int equalPageId(PageId p1, PageId p2);
 
 //variable globale de buffer pool
 static Frame *frames;
 static size_t nframes;
-static count = 0;
-static Frame *lastFrame= NULL; // utilisé dans la stratégie MRU
+static size_t loaded_frames;
+static unsigned long count = 0;
+static UnpFrame *replacement_list;
 
 uint8_t *GetPage(PageId pageId){
 	//vérifier si la page existe en mémoire
 	int i;
-	for (i=0;i<nframes;i++){
-		if (equalPageId(frames[i].pageId, pageId))
+	int libre=-1;
+	for (i=0;i<loaded_frames;i++){
+		if (equalPageId(frames[i].pageId, pageId)) {
+			frames[i].pin_count++;
+			if(frames[i].pin_count == 1)
+			    delete_unp(frames[i].unp);
 			return frames[i].buffer;
+		}
+	}
+
+	//lecture depuis le disque puis mise en m�moire de la page s'il y a une frame libre dispo
+	if (loaded_frames < nframes){
+	    frames[loaded_frames].pageId = pageId;
+	    frames[loaded_frames].pin_count = 1;
+	    ReadPage(pageId, frames[loaded_frames].buffer);
+	    return frames[loaded_frames++].buffer;
 	}
 
 	// 1 - Methode MRU
@@ -30,12 +45,12 @@ uint8_t *GetPage(PageId pageId){
     }
     
     if (replaced->dirty == 1)
-        WritePage(replaced.pageId, replaced.buffer);
+        WritePage(replaced->pageId, replaced->buffer);
     
     replaced->pageId = pageId;
     replaced->dirty = 0;
     replaced->pin_count = 1;
-    return replaced.buffer;
+    return replaced->buffer;
 
 }
 
@@ -47,14 +62,15 @@ void FreePage(PageId pageId, int valdirty){
 		if (equalPageId(frames[i].pageId, pageId)){
 			break;
 		}
-	}​
-	if (i==nframes){ //page pas trouvÃ©e
-		fprintf(stderr, "Page de id %d pas trouvee",pageId);
+	}
+    if (i==nframes){ //page pas trouvÃ©e
+		fprintf(stderr, "Page de id <%d, %d> pas trouvee", pageId.FileIdx, pageId.PageIdx);
 		return;
 	}
 	frames[i].pin_count--;
-	if (frames[i].pin_count==0)
-		frames[i].lastUnpin=count;
+	if (frames[i].pin_count==0) {
+		frames[i].unp = insertUnpAfter(lastElem(replacement_list), &frames[i]);
+	}
 	//attention si l'ancienne valeur de dirty vaut 1, elle reste Ã  1
 	if (frames[i].dirty==0)
 		frames[i].dirty=valdirty;
@@ -71,9 +87,8 @@ void FlushAll(){
 			frames[i].dirty=0;
 		}
 		frames[i].pin_count=0;
-		free(frames[i].buffer);
-
 	}
+	//free(frames[0].buffer);
 }
 
 
@@ -82,26 +97,33 @@ void initBufferManager(DBParams params, uint32_t memoire) {
     
     nframes = memoire / params.pageSize;
     frames = (Frame *) calloc(nframes, sizeof(Frame));
-    bpool = (uint8_t *) malloc(params.pageSize);
+    bpool = (uint8_t *) malloc(nframes*params.pageSize);
     for(size_t i=0; i<nframes; i++) {
         frames[i].buffer = bpool;
         bpool += params.pageSize;
     }
+    loaded_frames = 0;
+    replacement_list = initReplacementList();
 }
 
+
 Frame *findMRU() {
-    return lastFrame;
+
+    if(isListEmpty(replacement_list)) {
+        return NULL;
+    }
+    UnpFrame *unp = lastElem(replacement_list);
+    Frame *ret = unp->frame;
+    delete_unp(unp);
+    return ret;
 }
 
 Frame *findLRU() {
-    long unsigned min_i = 0;
-    for(int i=1; i<nframes; i++) {
-        if(frames[i].pin_count == 0 && frames[i].lastUnpin < frames[min_i].lastUnpin)
-            min_i = i;
-    }
-    if (i==0 && frames[i].pin_count != 0) // pas de frame disponible
+    if(isListEmpty(replacement_list)) {
         return NULL;
-    else
-        return frames+i;
-    } 
+    }
+    UnpFrame *unp = firstElem(replacement_list);
+    Frame *ret = unp->frame;
+    delete_unp(unp);
+    return ret;
 }

@@ -8,7 +8,7 @@
 extern DBParams params;
 
 int main(int argc, char **argv) {
-    if (argc != 1) {
+    if (argc != 2) {
         fprintf(stderr, "Utilisation: %s CHEMIN_VERS_BD (il manque un argument)\n", argv[0]);
         return -1;
     }

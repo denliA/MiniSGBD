@@ -16,6 +16,7 @@ FileList getList(DBParams *p) {
     strcat(path, "/");
     strcat(path, LISTNAME);
     
+    printf("path : %s\n", path);
     file = fopen(path, "r");
     if (file == NULL) { // if the file does not exist yet (the DB was never initialized)
         fl.list = NULL;
@@ -42,6 +43,7 @@ FileList getList(DBParams *p) {
             fl.list = (PagesStatus *) realloc( fl.list, sizeof(PagesStatus) * (fl.size+=DEF_ALLOC_LIST) );
         fl.list[fl.nfiles++] = byte;
     }
+printf("APRES WHILE\n");
     
     fclose(file);
     return fl;

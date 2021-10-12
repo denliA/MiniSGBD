@@ -58,7 +58,7 @@ int ReadPage(PageId pi, uint8_t *buffer) { //todo : gestion d'erreurs ?
     char *file_name = getFilePath(params.DBPath, pi.FileIdx);
     FILE *file = fopen(file_name, "r");
     fseek(file, pi.PageIdx * params.pageSize, SEEK_SET);
-    fread(buffer, 1, params.pageSize, file);
+    fread(buffer, sizeof(uint8_t), params.pageSize, file);
     fclose(file);
     return 0;
 }
@@ -71,7 +71,7 @@ int WritePage(PageId pi, const uint8_t *buffer) {
 	char *file_name = getFilePath(params.DBPath, pi.FileIdx);
     FILE *file = fopen(file_name, "w");
     fseek(file, pi.PageIdx * params.pageSize, SEEK_SET);
-    fwrite(buffer, 1, params.pageSize, file);
+    fwrite(buffer, sizeof(uint8_t), params.pageSize, file);
     fclose(file);
     return 0;
 }
@@ -80,7 +80,7 @@ static uint32_t create_new_file(void) {
     uint32_t next_file_id = addFile(&filelist);
     char *file_name = getFilePath(params.DBPath, next_file_id);
     FILE *file = fopen(file_name, "w");
-    void *tmp = calloc(params.pageSize, 1);
+    void *tmp = calloc(params.pageSize, 4);
     fwrite(tmp, params.maxPagesPerFile, params.pageSize, file);
     fclose(file);
     free(tmp);
