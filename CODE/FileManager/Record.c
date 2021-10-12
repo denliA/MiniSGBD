@@ -1,27 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "RelationInfo.h"
 #include "Record.h"
 
 
-void RecordInit(Record* rec,RelationInfo *rel){
+void RecordInit(Record* rec, RelationInfo *rel){
 	rec->relInfo=rel;
-	rec->values=(void**)calloc(2, rel->nbCol*sizeof(void*));
+	rec->values= calloc(1, rel->size);
+}
 
-	for (int i=0;i<rel->nbCol;i++){//TODO essayer de remplacer par une enum
-		if (strcmp(rel->colType[i],"int")==0){
-			rec->values[i]=calloc(1,sizeof(int));
-		}
-		else if (strcmp(rel->colType[i],"float")==0){
-			rec->values[i]=calloc(1,sizeof(float));
-		}
-		else if (strncmp(rel->colType[i],"string",6){
-				int k=(int)strtol((rel->colType[i]+6),NULL,10);
-		}
-	}
+void writeToBuffer(Record *rec, uint8_t *buff, uint32_t pos) {
+    memcpy(buff+pos, rec->values, rec->relInfo->size);
+}
 
+void readFromBuffer(Record *r, uint8_t *buff, uint32_t pos) {
+    memcpy(rec->values, buff+pos, rec->rec->relInfo->size);
+}
 
-	/*rec->values[0]=(char*)calloc(STRING_SIZE, sizeof(char));
-    rec->values[1]=(char*)calloc(STRING_SIZE, sizeof(char));*/
+void RecordFinish(Record *rec) {
+    free(rec->values);
+    free(rec);
 }
