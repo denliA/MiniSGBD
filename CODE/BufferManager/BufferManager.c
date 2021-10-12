@@ -8,7 +8,6 @@
 
 static Frame *findMRU(void); // stratégie MRU. Retourne la Frame contenant la page à décharger.
 static Frame *findLRU(void);
-int equalPageId(PageId p1, PageId p2);
 
 //variable globale de buffer pool
 static Frame *frames;
@@ -30,7 +29,7 @@ uint8_t *GetPage(PageId pageId){
 		}
 	}
 
-	//lecture depuis le disque puis mise en m�moire de la page s'il y a une frame libre dispo
+	//lecture depuis le disque puis mise en m�moire de la page s'il y a une frame libre dispo
 	if (loaded_frames < nframes){
 	    frames[loaded_frames].pageId = pageId;
 	    frames[loaded_frames].pin_count = 1;
