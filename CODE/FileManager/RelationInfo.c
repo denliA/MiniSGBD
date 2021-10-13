@@ -7,7 +7,9 @@
 
 extern DBParams params;
 
-void RelationInfoInit(RelationInfo* rel, char *name, uint32_t nbCol, char **colNames, Type *colTypes, PageId headerPage) {
+RelationInfo *RelationInfoInit(char *name, uint32_t nbCol, char **colNames, Type *colTypes, PageId headerPage) {
+	RelationInfo *rel = (RelationInfo *) malloc(sizeof(RelationInfo));
+	
 	rel->name=name;
 	rel->nbCol = nbCol;
 	rel->colNames=colNames;

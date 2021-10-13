@@ -14,14 +14,14 @@ typedef struct _RelInfo{
 	uint32_t nbCol;
 	char **colNames;
 	ColType *colTypes;
-    size_t size;
-    size_t colOffset;
+    uint32_t size;
+    uint32_t colOffset;
     PageId headerPage;
     uint32_t slotCount;
     
 } RelationInfo;
 
-void RelationInfoInit(RelationInfo* rel, char *name, uint32_t nbCol, char **colNames, Type *colTypes);
-void RelationInfoFinish(void);
+RelationInfo *RelationInfoInit(char *name, uint32_t nbCol, char **colNames, Type *colTypes);
+void RelationInfoFinish(RelationInfo *);
 
 #endif
