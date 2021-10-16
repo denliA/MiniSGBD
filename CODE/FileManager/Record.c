@@ -15,8 +15,8 @@ void writeToBuffer(Record *rec, uint8_t *buff, uint32_t pos) {
     memcpy(buff+pos, rec->values, rec->relInfo->size);
 }
 
-void readFromBuffer(Record *r, uint8_t *buff, uint32_t pos) {
-    memcpy(rec->values, buff+pos, rec->rec->relInfo->size);
+void readFromBuffer(Record *rec, uint8_t *buff, uint32_t pos) {
+    memcpy(rec->values, buff+pos, rec->relInfo->size);
 }
 
 void RecordFinish(Record *rec) {

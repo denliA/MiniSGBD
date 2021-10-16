@@ -4,7 +4,7 @@
 
 
 typedef struct _Record{
-	RelationInfo relInfo;
+	RelationInfo *relInfo;
 	void* values;
 
 }Record;
