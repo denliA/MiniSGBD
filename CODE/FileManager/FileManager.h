@@ -1,16 +1,10 @@
-/*
- * FileManager.h
- *
- *  Created on: 12 oct. 2021
- *      Author: ij07411
- */
-
 #ifndef FILEMANAGER_H
 #define FILEMANAGER_H
-#include "PageId.h"
+#include "../DiskManager/PageId.h"
+#include "RelationInfo.h"
+#include "Rid.h"
 
-
-PageId readPageIdFromPageBuffer(uint8_t *buff, uint8_t first);
-
+Rid InsertRecordIntoRelation(RelationInfo *rel, Record *rec);
+Record *GetAllRecords(RelationInfo *rel, uint32_t *size);
 
 #endif
