@@ -4,7 +4,7 @@
 #include "../DiskManager/PageId.h"
 #include "../DiskManager/DiskManager.h"
 #include "../BufferManager/BufferManager.h"
-#include "Rid.h"
+#include "FileManager.h"
 
 
 #define FREE_LIST 1
@@ -29,7 +29,7 @@ static PageId readPageIdFromPageBuffer(uint8_t *buff, uint8_t first){
 }
 
 
-static PageId createHeaderPage(){
+PageId createHeaderPage(void){
     //allocation de la page
     PageId pageId = AllocPage();
     
@@ -64,7 +64,7 @@ static PageId addDataPage(RelationInfo *rel) {
 
 /* unlinkDataPage: supprome page de la liste chaînée des pages pleines ou vides (respectivement si from == FULL_LIST ou FREE_LIST) */
 static void unlinkDataPage(PageId page, PageId header, int from) {
-    uint8_t *pageBuff = GetPage(rel->headerPage);
+    uint8_t *pageBuff = GetPage(page);
     PageId next = readPageIdFromPageBuffer(pageBuff, NEXT_PAGE);
     PageId prec = readPageIdFromPageBuffer(pageBuff, PREC_PAGE);
     uint8_t *nextb = GetPage(next), *precb = GetPage(prec);
@@ -74,14 +74,14 @@ static void unlinkDataPage(PageId page, PageId header, int from) {
     
     FreePage(next, 1);
     FreePage(prec, 1);
-    FreePage(rel->headerPage, 1);
+    FreePage(page, 1);
 }
 
 static void insertDataPage(PageId page, PageId header, int where) {
     uint8_t *headerBuff = GetPage(header);
     uint8_t *pageBuff = GetPage(page);
     
-    PageId last = getPageIdFromPageBuffer(headerBuff, where);
+    PageId last = readPageIdFromPageBuffer(headerBuff, where);
     uint8_t *lastb = GetPage(last);
     
     writePageIdToPageBuffer(header, pageBuff, NEXT_PAGE);
@@ -105,7 +105,7 @@ static PageId getFreePageId(RelationInfo *rel) {
 
 static Rid writeRecordToDataPage(RelationInfo *rel, Record *r, PageId p) {
     uint8_t *buff = GetPage(p);
-    uint8_t *bytemap = 2*PAGE_SIZE + buff;
+    uint8_t *bytemap = 2*PAGEID_SIZE + buff;
     uint8_t *slots = bytemap + rel->slotCount;
     uint32_t free_slot;
     Rid rid;
@@ -113,9 +113,9 @@ static Rid writeRecordToDataPage(RelationInfo *rel, Record *r, PageId p) {
     for(free_slot=0; free_slot < rel->slotCount; free_slot++) {
         if(!bytemap[free_slot]) {
             writeToBuffer(r, slots, free_slot*rel->size);
-            if (free_slot == slotCount-1) {
+            if (free_slot == rel->slotCount-1) {
                 unlinkDataPage(p, rel->headerPage, FREE_LIST);
-                insertDatePage(p, rel->headerPage, LAST_FULL);
+                insertDataPage(p, rel->headerPage, LAST_FULL);
             }
             FreePage(p, 1);
             rid.pageId = p;
@@ -131,7 +131,7 @@ static Rid writeRecordToDataPage(RelationInfo *rel, Record *r, PageId p) {
 static uint32_t getRecordsInDataPage(RelationInfo *rel, PageId p, Record *list, uint32_t *size, uint32_t *offset) {
     uint32_t readrecs = 0;
     uint8_t *pb = GetPage(p);
-    uint8_t *bytemap = pb + 2*PAGE_SIZE;
+    uint8_t *bytemap = pb + 2*PAGEID_SIZE;
     uint8_t *slots = bytemap + rel->slotCount;
     for (uint32_t slot = 0; slot < rel->slotCount; slot++) {
         if (bytemap[slot]) {
@@ -149,22 +149,22 @@ static uint32_t getRecordsInDataPage(RelationInfo *rel, PageId p, Record *list, 
 
 Rid InsertRecordIntoRelation(RelationInfo *rel, Record *rec) {
     PageId page = getFreePageId(rel);
-    return writeRecordToDataPage(rel, rec, page)
+    return writeRecordToDataPage(rel, rec, page);
 }
                                           
 Record *GetAllRecords(RelationInfo *rel, uint32_t *size) {
-    uint8_t header = GetPage(rel->headerPage);
+    uint8_t *header = GetPage(rel->headerPage);
     Record *list = (Record *) malloc(sizeof(Record)*(*size = 2*rel->slotCount));
     uint32_t offset = 0;
-    PageId next_full = getPageIdFromPageBuffer(header, FULL_LIST);
-    while(!equalPageId(next_full, header)) {
+    PageId next_full = readPageIdFromPageBuffer(header, FULL_LIST);
+    while(!equalPageId(next_full, rel->headerPage)) {
         PageId old_full = next_full;
         uint8_t *pbuff = GetPage(next_full);
-        getRecordsInDatePage(rel, next_full, list, size, &offset);
-        next_full = getPageIdFromPageBuffer(pbuff, NEXT_PAGE);
+        getRecordsInDataPage(rel, next_full, list, size, &offset);
+        next_full = readPageIdFromPageBuffer(pbuff, NEXT_PAGE);
         FreePage(old_full, 0);
     }
     list = (Record *) realloc(list, sizeof(Record)*offset);
-    *size = *offset;
+    *size = offset;
     return list;
 }
