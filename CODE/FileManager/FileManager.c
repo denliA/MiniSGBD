@@ -168,3 +168,36 @@ Record *GetAllRecords(RelationInfo *rel, uint32_t *size) {
     *size = offset;
     return list;
 }
+
+
+ListRecordsIterator *GetListRecordsIterator(RelationInfo *rel) {
+    ListRecordsIterator *iter = (ListRecordsIterator *) malloc(sizeof *iter);
+    iter->rel = rel;
+    uint8_t *header = GetPage(rel->headerPage);
+    PageId nextFull = readPageIdFromPageBuffer(header, FULL_LIST), nextFree;
+    if (!equalPageId(nextFull, rel->headerPage)) {
+        setRecIterState(iter, FULL_LIST, nextFull, GetPage(nextFull), 0);
+    } else if (!equalPageId(nextFree = readPageIdFromPageBuffer(header, FREE_LIST), rel->headerPage)) {
+        setRecIterState(iter, FREE_LIST, nextFree, GetPage(nextFree), 0);
+    } else {
+        iter->currentList = -1;
+    }
+}
+
+static void incrementIter(ListRecordsIterator *iter) {
+    if(iter->currentList == FULL_LIST) {
+        if(iter->currentSlot >= iter->rel->slotCount) {
+            
+        }
+    }
+}
+
+Record *GetNextRecord(ListRecordsIterator *iter) {
+    Record *rec;
+    
+    if(iter->currentList == -1)
+        return NULL;
+    
+    
+}
+
