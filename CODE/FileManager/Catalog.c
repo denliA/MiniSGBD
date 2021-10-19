@@ -10,7 +10,7 @@
 
 extern DBParams params;
 
-void Init(Catalog* cat){
+void InitCatalog(Catalog* cat){
     FILE *file;
 
     
@@ -71,7 +71,7 @@ void Init(Catalog* cat){
     
 }
 
-void Finish(Catalog* cat){
+void FinishCatalog(Catalog* cat){
     char *path = (char *) malloc(strlen(params.DBPath)+ 1 + strlen("Catalog.def") + 1);
     path[0] = '\0';
     strcat(path, params.DBPath);
