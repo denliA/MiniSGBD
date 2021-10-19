@@ -10,7 +10,7 @@ typedef struct _ListRecordsIterator {
     int8_t currentList;
     PageId currentPage;
     uint8_t *buffer;
-    uint32_t currentSlot;
+    int32_t currentSlot;
 } ListRecordsIterator;
 
 #define setRecIterState(_iter, _currentList,_currentPage, _buffer, _currentSlot) \

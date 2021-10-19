@@ -17,6 +17,7 @@ typedef struct _RelInfo{
 	ColType *colTypes;
     uint32_t size;
     uint32_t *colOffset;
+    uint32_t byteBufOff;
     PageId headerPage;
     uint32_t slotCount;
     
