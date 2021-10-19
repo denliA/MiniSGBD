@@ -5,7 +5,7 @@ windows : MiniSGBD win_clean
 unix : clean
 
 
-MiniSGBD: bin main.o DiskManager.o FileList.o BufferManager.o Frame.o Record.o RelationInfo.o Catalog.o 
+MiniSGBD: bin main.o DiskManager.o FileList.o BufferManager.o Frame.o Record.o RelationInfo.o Catalog.o FileManager.o
 	gcc -o bin/MiniSGBD bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Frame.o bin/main.o
 
 Tests: bin Tests.o DiskManager.o FileList.o BufferManager.o Frame.o
@@ -40,6 +40,9 @@ Catalog.o:
 
 Record.o:
 	gcc -o bin/Record.o -c CODE/FileManager/Record.c
+
+FileManager.o:
+	gcc -o bin/FileManager.o -c CODE/FileManager/FileManager.c
 
 clean:
 	rm -f bin/*.o
