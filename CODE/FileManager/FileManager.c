@@ -168,3 +168,73 @@ Record *GetAllRecords(RelationInfo *rel, uint32_t *size) {
     *size = offset;
     return list;
 }
+
+
+ListRecordsIterator *GetListRecordsIterator(RelationInfo *rel) {
+    ListRecordsIterator *iter = (ListRecordsIterator *) malloc(sizeof *iter);
+    iter->rel = rel;
+    uint8_t *header = GetPage(rel->headerPage);
+    PageId nextFull = readPageIdFromPageBuffer(header, FULL_LIST), nextFree;
+    if (!equalPageId(nextFull, rel->headerPage)) {
+        setRecIterState(iter, FULL_LIST, nextFull, GetPage(nextFull), -1);
+    } else if (!equalPageId(nextFree = readPageIdFromPageBuffer(header, FREE_LIST), rel->headerPage)) {
+        setRecIterState(iter, FREE_LIST, nextFree, GetPage(nextFree), -1);
+    } else {
+        iter->currentList = -1;
+    }
+}
+
+static void incrementIter(ListRecordsIterator *iter) {
+    iter->currentSlot++;
+    
+    if(iter->currentList == FULL_LIST) {
+        if (iter->currentSlot < iter->rel->slotCount) {
+            iter->currentSlot++;
+            return;
+        } else {
+            PageId next = readPageIdFromPageBuffer(iter->buffer, NEXT_PAGE);
+            FreePage(iter->currentPage, 0);
+            if (equalPageId(next, iter->rel->headerPage)) {
+                uint8_t *header = GetPage(iter->rel->headerPage);
+                PageId firstFree = readPageIdFromPageBuffer(header, FREE_LIST);
+                FreePage(iter->rel->headerPage, 0);
+                if(equalPageId(firstFree, iter->rel->headerPage)) {
+                    iter->currentList = -1;
+                    return;
+                }
+                setRecIterState(iter, FREE_LIST, firstFree, GetPage(firstFree), 0);
+            } else {
+                setRecIterState(iter, FULL_LIST, next, GetPage(next), 0);
+            }
+        }
+    }
+    
+    if(iter->currentList == FREE_LIST) {
+        while (iter->currentList == FREE_LIST) {
+            uint8_t *bytebuf = iter->buffer + iter->rel->byteBufOff; // ??? check me maybe i'm a bug
+            while(iter->currentSlot < iter->rel->slotCount) {
+                if(bytebuf[iter->currentSlot])
+                    return;
+                iter->currentSlot++;
+            }
+            PageId next = readPageIdFromPageBuffer(iter->buffer, NEXT_PAGE);
+            FreePage(iter->currentPage, 0);
+            if (equalPageId(next,iter->rel->headerPage)) {
+                iter->currentList = -1;
+            } else {
+                setRecIterState(iter, FREE_LIST, next, GetPage(next), 0);
+            }
+        }
+    }
+}
+
+Record *GetNextRecord(ListRecordsIterator *iter) {
+    Record *rec;
+    incrementIter(iter);
+    if(iter->currentList == -1)
+        return NULL;
+    rec = (Record *) malloc(sizeof(Record));
+    readFromBuffer(rec, iter->buffer, 2*PAGEID_SIZE + iter->currentSlot * iter->rel->size);
+    return rec;
+}
+

@@ -29,6 +29,7 @@ RelationInfo *RelationInfoInit(RelationInfo *rel, char *name, uint32_t nbCol, ch
     pageSize -= 2*PAGEID_SIZE;
     
     rel->slotCount = pageSize / (rel->size + 1);
+    rel->byteBufOff = 2 * PAGEID_SIZE + rel->slotCount * rel->size;
     return rel;
 }
 
