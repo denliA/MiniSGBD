@@ -66,7 +66,7 @@ void FreePage(PageId pageId, int valdirty){
 		fprintf(stderr, "Page de id <%d, %d> pas trouvee", pageId.FileIdx, pageId.PageIdx);
 		return;
 	} else if (frames[i].pin_count<=0) {
-	    fprintf(stderr, "Page de id <%d, %d> a été free alors qu'elle n'était pas utilisée", pageId.FileIdx, pageId.PageIdx
+	    fprintf(stderr, "Page de id <%d, %d> a été free alors qu'elle n'était pas utilisée", pageId.FileIdx, pageId.PageIdx);
 	}
 	frames[i].pin_count--;
 	if (frames[i].pin_count==0) {
