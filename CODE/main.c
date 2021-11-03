@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "DiskManager/DBParams.h"
 #include "DiskManager/DiskManager.h"
@@ -24,11 +25,11 @@ int main(int argc, char **argv) {
     //debut de la boucle de lecture de commandes
     InitDBM();
     
+    //utilisation de getline : allocation d'un buffer de char
+    char *commande;
     //toutes les comparaisons doivent etre insensibles a la casse
     do{
         
-        //utilisation de getline : allocation d'un buffer de char
-        char *commande;
         //taille max de la commande arbitrairement choisie
         size_t nb_char_max = 250;
         //la commande est size_t parce que getline
@@ -45,6 +46,6 @@ int main(int argc, char **argv) {
         nb_char_commande = getline(&commande,&nb_char_max,stdin);
         printf("Commande : %s \n",commande);
         
-    }while(strnicmp(commande,"exit",5)!=0)
+    }while(strncmp(commande,"exit",5)!=0);
     return 0;
 }
