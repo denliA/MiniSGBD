@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 
-make
-./bin/MiniSGBD
+make all unix
+./bin/MiniSGBD DB

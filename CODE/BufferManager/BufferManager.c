@@ -29,7 +29,7 @@ uint8_t *GetPage(PageId pageId){
 		}
 	}
 
-	//lecture depuis le disque puis mise en m�moire de la page s'il y a une frame libre dispo
+	//lecture depuis le disque puis mise en mémoire de la page s'il y a une frame libre dispo
 	if (loaded_frames < nframes){
 	    frames[loaded_frames].pageId = pageId;
 	    frames[loaded_frames].pin_count = 1;
@@ -62,7 +62,7 @@ void FreePage(PageId pageId, int valdirty){
 			break;
 		}
 	}
-    if (i==nframes){ //page pas trouvÃ©e
+    if (i==nframes){ //page pas trouvée
 		fprintf(stderr, "Page de id <%d, %d> pas trouvee", pageId.FileIdx, pageId.PageIdx);
 		return;
 	} else if (frames[i].pin_count<=0) {
@@ -72,7 +72,7 @@ void FreePage(PageId pageId, int valdirty){
 	if (frames[i].pin_count==0) {
 		frames[i].unp = insertUnpAfter(lastElem(replacement_list), &frames[i]);
 	}
-	//attention si l'ancienne valeur de dirty vaut 1, elle reste Ã  1
+	//attention si l'ancienne valeur de dirty vaut 1, elle reste à  1
 	if (frames[i].dirty==0)
 		frames[i].dirty=valdirty;
 
