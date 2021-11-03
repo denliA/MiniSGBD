@@ -1,7 +1,7 @@
 #ifndef FRAME_H
 #define FRAME_H
 
-#include "../DiskManager/PageId.h"
+#include "DiskManager/PageId.h"
 
 typedef struct _Frame{
     //adresse du buffer contenant la page dans le BufferPool

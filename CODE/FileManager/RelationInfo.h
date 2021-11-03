@@ -1,7 +1,7 @@
 #ifndef RELINFO_H
 #define RELINFO_H
 
-#include "../DiskManager/PageId.h"
+#include "DiskManager/PageId.h"
 
 enum { T_INT, T_FLOAT, T_STRING };
 typedef struct _ColType {

@@ -1,5 +1,5 @@
 #include "DBManager.h"
-#include "../BufferManager/BufferManager.h"
+#include "BufferManager/BufferManager.h"
 
 extern  Catalog cat;
 

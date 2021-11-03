@@ -1,6 +1,6 @@
 #ifndef FILEMANAGER_H
 #define FILEMANAGER_H
-#include "../DiskManager/PageId.h"
+#include "DiskManager/PageId.h"
 #include "RelationInfo.h"
 #include "Record.h"
 #include "Rid.h"

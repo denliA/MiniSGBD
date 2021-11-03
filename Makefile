@@ -1,3 +1,5 @@
+CC=gcc -I CODE/
+
 
 all : MiniSGBD Tests
 
@@ -15,37 +17,37 @@ bin:
 	- mkdir bin
 
 main.o:
-	gcc -o bin/main.o -c CODE/main.c
+	$(CC) -o bin/main.o -c CODE/main.c
 
 DiskManager.o:
-	gcc -o bin/DiskManager.o -c CODE/DiskManager/DiskManager.c
+	$(CC) -o bin/DiskManager.o -c CODE/DiskManager/DiskManager.c
 
 BufferManager.o:
-	gcc -o bin/BufferManager.o -c CODE/BufferManager/BufferManager.c
+	$(CC) -o bin/BufferManager.o -c CODE/BufferManager/BufferManager.c
 	
 Frame.o:
-	gcc -o bin/Frame.o -c CODE/BufferManager/Frame.c
+	$(CC) -o bin/Frame.o -c CODE/BufferManager/Frame.c
 
 FileList.o:
-	gcc -o bin/FileList.o -c CODE/DiskManager/FileList.c
+	$(CC) -o bin/FileList.o -c CODE/DiskManager/FileList.c
 
 Tests.o:
-	gcc -o bin/Tests.o -c CODE/Tests/Tests.c
+	$(CC) -o bin/Tests.o -c CODE/Tests/Tests.c
 
 RelationInfo.o:
-	gcc -o bin/RelationInfo.o -c CODE/FileManager/RelationInfo.c
+	$(CC) -o bin/RelationInfo.o -c CODE/FileManager/RelationInfo.c
 
 Catalog.o:
-	gcc -o bin/Catalog.o -c CODE/FileManager/Catalog.c
+	$(CC) -o bin/Catalog.o -c CODE/FileManager/Catalog.c
 
 Record.o:
-	gcc -o bin/Record.o -c CODE/FileManager/Record.c
+	$(CC) -o bin/Record.o -c CODE/FileManager/Record.c
 
 FileManager.o:
-	gcc -o bin/FileManager.o -c CODE/FileManager/FileManager.c
+	$(CC) -o bin/FileManager.o -c CODE/FileManager/FileManager.c
 
 DBManager.o:
-	gcc -o bin/DBManager.o -c CODE/DBManager/DBManager.c
+	$(CC) -o bin/DBManager.o -c CODE/DBManager/DBManager.c
 
 clean:
 	rm -f bin/*.o

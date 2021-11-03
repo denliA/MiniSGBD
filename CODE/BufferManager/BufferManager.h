@@ -1,8 +1,8 @@
 #ifndef BUFFERMANAGER_H
 #define BUFFERMANAGER_H
 
-#include "../DiskManager/PageId.h"
-#include "../DiskManager/DBParams.h"
+#include "DiskManager/PageId.h"
+#include "DiskManager/DBParams.h"
 
 void initBufferManager(DBParams params, uint32_t max_mem);
 uint8_t *GetPage(PageId pageId);

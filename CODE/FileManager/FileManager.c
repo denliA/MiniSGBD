@@ -1,9 +1,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "../DiskManager/PageId.h"
-#include "../DiskManager/DiskManager.h"
-#include "../BufferManager/BufferManager.h"
+#include "DiskManager/PageId.h"
+#include "DiskManager/DiskManager.h"
+#include "BufferManager/BufferManager.h"
 #include "FileManager.h"
 
 

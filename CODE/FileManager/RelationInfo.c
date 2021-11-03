@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "RelationInfo.h"
-#include "../DiskManager/DBParams.h"
+#include "DiskManager/DBParams.h"
 
 #define CHAR_SIZE 51
 #define COLUMN_AMOUNT 256

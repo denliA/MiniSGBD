@@ -3,8 +3,8 @@
 #include <errno.h>
 #include <string.h>
 #include "Catalog.h"
-#include "../DiskManager/DBParams.h"
-#include "../DiskManager/PageId.h"
+#include "DiskManager/DBParams.h"
+#include "DiskManager/PageId.h"
 
 #define CAT_SIZE 100
 

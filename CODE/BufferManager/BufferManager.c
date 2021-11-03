@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "../DiskManager/DiskManager.h"
-#include "../DiskManager/FileList.h"
-#include "../DiskManager/DBParams.h"
+#include "DiskManager/DiskManager.h"
+#include "DiskManager/FileList.h"
+#include "DiskManager/DBParams.h"
 #include "Frame.h"
 #include "BufferManager.h"
 
