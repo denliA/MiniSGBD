@@ -15,9 +15,9 @@ typedef struct _Catalog{
 	int sizeMax;
 }Catalog;
 
-void Init(Catalog* cat);
+void InitCatalog(Catalog* cat);
 
-void Finish(Catalog* cat);
+void FinishCatalog(Catalog* cat);
 
 void AddRelation(RelationInfo * rel,Catalog* cat);
 

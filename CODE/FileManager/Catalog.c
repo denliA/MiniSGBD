@@ -10,6 +10,8 @@
 
 extern DBParams params;
 
+Catalog cat;
+
 void InitCatalog(Catalog* cat){
     FILE *file;
 

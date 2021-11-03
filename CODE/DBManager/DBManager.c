@@ -1,17 +1,18 @@
 #include "DBManager.h"
+#include "../BufferManager/BufferManager.h"
 
 extern  Catalog cat;
 
 void InitDBM(){
-	InitCatalog(cat);
+	InitCatalog(&cat);
 }
 
 void FinishDBM(){
-	FinishCatalog(cat);
+	FinishCatalog(&cat);
 	FlushAll();
 }
 
 //affiche
-void ProcessCommand(char**){
+void ProcessCommand(char* command){
 
 }

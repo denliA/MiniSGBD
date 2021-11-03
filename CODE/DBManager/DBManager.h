@@ -2,11 +2,11 @@
 #define DBMANAGER_H
 #include "../FileManager/Catalog.h"
 
-void InitCatalog(void);
+void InitDBM(void);
 
-void FinishCatalog(void);
+void FinishDBM(void);
 
-void ProcessCommand(char**);
+void ProcessCommand(char*);
 
 
 #endif
