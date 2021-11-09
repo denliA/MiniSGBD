@@ -26,7 +26,7 @@ void ProcessCommand(char* command){
     } else if (commeq(command, "DROPDB")) {
         supprimerDB();
     } else if (commeq(command, "INSERT")) {
-    
+        
     } else if (commeq(command, "BATCHINSERT")) {
     
     } else if (commeq(command, "SELECTMONO")) {
