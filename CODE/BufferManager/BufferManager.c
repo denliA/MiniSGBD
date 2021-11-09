@@ -77,8 +77,6 @@ void FreePage(PageId pageId, int valdirty){
 		frames[i].dirty=valdirty;
 
 }
-    
-
 
 
 void FlushAll(){
@@ -128,3 +126,5 @@ Frame *findLRU() {
     delete_unp(unp);
     return ret;
 }
+
+

@@ -16,9 +16,8 @@ typedef struct _Catalog{
 }Catalog;
 
 void InitCatalog(void);
-
 void FinishCatalog(void);
-
 void AddRelation(RelationInfo * rel);
+void resetCatalog(void);
 
 #endif

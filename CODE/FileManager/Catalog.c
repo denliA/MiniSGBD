@@ -96,6 +96,19 @@ void FinishCatalog(void){
 	free(cat.tab);
 }
 
+void resetCatalog(){
+    //on vide le catalog
+    FinishCatalog();
+    //on supprime le catalog
+    char* path = (char *) malloc( strlen(DBPath) + strlen("/Catalog.log") +1);
+	strcpy(path, DBPath);
+	strcat(path, "/Catalog.log");
+    remove(path);
+    free(path);
+    //on reinitialise le catalog
+    InitCatalog();
+}
+
 void AddRelation(RelationInfo * rel){
 	//realloc si le tableau est rempli
 	if ((cat.cpt)>cat.sizeMax){

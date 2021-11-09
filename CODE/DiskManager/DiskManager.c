@@ -20,6 +20,31 @@ void initDiskManager(void) {
     atexit(endDiskManager);
 }
 
+void resetDiskManager(void){
+    
+    char * path;
+    uint32_t file;
+   
+    //pour chaque file dans filelist
+    for (file = 0; file < filelist.nfiles; file++){
+        //on recupere son adresse
+        path = getFilePath(params.DBPath, file);
+        //on le supprime
+        remove(path);
+        free(path);
+    }
+
+    //on supprime filelist aussi
+    path = (char *) malloc( strlen(DBPath) + strlen("/.filelist") +1);
+	strcpy(path, DBPath);
+	strcat(path, "/.filelist");
+    remove(path);
+    free(path);
+
+    //on reinitialise parce que c'est un reset
+    initDiskManager();
+}
+
 PageId AllocPage(void) {
     FILE *f;
     PageId pid;
