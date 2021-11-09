@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "../DiskManager/DiskManager.h"
 #include "../DiskManager/FileList.h"
-DBParams params;
+extern DBParams params;
 static FileList filelist;
 
 uint8_t* word;
