@@ -115,8 +115,9 @@ void resetCatalog(){
 RelationInfo* findRelation(char nom[]){
     //on va comparer le nom cherche au nom de chaque relation
     for(uint32_t rel=0; rel<cat.cpt; rel++){
-        if(cat.tab[rel].){ return ;}
+        if(strcmp(cat.tab[rel].name, nom) == 0 ){ return &cat.tab[rel];}
     }
+    return NULL;
 }
 
 void AddRelation(RelationInfo * rel){
