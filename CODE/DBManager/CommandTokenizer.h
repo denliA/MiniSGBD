@@ -1,0 +1,38 @@
+#ifndef COMMAND_TOKENIZER_H
+#define COMMAND_TOKENIZER_H
+
+#define MAX_ATTR 100
+
+enum {
+    ENDOFCOMMAND = -1, DEUX_POINTS, VIRGULE, WHERE, FROM, AND, OR, OPEQ, OPSUP, OPINF, OPSUPEQ, OPINFEQ, OPNEQ, TYPE_STRING, TYPE_INT, TYPE_FLOAT, STRING_CONSTANT,
+    FLOAT_CONSTANT, INT_CONSTANT, PAREN_OUVR, PAREN_FERM, ETOILE, NOM_VARIABLE
+}
+
+struct command {
+    unsigned pos;
+    char *command;
+};
+
+struct token {
+    int type;
+    union {
+        char sattr[MAX_ATTR];
+        float fattr;
+        uint32_t iattr;
+    } attr;
+};
+
+/*
+Utilisation: 
+struct command c = newCommand(char *command);
+struct token tok;
+while( nextToken(command, &tok) >= 0) {
+    //faire des choses sur le token actuel
+};
+
+*/
+
+struct command newCommand(char *command);
+int nextToken(struct command com, struct token *tok);
+
+#endif
