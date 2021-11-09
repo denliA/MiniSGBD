@@ -5,6 +5,8 @@
 #include "RelationInfo.h"
 #include "Record.h"
 
+extern int ordre_ordi;
+extern int ordre_save;
 
 void RecordInit(Record* rec, RelationInfo *rel){
 	rec->relInfo=rel;

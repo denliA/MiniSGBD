@@ -1,15 +1,18 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "DiskManager.h"
 #include "FileList.h"
 #include "DBParams.h"
+#include "util/fileutil.h"
 
 static uint32_t create_new_file(void);
+static void check_endianness(void);
 
 DBParams params;
 static FileList filelist;
-
+char ordre_ordi, ordre_save;
 
 
 void initDiskManager(void) {
@@ -17,6 +20,7 @@ void initDiskManager(void) {
     if(filelist.list == NULL) { // le fichier n'existe pas encore
         filelist = initList();
     }
+    check_endianness();
     atexit(endDiskManager);
 }
 
@@ -88,6 +92,30 @@ static uint32_t create_new_file(void) {
     return next_file_id;
 }
 
+static void check_endianness(void) {
+    int test = 1;
+    char *petite = (char*) &test;
+    ordre_ordi = (*petite == 1) ? LSF : MSF;
+    char *tmp = malloc(strlen(params.DBPath)+strlen("/.endianness")+1); strcpy(tmp, params.DBPath); strcat(tmp, "/.endianness");
+    if(exists(tmp)) {
+        FILE *f = fopen(tmp, "r");
+        fread(&ordre_save, 1, 1, f);
+        fclose(f);
+    } else {
+        ordre_save = ordre_ordi;
+    }
+    free(tmp);
+}
+
+static void saveEndianness(void) {
+    FILE *f;
+    char *tmp = malloc(strlen(params.DBPath)+strlen("/.endianness")+1); strcpy(tmp, params.DBPath); strcat(tmp, "/.endianness");
+    f = fopen(tmp, "w");
+    fwrite(&ordre_save, 1, 1, f);
+    free(tmp);
+}
+
 void endDiskManager(void) {
     saveList(filelist, &params);
+    saveEndianness();
 }

@@ -5,6 +5,9 @@
 
 #include "PageId.h"
 
+#define MSF 1
+#define LSF 2
+
 void initDiskManager(void);
 PageId AllocPage(void);
 int ReadPage(PageId, uint8_t *);
