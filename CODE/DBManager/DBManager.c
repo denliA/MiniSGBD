@@ -3,12 +3,12 @@
 
 extern  Catalog cat;
 
-void InitDBM(){
-	InitCatalog(&cat);
+void InitDBM(void){
+	InitCatalog();
 }
 
-void FinishDBM(){
-	FinishCatalog(&cat);
+void FinishDBM(void){
+	FinishCatalog();
 	FlushAll();
 }
 

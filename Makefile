@@ -7,11 +7,11 @@ windows : MiniSGBD win_clean
 unix : clean
 
 
-MiniSGBD: bin main.o DiskManager.o FileList.o BufferManager.o Frame.o Record.o RelationInfo.o Catalog.o FileManager.o DBManager.o
-	gcc -o bin/MiniSGBD bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Frame.o bin/main.o bin/Catalog.o bin/DBManager.o bin/FileManager.o bin/RelationInfo.o bin/Record.o
+MiniSGBD: bin main.o DiskManager.o FileList.o BufferManager.o Frame.o Record.o RelationInfo.o Catalog.o FileManager.o DBManager.o stringutil.o fileutil.o
+	gcc -o bin/MiniSGBD bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Frame.o bin/main.o bin/Catalog.o bin/DBManager.o bin/FileManager.o bin/RelationInfo.o bin/Record.o bin/stringutil.o bin/fileutil.o
 
-Tests: bin Tests.o DiskManager.o FileList.o BufferManager.o Frame.o
-	gcc -o bin/Tests bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Frame.o bin/Tests.o
+Tests: bin Tests.o DiskManager.o FileList.o BufferManager.o Frame.o stringutil.o fileutil.o
+	gcc -o bin/Tests bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Frame.o bin/Tests.o bin/fileutil.o bin/stringutil.o
 
 bin:
 	- mkdir bin
@@ -48,6 +48,12 @@ FileManager.o:
 
 DBManager.o:
 	$(CC) -o bin/DBManager.o -c CODE/DBManager/DBManager.c
+
+fileutil.o:
+	$(CC) -o bin/fileutil.o -c CODE/util/fileutil.c
+
+stringutil.o:
+	$(CC) -o bin/stringutil.o -c CODE/util/stringutil.c
 
 clean:
 	rm -f bin/*.o

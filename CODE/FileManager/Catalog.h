@@ -15,10 +15,10 @@ typedef struct _Catalog{
 	int sizeMax;
 }Catalog;
 
-void InitCatalog(Catalog* cat);
+void InitCatalog(void);
 
-void FinishCatalog(Catalog* cat);
+void FinishCatalog(void);
 
-void AddRelation(RelationInfo * rel,Catalog* cat);
+void AddRelation(RelationInfo * rel);
 
 #endif
