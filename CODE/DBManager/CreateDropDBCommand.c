@@ -1,4 +1,4 @@
-#include "CreateDropDB.h"
+#include "CreateDropDBCommand.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "FileManager/Catalog.h"

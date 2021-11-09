@@ -18,7 +18,7 @@ typedef struct _Catalog{
 void InitCatalog(void);
 void FinishCatalog(void);
 void AddRelation(RelationInfo * rel);
-RelationInfo* findRelation(char[] nom);
+RelationInfo* findRelation(char nom[]);
 void resetCatalog(void);
 
 #endif
