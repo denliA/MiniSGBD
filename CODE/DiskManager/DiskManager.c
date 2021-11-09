@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "DiskManager.h"
 #include "FileList.h"
 #include "DBParams.h"
@@ -35,8 +36,8 @@ void resetDiskManager(void){
     }
 
     //on supprime filelist aussi
-    path = (char *) malloc( strlen(DBPath) + strlen("/.filelist") +1);
-	strcpy(path, DBPath);
+    path = (char *) malloc( strlen(params.DBPath) + strlen("/.filelist") +1);
+	strcpy(path, params.DBPath);
 	strcat(path, "/.filelist");
     remove(path);
     free(path);

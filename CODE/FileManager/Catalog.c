@@ -100,8 +100,8 @@ void resetCatalog(){
     //on vide le catalog
     FinishCatalog();
     //on supprime le catalog
-    char* path = (char *) malloc( strlen(DBPath) + strlen("/Catalog.log") +1);
-	strcpy(path, DBPath);
+    char* path = (char *) malloc( strlen(params.DBPath) + strlen("/Catalog.log") +1);
+	strcpy(path, params.DBPath);
 	strcat(path, "/Catalog.log");
     remove(path);
     free(path);
