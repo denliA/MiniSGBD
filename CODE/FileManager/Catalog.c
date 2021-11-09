@@ -96,6 +96,7 @@ void FinishCatalog(void){
 	free(cat.tab);
 }
 
+//supprime tout dans le catalog puis le reinitialise
 void resetCatalog(){
     //on vide le catalog
     FinishCatalog();
@@ -107,6 +108,15 @@ void resetCatalog(){
     free(path);
     //on reinitialise le catalog
     InitCatalog();
+}
+
+//TODO
+//renvoie la relation du catalog portant le nom passe en argument
+RelationInfo* findRelation(char[] nom){
+    //on va comparer le nom cherche au nom de chaque relation
+    for(uint32_t rel=0; rel<cat.cpt; rel++){
+        if(cat.tab[rel].){ return ;}
+    }
 }
 
 void AddRelation(RelationInfo * rel){

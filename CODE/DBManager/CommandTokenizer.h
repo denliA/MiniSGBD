@@ -24,9 +24,9 @@ struct token {
 
 /*
 Utilisation: 
-struct command c = newCommand(char *command);
+struct command c = newCommand(command);
 struct token tok;
-while( nextToken(command, &tok) >= 0) {
+while( nextToken(command, &tok) != ENDOFCOMMAND) {
     //faire des choses sur le token actuel
 };
 
