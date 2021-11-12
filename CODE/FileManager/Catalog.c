@@ -96,6 +96,30 @@ void FinishCatalog(void){
 	free(cat.tab);
 }
 
+//supprime tout dans le catalog puis le reinitialise
+void resetCatalog(){
+    //on vide le catalog
+    FinishCatalog();
+    //on supprime le catalog
+    char* path = (char *) malloc( strlen(params.DBPath) + strlen("/Catalog.log") +1);
+	strcpy(path, params.DBPath);
+	strcat(path, "/Catalog.log");
+    remove(path);
+    free(path);
+    //on reinitialise le catalog
+    InitCatalog();
+}
+
+//TODO
+//renvoie la relation du catalog portant le nom passe en argument
+RelationInfo* findRelation(char nom[]){
+    //on va comparer le nom cherche au nom de chaque relation
+    for(uint32_t rel=0; rel<cat.cpt; rel++){
+        if(strcmp(cat.tab[rel].name, nom) == 0 ){ return &cat.tab[rel];}
+    }
+    return NULL;
+}
+
 void AddRelation(RelationInfo * rel){
 	//realloc si le tableau est rempli
 	if ((cat.cpt)>cat.sizeMax){

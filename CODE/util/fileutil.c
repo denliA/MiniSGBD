@@ -115,6 +115,11 @@ int validPath(char *path) {
             dropTokens(subs); free(tmp);\
             return 0;\
         }\
+        if(!(isLast) && !isDir(subpath)) {\
+            fprintf(stderr, "E: dans le chemin \"%s\", \"%s\" n'est pas un dossier.", path, subpath);\
+            dropTokens(subs); free(tmp);\
+            return 0;\
+        }\
     }
     
     char *p = path;

@@ -1,7 +1,9 @@
 #include <string.h>
+#include <stdio.h>
 
 #include "DBManager.h"
 #include "BufferManager/BufferManager.h"
+#include "CreateDropDBCommand.h"
 
 extern  Catalog cat;
 
@@ -22,13 +24,13 @@ void ProcessCommand(char* command){
     if(commeq(command, "CREATE RELATION")) {
         // 
     } else if (commeq(command, "DROPDB")) {
-    
+        supprimerDB();
     } else if (commeq(command, "INSERT")) {
-    
+        
     } else if (commeq(command, "BATCHINSERT")) {
     
     } else if (commeq(command, "SELECTMONO")) {
     
     } else 
-        printf("Erreur: commande \"%S\" inconnue\n", command);
+        printf("Erreur: commande \"%s\" inconnue\n", command);
 }

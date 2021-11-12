@@ -8,5 +8,4 @@ void FinishDBM(void);
 
 void ProcessCommand(char*);
 
-
 #endif
