@@ -5,6 +5,7 @@
 #include "DiskManager/DiskManager.h"
 #include "BufferManager/BufferManager.h"
 #include "FileManager.h"
+#include "util/endianness.h"
 
 
 #define FREE_LIST 1
@@ -16,16 +17,17 @@
 
 
 static void writePageIdToPageBuffer(PageId pageId, uint8_t* buff, int first){
-	PageId *deb=(PageId*)&buff[PAGEID_SIZE*first];
-	*deb=pageId;
-
+	buff += PAGEID_SIZE*first;
+	writeInt32InBuffer(pageId.FileIdx, buff, params.saveEndianness[0]);
+	buff[4] = pageId.PageIdx;
 }
 
 
 static PageId readPageIdFromPageBuffer(uint8_t *buff, uint8_t first){
-	void *debut = buff + sizeof(PageId)*first;
-	PageId *ptr = (PageId*)debut;
-	return *ptr;
+    PageId res;
+    buff += PAGEID_SIZE*first;
+    res.FileIdx = readInt32FromBuffer(buff, params.saveEndianness[0]);
+    return res;
 }
 
 

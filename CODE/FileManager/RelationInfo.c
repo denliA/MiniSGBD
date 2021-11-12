@@ -22,7 +22,8 @@ RelationInfo *RelationInfoInit(RelationInfo *rel, char *name, uint32_t nbCol, ch
     rel->colOffset = (uint32_t *) malloc( (sizeof *rel->colOffset) * nbCol );
     for(int i = 0; i<nbCol; i++) {
         rel->colOffset[i] = rel->size;
-        rel->size += colTypes[i].type == T_INT ? sizeof(int32_t) : colTypes[i].type == T_FLOAT ? sizeof(float) : colTypes[i].stringSize;
+        // Pour garder les int et les float alignés en mémoire, on arrondit la taille d'un string au multiple de 4 supérieur.
+        rel->size += colTypes[i].type == T_INT ? sizeof(int32_t) : colTypes[i].type == T_FLOAT ? sizeof(float) : colTypes[i].stringSize + (4 - colTypes[i].stringSize%4);
     }
     
     unsigned int pageSize = params.pageSize;
