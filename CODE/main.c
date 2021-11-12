@@ -46,6 +46,6 @@ int main(int argc, char **argv) {
         nb_char_commande = getline(&commande,&nb_char_max,stdin);
         printf("Commande : %s \n",commande);
         
-    }while(strncmp(commande,"exit",5)!=0);
+    }while(strncmp(commande,"exit",4)!=0);
     return 0;
 }
