@@ -7,11 +7,11 @@ windows : MiniSGBD win_clean
 unix : clean
 
 
-MiniSGBD: bin main.o DiskManager.o FileList.o BufferManager.o Frame.o Record.o RelationInfo.o Catalog.o FileManager.o DBManager.o stringutil.o fileutil.o CommandTokenizer.o CreateDropDBCommand.o
-	gcc -o bin/MiniSGBD bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Frame.o bin/main.o bin/Catalog.o bin/DBManager.o bin/FileManager.o bin/RelationInfo.o bin/Record.o bin/stringutil.o bin/fileutil.o bin/CreateDropDBCommand.o
+MiniSGBD: bin main.o DiskManager.o FileList.o BufferManager.o Frame.o Record.o RelationInfo.o Catalog.o FileManager.o DBManager.o stringutil.o fileutil.o endianness.o CommandTokenizer.o CreateDropDBCommand.o
+	gcc -o bin/MiniSGBD bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Frame.o bin/main.o bin/Catalog.o bin/DBManager.o bin/FileManager.o bin/RelationInfo.o bin/Record.o bin/stringutil.o bin/fileutil.o bin/endianness.o bin/CreateDropDBCommand.o
 
-Tests: bin Tests.o DiskManager.o FileList.o BufferManager.o Frame.o stringutil.o fileutil.o
-	gcc -o bin/Tests bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Frame.o bin/Tests.o bin/fileutil.o bin/stringutil.o
+Tests: bin Tests.o DiskManager.o FileList.o BufferManager.o Frame.o stringutil.o fileutil.o endianness.o
+	gcc -o bin/Tests bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Frame.o bin/Tests.o bin/fileutil.o bin/stringutil.o bin/endianness.o
 
 bin:
 	- mkdir bin
@@ -54,6 +54,9 @@ fileutil.o:
 
 stringutil.o:
 	$(CC) -o bin/stringutil.o -c CODE/util/stringutil.c
+
+endianness.o:
+	$(CC) -o bin/endianness.o -c CODE/util/endianness.c
 
 CommandTokenizer.o:
 	$(CC) -o bin/CommandTokenizer.o -c CODE/DBManager/CommandTokenizer.c

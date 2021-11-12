@@ -145,7 +145,7 @@ int validPath(char *path) {
 
 
 int getBytesFromFile(char *path, uint8_t *buffer, size_t howmany) {
-    FILE *f = fopen(path, 'r');
+    FILE *f = fopen(path, "r");
     if(f==NULL) return errno;
     size_t res;
     if(res = fread(buffer, 1, howmany, f) < 0)
@@ -154,8 +154,8 @@ int getBytesFromFile(char *path, uint8_t *buffer, size_t howmany) {
     return res;
 }
 
-int writeBytesFromFile(char *path, uint8_t *buffer, size_t howmany) {
-    FILE *f = fopen(path, 'w');
+int writeBytesToFile(char *path, uint8_t *buffer, size_t howmany) {
+    FILE *f = fopen(path, "w");
     if(f==NULL) return errno;
     size_t res;
     if((res=fwrite(buffer, 1, howmany, f)) < howmany)
