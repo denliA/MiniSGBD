@@ -4,9 +4,9 @@
 #define DISKMANAGER_H
 
 #include "PageId.h"
+#include "DBParams.h"
 
-#define MSF 1
-#define LSF 2
+extern DBParams params;
 
 void initDiskManager(void);
 PageId AllocPage(void);
@@ -16,3 +16,5 @@ void DesallocPage(PageId);
 void endDiskManager(void);
 
 #endif
+
+

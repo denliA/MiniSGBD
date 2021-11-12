@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <stdarg.h>
 
 /* *************************************************************************
  * Macros pour généraliser les fonctions de manipulation de fichiers afin
@@ -137,6 +138,40 @@ int validPath(char *path) {
     return isDir(path) ? VALID_DIR : VALID_FILE;
 }
 
+
+int getBytesFromFile(char *path, uint8_t *buffer, size_t howmany) {
+    FILE *f = fopen(path, 'r');
+    if(f==NULL) return errno;
+    size_t res;
+    if(res = fread(buffer, 1, howmany, f) < 0)
+        return errno;
+    fclose(f);
+    return res;
+}
+
+int writeBytesFromFile(char *path, uint8_t *buffer, size_t howmany) {
+    FILE *f = fopen(path, 'w');
+    if(f==NULL) return errno;
+    size_t res;
+    if((res=fwrite(buffer, 1, howmany, f)) < howmany)
+        return errno;
+    fclose(f);
+    return res;
+}
+
+char *tmpPath(size_t len, char *format, ...) {
+    static char *string;
+    if(string != NULL) {
+        free(string);
+    }
+    if((string = malloc(len))==NULL)
+        return NULL;
+    va_list p;
+    va_start(p, format);
+    vsprintf(string, format, p);
+    va_end(p);
+    return string;
+}
 
 /*int main(int argc, char **argv) {
     if(argc != 2) exit(1);

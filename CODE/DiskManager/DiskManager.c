@@ -4,23 +4,33 @@
 #include <string.h>
 #include "DiskManager.h"
 #include "FileList.h"
-#include "DBParams.h"
 #include "util/fileutil.h"
 
+#define fatal(...)   { fprintf(stderr, __VA_ARGS__); exit(EXIT_FAILURE); }
+
 static uint32_t create_new_file(void);
-static void check_endianness(void);
 
 DBParams params;
 static FileList filelist;
-char ordre_ordi, ordre_save;
-
 
 void initDiskManager(void) {
+    
     filelist = getList(&params);
     if(filelist.list == NULL) { // le fichier n'existe pas encore
         filelist = initList();
     }
-    check_endianness();
+    
+    if(getInt32End() == UNRECOGNIZED_ENDIAN) fatal("E: [initDiskManager] La représentation d'entiers de cette machine n'est pas gérée\n");
+    if(getFloatEnd() == UNRECOGNIZED_ENDIAN) fatal("E: [initDiskManager] La représentation de réels de cette machine n'est aps gérée\n");
+    
+    char *endpath = tmpPath(strlen(params.DBPath)+strlen("/.endianness"), "%s%s", params.DBPath, "/.endianness");
+    if(exists(endpath)) {
+        getBytesFromFile(endpath, params.saveEndianness, 2);
+    } else {
+        params.saveEndianness[0] = getInt32End();
+        params.saveEndianness[1] = getFloatEnd();
+    }
+    
     atexit(endDiskManager);
 }
 
@@ -92,30 +102,7 @@ static uint32_t create_new_file(void) {
     return next_file_id;
 }
 
-static void check_endianness(void) {
-    int test = 1;
-    char *petite = (char*) &test;
-    ordre_ordi = (*petite == 1) ? LSF : MSF;
-    char *tmp = malloc(strlen(params.DBPath)+strlen("/.endianness")+1); strcpy(tmp, params.DBPath); strcat(tmp, "/.endianness");
-    if(exists(tmp)) {
-        FILE *f = fopen(tmp, "r");
-        fread(&ordre_save, 1, 1, f);
-        fclose(f);
-    } else {
-        ordre_save = ordre_ordi;
-    }
-    free(tmp);
-}
-
-static void saveEndianness(void) {
-    FILE *f;
-    char *tmp = malloc(strlen(params.DBPath)+strlen("/.endianness")+1); strcpy(tmp, params.DBPath); strcat(tmp, "/.endianness");
-    f = fopen(tmp, "w");
-    fwrite(&ordre_save, 1, 1, f);
-    free(tmp);
-}
-
 void endDiskManager(void) {
     saveList(filelist, &params);
-    saveEndianness();
+    writeBytesToFile(tmpPath(strlen(params.DBPath)+strlen("/.endianness"), "%s%s", params.DBPath, "/.endianness"), params.saveEndianness, 2);
 }

@@ -13,6 +13,10 @@
 #error Système d exploitation non supporté 
 #endif // defined __linux__ || defined __APPLE__
 
+#include <stddef.h>
+#include <stdint.h>
+
+// Informations sur un fichier
 int exists(char *file);
 int canRead(char *file);
 int canWrite(char *file);
@@ -23,5 +27,11 @@ long int fileSize(char *file);
 int blockSize(char *file);
 //int ask(char *file, char *request);
 
+
+// Actions
+int getBytesFromFile(char *path, uint8_t *buffer, size_t howmany);
+int writeBytesToFile(char *path, uint8_t *buffer, size_t howmany);
+
+char *tmpPath(size_t len, char *format, ...);
 
 #endif // FILEUTIL_H
