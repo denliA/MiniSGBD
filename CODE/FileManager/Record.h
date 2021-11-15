@@ -1,12 +1,12 @@
 #ifndef RECORD_H
 #define RECORD_H
 #include "RelationInfo.h"
-
+#include "Rid.h"
 
 typedef struct _Record{
 	RelationInfo *relInfo;
 	void* values;
-
+    Rid rid;
 }Record;
 
 
@@ -15,5 +15,6 @@ void RecordFinish(Record *);
 void writeToBuffer(Record *r, uint8_t *buff, uint32_t pos);
 void readFromBuffer(Record *r, uint8_t *buff, uint32_t pos);
 
+void printRecord(Record *r);
 
 #endif

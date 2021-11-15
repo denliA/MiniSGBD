@@ -12,6 +12,7 @@ extern DBParams params;
 void RecordInit(Record* rec, RelationInfo *rel){
 	rec->relInfo=rel;
 	rec->values= calloc(1, rel->size);
+	initDummyRID(rec->rid);
 }
 
 void writeToBuffer(Record *rec, uint8_t *buff, uint32_t pos) {
@@ -71,4 +72,20 @@ void readFromBuffer(Record *rec, uint8_t *buff, uint32_t pos) {
 void RecordFinish(Record *rec) {
     free(rec->values);
     free(rec);
+}
+
+void printRecord(Record *r) {
+    RelationInfo *rel = r->relInfo;
+    for(int i=0; i< relInfo->nbCol; i++) {
+        void val = (rec->values+rel->colOffset[i]);
+        if (rel->colTypes[i].type == T_INT)
+            printf("%d", *(int*)val);
+        else if (rel->colTypes[i].type == T_FLOAT)
+            printf("%f", *(float*)val);
+        else if (rel->colTypes[i].type == T_STRING) {
+            printf("%.*s", rel->colTypes[i].stringSize, val);
+        } else
+            printf("INVALID_COL%d_TYPE", i);
+    }
+    putchar('\n');
 }
