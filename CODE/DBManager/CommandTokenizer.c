@@ -50,6 +50,12 @@ int nextToken(struct command com, struct token *tok) {
     } else if(strbegstr(com.command+com.pos, "OR")) {
         com.pos += strlen("OR");
         return tok->type = OR;
+    } else if(strbegstr(com.command+com.pos, "INTO")) {
+        com.pos += strlen("INTO");
+        return tok->type = INTO;
+    } else if(strbegstr(com.command+com.pos, "RECORD")) {
+        com.pos += strlen("RECORD");
+        return tok->type = RECORD;
     } else if(strbegstr(com.command+com.pos, "int")) {
         com.pos += strlen("int");
         return tok->type = TYPE_INT;
