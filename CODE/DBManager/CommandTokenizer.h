@@ -29,12 +29,21 @@ Utilisation:
 struct command c = newCommand(command);
 struct token tok;
 while( nextToken(command, &tok) != ENDOFCOMMAND) {
-    //faire des choses sur le token actuel
+    //faire des choses sur le token actuel : (choses précisées dans nextToken)
 };
+*/
+struct command newCommand(char *command);
+
+
+/** (ici les lettres en majuscule concernent l'énumération)
+Types possiblement retournés : (qui seront à la fois dans la valeur de retour de nextToken(com, tok) et dans le champ tok->type)
+    - DEUX_POINTS ou VIRGULE : indique qu'il vient de lire ":" ou "," dans la chaîne.
+        --> ici le champ tok->attr doit être ignoré
+    - WHERE ou FROM ou INTO ou AND ou OR: indique que le mot clé correspondant a été lu 
+        --> ici le champ tok->attr doit être ignoré
+    - OPEQ ou OPSUP ou OPINF ou OPSUPEQ ou OPINFEQ
 
 */
-
-struct command newCommand(char *command);
 int nextToken(struct command com, struct token *tok);
 
 #endif
