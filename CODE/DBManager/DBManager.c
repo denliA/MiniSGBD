@@ -4,7 +4,7 @@
 #include "DBManager.h"
 #include "BufferManager/BufferManager.h"
 #include "CreateDropDBCommand.h"
-
+#include "Command.h"
 extern  Catalog cat;
 
 #define commeq(big, little) ( strncmp( (big), (little), strlen(little) ) == 0 ) 
@@ -22,15 +22,18 @@ void FinishDBM(void){
 
 void ProcessCommand(char* command){
     if(commeq(command, "CREATE RELATION")) {
-        // 
+
+    	createRelationCommand cRc=initCreateRelationCommand(command+strlen("CREATE RELATION"));
+    	ExecuteRelationCommand(cRc);
+
     } else if (commeq(command, "DROPDB")) {
         supprimerDB();
     } else if (commeq(command, "INSERT")) {
         
     } else if (commeq(command, "BATCHINSERT")) {
-    
+
     } else if (commeq(command, "SELECTMONO")) {
-    
+
     } else 
         printf("Erreur: commande \"%s\" inconnue\n", command);
 }
