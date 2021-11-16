@@ -69,7 +69,7 @@ int nextToken(struct command com, struct token *tok) {
     char *endptr;
     long long res = strtoll(com.command+com.pos, &endptr, 0);
     if( *endptr == '.' || tolower(*endptr) == 'e') {
-        double dres = strtod(com.command + com.pos, &endptr, 0);
+        double dres = strtod(com.command + com.pos, &endptr);
         if(endptr != com.command+com.pos &&  isSep(*endptr)) { // C'est un float valide
             com.pos+= endptr - &com.command[com.pos];
             tok->attr.fattr = dres;
