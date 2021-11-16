@@ -76,14 +76,14 @@ void RecordFinish(Record *rec) {
 
 void printRecord(Record *r) {
     RelationInfo *rel = r->relInfo;
-    for(int i=0; i< relInfo->nbCol; i++) {
-        void val = (rec->values+rel->colOffset[i]);
+    for(int i=0; i< rel->nbCol; i++) {
+        void *val = (r->values+rel->colOffset[i]);
         if (rel->colTypes[i].type == T_INT)
             printf("%d", *(int*)val);
         else if (rel->colTypes[i].type == T_FLOAT)
             printf("%f", *(float*)val);
         else if (rel->colTypes[i].type == T_STRING) {
-            printf("%.*s", rel->colTypes[i].stringSize, val);
+            printf("%.*s", rel->colTypes[i].stringSize, (char*) val);
         } else
             printf("INVALID_COL%d_TYPE", i);
     }

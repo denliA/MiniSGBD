@@ -50,6 +50,12 @@ int nextToken(struct command com, struct token *tok) {
     } else if(strbegstr(com.command+com.pos, "OR")) {
         com.pos += strlen("OR");
         return tok->type = OR;
+    } else if(strbegstr(com.command+com.pos, "INTO")) {
+        com.pos += strlen("INTO");
+        return tok->type = INTO;
+    } else if(strbegstr(com.command+com.pos, "RECORD")) {
+        com.pos += strlen("RECORD");
+        return tok->type = RECORD;
     } else if(strbegstr(com.command+com.pos, "int")) {
         com.pos += strlen("int");
         return tok->type = TYPE_INT;
@@ -69,7 +75,7 @@ int nextToken(struct command com, struct token *tok) {
     char *endptr;
     long long res = strtoll(com.command+com.pos, &endptr, 0);
     if( *endptr == '.' || tolower(*endptr) == 'e') {
-        double dres = strtod(com.command + com.pos, &endptr, 0);
+        double dres = strtod(com.command + com.pos, &endptr);
         if(endptr != com.command+com.pos &&  isSep(*endptr)) { // C'est un float valide
             com.pos+= endptr - &com.command[com.pos];
             tok->attr.fattr = dres;
