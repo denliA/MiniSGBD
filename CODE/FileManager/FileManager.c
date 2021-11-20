@@ -50,17 +50,22 @@ PageId createHeaderPage(void){
 
 static PageId addDataPage(RelationInfo *rel) {
     PageId newPage = AllocPage();
-    uint8_t *newPageBuff = GetPage(newPage);
+   
     uint8_t *headerBuff = GetPage(rel->headerPage);
-    PageId lastVide = readPageIdFromPageBuffer(headerBuff, 2);
-    uint8_t *lastVideBuff = GetPage(lastVide);
-    writePageIdToPageBuffer(lastVide, newPageBuff, 0);
-    writePageIdToPageBuffer(readPageIdFromPageBuffer(lastVideBuff, 1), newPageBuff, 1);
-    writePageIdToPageBuffer(newPage, lastVideBuff, 1);
-    writePageIdToPageBuffer(newPage, headerBuff, 3);
-    FreePage(newPage, 1);
+    PageId lastVide = readPageIdFromPageBuffer(headerBuff, LAST_FREE);
+    writePageIdToPageBuffer(newPage, headerBuff, LAST_FREE);
     FreePage(rel->headerPage, 1);
+    
+    uint8_t *lastVideBuff = GetPage(lastVide);
+    writePageIdToPageBuffer(newPage, lastVideBuff, NEXT_PAGE);
+    uint8_t nextOfLastVideBuff = readPageIdFromPageBuffer(lastVideBuff, NEXT_PAGE); // Doit valoir rel->headerPage si tout va bien
     FreePage(lastVide, 1);
+    
+    uint8_t *newPageBuff = GetPage(newPage);
+    writePageIdToPageBuffer(lastVide, newPageBuff, PREC_PAGE);
+    writePageIdToPageBuffer(nextOfLastVideBuff, newPageBuff, NEXT_PAGE);
+    FreePage(newPage, 1);
+    
     return newPage;
 }
 
