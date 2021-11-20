@@ -39,10 +39,10 @@ PageId createHeaderPage(void){
     uint8_t *headerPage = GetPage(pageId);
     //écriture du PageId de la page dans elle même (permet de construire une liste chaînée circulaire et ainsi 
     // avoir un accès plus rapide au dernier élément
-    writePageIdToPageBuffer(pageId,headerPage,0); // next plein
-    writePageIdToPageBuffer(pageId,headerPage,1); // next vide
-    writePageIdToPageBuffer(pageId,headerPage,2); // last plein
-    writePageIdToPageBuffer(pageId,headerPage,3); // last vide
+    writePageIdToPageBuffer(pageId,headerPage,FULL_LIST); // next plein
+    writePageIdToPageBuffer(pageId,headerPage,FREE_LIST); // next vide
+    writePageIdToPageBuffer(pageId,headerPage,LAST_FULL); // last plein
+    writePageIdToPageBuffer(pageId,headerPage,LAST_FREE); // last vide
     //on libère la page qui a été modifiée donc dirty à 1
     FreePage(pageId,1);
     return pageId;
