@@ -16,19 +16,20 @@
 void ExecuteRelationCommand(CRC *command){
 	PageId page=createHeaderPage();
 	RelationInfo *rel=RelationInfoInit(NULL, command->relName,command->colNum,command->colNames, command->colTypes,page);
-	AddRelationInfo(rel);
+	AddRelation(rel);
 }
 
 CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 	CRC *temp=calloc(1,sizeof(CRC));
-	temp->colNames=calloc(50,50*sizeof(char));
-	temp->colTypes=calloc(50,sizeof(ColType));
+	temp->colNames=calloc(5,5*sizeof(char*));
+	temp->colTypes=calloc(5,sizeof(ColType));
+	size_t sizeTabs = 5;
 	struct command comm=newCommand(com);
 
 	struct token tok;
 
 	if (okToken(comm,&tok) && (tok.type==NOM_VARIABLE)){
-				temp->relName=tok.attr;
+				temp->relName=strdup(tok.attr.sattr);
 	} else{
 		return NULL;
 	}
@@ -37,14 +38,19 @@ CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 
 	if(okToken(comm,&tok) && tok.type==PAREN_OUVR){
 		while(okToken(comm,&tok)){
+		    if(tracker == sizeTabs) {
+		        temp->colNames = realloc(temp->colNames, (sizeTabs+5)*sizeof(char*));
+		        temp->colTypes = realloc(temp->colTypes, (sizeTabs+5)*sizeof(ColType));
+		        sizeTabs+=5;
+		    }
 			if (tok.type==NOM_VARIABLE){
-				temp->colNames[tracker]=tok.attr;
+				temp->colNames[tracker]=strdup(tok.attr.sattr);
 			}
 
 			if (okToken(comm,&tok) &&tok.type==DEUX_POINTS){
 				nextToken((comm), (&tok));
 
-				ColType t=calloc(1,sizeof(ColType));
+				ColType t;
 				switch (tok.type){
 
 				case TYPE_INT:
@@ -70,7 +76,7 @@ CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 			if (okToken(comm,&tok) && tok.type!=VIRGULE){
 				return NULL;
 			}
-
+			tracker++;
 		}
 	}
 	return NULL;

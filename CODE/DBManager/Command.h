@@ -11,7 +11,7 @@
 
 /*************************************************** CreateRelation ******************************************/
 typedef struct cRC{
-	char relName[100];
+	char *relName;
 	uint32_t colNum;
 	char ** colNames;
 	ColType *colTypes;
