@@ -21,7 +21,63 @@
     return NULL;\
 }
 
+// Lorsque l'utiliateur donne une valeur du mauvais type
+#define CONST_TYPE_ERROR(rel, ncol, good, bad) {\
+    SYNTAX_ERROR("Erreur: La colonne %d de %s est de type %s, mais j'ai eu un %s.\n", (ncol), (rel)->name, typeToString(good), typeToString(bad)); \
+}
 
+// Pour print le type d'une colonne donnée.
+#define typeToString(type) ( (type) == T_INT ? "integer" : (type) == T_FLOAT ?  "float" : (type) == T_STRING ? "stringX" : "INCONNU" ) 
+
+
+/* Entrées: - rel : la relation que représente le tuple. 
+            - command : commande commençant exactement au début du tuple, c'est à dire avec une parenthèse ouvrante 
+   Sortie: record contenant le tuple représenté par command.
+   
+   La fonction effectue toutes les vérifications de syntaxe et de types.
+*/
+static Record *parseTuple(RelationInfo *rel, struct command *comm) {
+    struct token tok;
+    Record *rec = malloc(sizeof(Record));
+    RecordInit(rec, rel);
+    
+    if(nextToken(comm, &tok) != PAREN_OUVR) {
+        RecordFinish(rec); SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à un parenthèse ouvrante\n");
+    }
+    for(int i=0; i<rel->nbCol;i++) {
+        int type;
+        switch(nextToken(comm, &tok)) {
+        case INT_CONSTANT:
+            if((type=getTypeAtColumn(rel, i)) != T_INT) {
+                RecordFinish(rec);
+                CONST_TYPE_ERROR(rel, i, type, T_INT);
+            } break;
+        case FLOAT_CONSTANT:
+            if((type=getTypeAtColumn(rel,i)) != T_FLOAT) {
+                RecordFinish(rec);
+                CONST_TYPE_ERROR(rel, i, type, T_FLOAT);
+            } break;
+        case STRING_CONSTANT:
+            if((type=getTypeAtColumn(rel,i)) != T_FLOAT) {
+                RecordFinish(rec); CONST_TYPE_ERROR(rel, i, type, T_STRING);
+            } else if (strlen(tok.attr.sattr) > rel->colTypes[i].stringSize) {
+                RecordFinish(rec);
+                SYNTAX_ERROR("Erreur sur la colonne %d, %s fait %ld caractères, mais %s(%d) est de type string%d\n", i, tok.attr.sattr, strlen(tok.attr.sattr), rel->colNames[i], i, rel->colTypes[i].stringSize);
+            } break;
+         default:
+            RecordFinish(rec); SYNTAX_ERROR("Erreur: Je m'attendais à une constante pour la colonne %d de %s\n", i, rel->name);
+        }
+        
+        setColumnTo(rec, i, &tok.attr);
+        
+        if( i == rel->nbCol - 1 && nextToken(comm, &tok) != PAREN_FERM ) {
+            RecordFinish(rec); SYNTAX_ERROR("Erreur: Je m'attendais à une virgule après la colonne %d de %s\n", i, rel->name);
+        } else if ( tok.type != VIRGULE ) {
+            RecordFinish(rec); SYNTAX_ERROR("Erreur: %i records lus, parenthèse fermante manquante.\n", i+1);
+        }
+    }
+    return rec;
+}
 
 
 

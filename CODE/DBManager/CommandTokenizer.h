@@ -30,7 +30,7 @@ struct token {
 Utilisation: 
 struct command c = newCommand(command);
 struct token tok;
-while( nextToken(command, &tok) != ENDOFCOMMAND) {
+while( nextToken(&command, &tok) != ENDOFCOMMAND) {
     //faire des choses sur le token actuel : (choses précisées dans nextToken)
 };
 */
@@ -57,5 +57,8 @@ Types possiblement retournés : (qui seront à la fois dans la valeur de retour 
         --> peut représenter à la fois une valeur de stringx, OU un nom de variable
 */
 int nextToken(struct command *com, struct token *tok);
+
+
+//TODO: RollBack(struct command *com); // Revient d'un token en arrière. (jsp si ça sera utile)
 
 #endif

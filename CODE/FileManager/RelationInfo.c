@@ -43,6 +43,12 @@ void RelationInfoFinish(RelationInfo* rel){
 	free(rel->colOffset);
 }
 
+int getTypeAtColumn(RelationInfo *relInfo, int col) {
+    if(!relInfo || relInfo->nbCol <= col || col<0) 
+        return -1;
+    return relInfo->colTypes[col].type;
+}
+
 void printRelationInfo(RelationInfo *rel) {
     printf("%s ", rel->name);
     putchar('(');

@@ -74,10 +74,8 @@ void RecordFinish(Record *rec) {
     free(rec);
 }
 
-int getTypeAtColumn(Record *r, int col) {
-    if(!r->relInfo || r->relInfo->nbCol <= col || col<0) 
-        return -1;
-    return r->relInfo->colTypes[col].type;
+int getTypeAtRecordColumn(Record *r, int col) {
+    return getTypeAtColumn(r->relInfo, col);
 }
 
 void setColumnTo(Record *r, int col, void *value) {
