@@ -31,27 +31,28 @@ CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 
 	struct token tok;
 
-	if (okToken(comm,&tok) && (tok.type==NOM_VARIABLE)){
+	if (okToken(&comm,&tok) && (tok.type==NOM_VARIABLE)){
 				temp->relName=strdup(tok.attr.sattr);
 	} else{
-		return NULL;
+		SYNTAX_ERROR("Erreur dans la commande: Je m'attendais à un nom de relaton.\n");
 	}
 
 	int tracker=0;
 
-	if(okToken(comm,&tok) && tok.type==PAREN_OUVR){
-		while(okToken(comm,&tok)){
+	if(okToken(&comm,&tok) && tok.type==PAREN_OUVR){
+		while(okToken(&comm,&tok)){
 		    if(tracker == sizeTabs) {
 		        temp->colNames = realloc(temp->colNames, (sizeTabs+5)*sizeof(char*));
 		        temp->colTypes = realloc(temp->colTypes, (sizeTabs+5)*sizeof(ColType));
 		        sizeTabs+=5;
 		    }
+		    
 			if (tok.type==NOM_VARIABLE){
 				temp->colNames[tracker]=strdup(tok.attr.sattr);
-			}
+			} else { SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à un nom de colonne\n"); }
 
-			if (okToken(comm,&tok) &&tok.type==DEUX_POINTS){
-				nextToken((comm), (&tok));
+			if (okToken(&comm,&tok) &&tok.type==DEUX_POINTS){
+				nextToken((&comm), (&tok));
 
 				ColType t;
 				switch (tok.type){
@@ -76,7 +77,7 @@ CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 
 			}
 
-			if (okToken(comm,&tok) && tok.type!=VIRGULE){
+			if (okToken(&comm,&tok) && tok.type!=VIRGULE){
 				return NULL;
 			}
 			tracker++;
@@ -98,27 +99,27 @@ BatchInsert *initBatchInsert(char *command){
 	temp->command = command;
 	struct command comm  = newCommand(command);
 	struct token tok;
-	while(nextToken(comm, &tok) != ENDOFCOMMAND) {
-		if(nextToken(comm, &tok) == NOM_VARIABLE){
+	while(nextToken(&comm, &tok) != ENDOFCOMMAND) {
+		if(nextToken(&comm, &tok) == NOM_VARIABLE){
 			if (strcmp(tok.attr.sattr,"BATCHINSERT")!=0){
 				fprintf(stderr,"Pas la commande BATCHINSERT");
 				return NULL;
 			}
 		}
-		if(nextToken(comm, &tok) != INTO){
+		if(nextToken(&comm, &tok) != INTO){
 			fprintf(stderr,"Commande mal tapee, il manque INTO");
 			return NULL;
 		}
-		if (nextToken(comm, &tok) == NOM_VARIABLE){
+		if (nextToken(&comm, &tok) == NOM_VARIABLE){
 			temp->relationName = strdup(tok.attr.sattr);
 		}
-		if (nextToken(comm, &tok) != FROM){
+		if (nextToken(&comm, &tok) != FROM){
 			if (strcmp(tok.attr.sattr,"FILE")!=0){
 				fprintf(stderr,"Commande mal tapee, il manque FILE");
 				return NULL;
 			}
 		}
-		if (nextToken(comm, &tok) == NOM_VARIABLE){
+		if (nextToken(&comm, &tok) == NOM_VARIABLE){
 			temp->fileName = strdup(tok.attr.sattr);
 		}
 	};
@@ -137,9 +138,9 @@ Insert initInsert(char* command){
     Insert holacmoi;
     struct command c = newCommand(command);
     struct token tok;
-    while( nextToken(c, &tok) != ENDOFCOMMAND) {
+    while( nextToken(&c, &tok) != ENDOFCOMMAND) {
         if(tok.type==INTO){
-            nextToken(c,&tok);
+            nextToken(&c,&tok);
             if(tok.type==NOM_VARIABLE){
                 //TODO traitement : appel chercheRelation
                 holacmoi.relation = findRelation(tok.attr.sattr);

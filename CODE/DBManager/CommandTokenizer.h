@@ -55,6 +55,6 @@ Types possiblement retournés : (qui seront à la fois dans la valeur de retour 
     - NOM_VARIABLE : Pour indiquer qu'aucun des cas décrits précédemment n'a été rencontré. Donc juste une chaîne quelconque de caractères
         --> peut représenter à la fois une valeur de stringx, OU un nom de variable
 */
-int nextToken(struct command com, struct token *tok);
+int nextToken(struct command *com, struct token *tok);
 
 #endif
