@@ -74,6 +74,36 @@ void RecordFinish(Record *rec) {
     free(rec);
 }
 
+int getTypeAtColumn(Record *r, int col) {
+    if(!r->relInfo || r->relInfo->nbCol <= col || col<0) 
+        return -1;
+    return r->relInfo->colTypes[col].type;
+}
+
+void setColumnTo(Record *r, int col, void *value) {
+    if (r->relInfo->nbCol <= col || col < 0) { fprintf(stderr, "E: [setColumnTo] bad col(%d) with nbCols=%d\n", col, r->relInfo->nbCol); exit(EXIT_FAILURE); }
+    void *position = r->values + r->relInfo->colOffset[col];
+    switch(r->relInfo->colTypes[col].type) {
+    case T_INT:
+        *(int32_t*)position = *(int32_t*) value;
+        break;
+    case T_FLOAT:
+        *(float*)position = *(float*) value;
+        break;
+    case T_STRING:
+        if(strnlen(value, r->relInfo->colTypes[col].stringSize + 1) > r->relInfo->colTypes[col].stringSize){
+            fprintf(stderr, "E: [setColumnTo] setting column %d of tuple <<%d, %d>, %d> of relation %s to too long string\n", col, r->rid.pageId.FileIdx, r->rid.pageId.PageIdx, r->rid.slotIdx, r->relInfo->name);
+            exit(EXIT_FAILURE);
+        }
+        strcpy(position, value);
+        break;
+    }
+}
+
+void *getAtColumn(Record *r, int col) {
+    if (r->relInfo->nbCol <= col || col < 0) { fprintf(stderr, "E: [setColumnTo] bad col(%d) with nbCols=%d\n", col, r->relInfo->nbCol); exit(EXIT_FAILURE); }
+    return r->values + r->relInfo->colOffset[col];
+}
 void printRecord(Record *r) {
     RelationInfo *rel = r->relInfo;
     for(int i=0; i< rel->nbCol; i++) {

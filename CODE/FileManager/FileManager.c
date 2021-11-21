@@ -128,6 +128,7 @@ static Rid writeRecordToDataPage(RelationInfo *rel, Record *r, PageId p) {
             FreePage(p, 1);
             rid.pageId = p;
             rid.slotIdx = free_slot;
+            r->rid = rid;
             bytemap[free_slot] = 1;
             return rid;
         }
