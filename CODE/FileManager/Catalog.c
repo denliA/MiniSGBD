@@ -5,6 +5,7 @@
 #include "Catalog.h"
 #include "DiskManager/DBParams.h"
 #include "DiskManager/PageId.h"
+#include "util/fileutil.h"
 
 #define CAT_SIZE 100
 
@@ -22,13 +23,12 @@ void InitCatalog(void){
     strcat(path, "/");
     strcat(path, "Catalog.def");
     
-    file = fopen(path, "wx");
-    if(file == NULL) {
-        if(errno = EEXIST) {
-            file = fopen(path, "w");
+    if(exists(path)) {
+        file = fopen(path, "w");
+        if(file==NULL) {
+            fprintf(stderr, "E: [Catalog] Can't open %s\n", params.DBPath);
+            exit(-1);
         }
-        fprintf(stderr, "E: [Catalog] Can't open %s\n", params.DBPath);
-        exit(-1);
     } else {
 	    cat.tab=(RelationInfo*)calloc(CAT_SIZE,sizeof(RelationInfo));
 	    cat.cpt=0;

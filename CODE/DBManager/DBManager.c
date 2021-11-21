@@ -23,7 +23,7 @@ void ProcessCommand(char* command){
     if(commeq(command, "CREATE RELATION")) {
 
     	CreateRelationCommand *crc = initCreateRelationCommand(command+strlen("CREATE RELATION"));
-    	ExecuteRelationCommand(crc);
+    	if (crc) ExecuteRelationCommand(crc);
 
     } else if (commeq(command, "DROPDB")) {
         supprimerDB();
@@ -33,6 +33,6 @@ void ProcessCommand(char* command){
 
     } else if (commeq(command, "SELECTMONO")) {
 
-    } else 
+    } else if (!commeq(command, "exit"));
         printf("Erreur: commande \"%s\" inconnue\n", command);
 }

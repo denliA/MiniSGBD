@@ -84,8 +84,6 @@ CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 					t.type=T_STRING;
 					t.stringSize=tok.attr.iattr;
 					break;
-				case PAREN_FERM:
-					return temp;
 				default:
 					SYNTAX_ERROR("Erreur: Je m'attendais à un type\n");
 				}
@@ -99,8 +97,10 @@ CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 			}
 			tracker++;
 		}
+	} else {
+	SYNTAX_ERROR("Erreur dans la commande: Je m'attendais à une parenthèse ouvrante, j'ai eu %d\n", tok.type);	
 	}
-	SYNTAX_ERROR("Erreur dans la commande: Je m'attendais à une parenthèse ouvrante\n");
+	return temp;
 }
 /***************************************************************************************************************************/
 
