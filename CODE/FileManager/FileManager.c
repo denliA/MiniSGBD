@@ -58,7 +58,7 @@ static PageId addDataPage(RelationInfo *rel) {
     
     uint8_t *lastVideBuff = GetPage(lastVide);
     writePageIdToPageBuffer(newPage, lastVideBuff, NEXT_PAGE);
-    uint8_t nextOfLastVideBuff = readPageIdFromPageBuffer(lastVideBuff, NEXT_PAGE); // Doit valoir rel->headerPage si tout va bien
+    PageId nextOfLastVideBuff = readPageIdFromPageBuffer(lastVideBuff, NEXT_PAGE); // Doit valoir rel->headerPage si tout va bien
     FreePage(lastVide, 1);
     
     uint8_t *newPageBuff = GetPage(newPage);
@@ -76,7 +76,7 @@ static void unlinkDataPage(PageId page, PageId header, int from) {
     PageId prec = readPageIdFromPageBuffer(pageBuff, PREC_PAGE);
     FreePage(page, 1);
     
-    uint8_t *nextb = GetPage(next)
+    uint8_t *nextb = GetPage(next);
     writePageIdToPageBuffer(prec, nextb, equalPageId(next, header) ? (from == FREE_LIST ? LAST_FREE : LAST_FULL) : PREC_PAGE);
     FreePage(next, 1);
     
@@ -146,7 +146,9 @@ static uint32_t getRecordsInDataPage(RelationInfo *rel, PageId p, Record *list, 
             if(*offset == *size) {
                 list = (Record *) realloc(list, sizeof(Record)*((*size)+=2*rel->slotCount));
             }
-            list->relInfo = rel;
+            Rid rid; rid.pageId = p; rid.slotIdx = slot;
+            list[slot].relInfo = rel;
+            list[slot].rid = rid;
             readFromBuffer(list+((*offset)++), slots, slot*rel->size);
             readrecs++;
         }
@@ -243,6 +245,9 @@ Record *GetNextRecord(ListRecordsIterator *iter) {
         return NULL;
     rec = (Record *) malloc(sizeof(Record));
     readFromBuffer(rec, iter->buffer, 2*PAGEID_SIZE + iter->currentSlot * iter->rel->size);
+    rec->relInfo = iter->rel;
+    rec->rid.pageId = iter->currentPage;
+    rec->rid.slotIdx = iter->currentSlot;
     return rec;
 }
 
