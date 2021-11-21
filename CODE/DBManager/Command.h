@@ -13,9 +13,10 @@ typedef struct cRC{
 	char ** colNames;
 	ColType *colTypes;
 
-}createRelationCommand;
+} CreateRelationCommand;
 
-
+void ExecuteRelationCommand(CreateRelationCommand *command);
+CreateRelationCommand *initCreateRelationCommand(char *com);
 
 
 #endif

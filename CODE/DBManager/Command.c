@@ -1,4 +1,4 @@
-#define cRC createRelationCommand
+#define CRC CreateRelationCommand
 
 #include <stdlib.h>
 
@@ -11,14 +11,14 @@
 
 #define okToken(comm, tok) (nextToken((comm), (tok))!=ENDOFCOMMAND)
 
-void ExecuteRelationCommand(cRC *command){
+void ExecuteRelationCommand(CRC *command){
 	PageId page=createHeaderPage();
 	RelationInfo *rel=RelationInfoInit(NULL, command->relName,command->colNum,command->colNames, command->colTypes,page);
 	AddRelationInfo(rel);
 }
 
-cRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
-	cRC *temp=calloc(1,sizeof(cRC));
+CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
+	CRC *temp=calloc(1,sizeof(CRC));
 	temp->colNames=calloc(50,50*sizeof(char));
 	temp->colTypes=calloc(50,sizeof(ColType));
 	struct command comm=newCommand(com);

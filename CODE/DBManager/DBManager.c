@@ -23,8 +23,8 @@ void FinishDBM(void){
 void ProcessCommand(char* command){
     if(commeq(command, "CREATE RELATION")) {
 
-    	createRelationCommand cRc=initCreateRelationCommand(command+strlen("CREATE RELATION"));
-    	ExecuteRelationCommand(cRc);
+    	CreateRelationCommand *crc = initCreateRelationCommand(command+strlen("CREATE RELATION"));
+    	ExecuteRelationCommand(crc);
 
     } else if (commeq(command, "DROPDB")) {
         supprimerDB();
