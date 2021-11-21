@@ -12,6 +12,7 @@ enum {
 };
 
 struct command {
+    unsigned prevpos;
     unsigned pos;
     char *command;
 };

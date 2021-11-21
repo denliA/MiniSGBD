@@ -12,6 +12,23 @@
 #include "Command.h"
 
 
+
+/**********************************************************GÉNÉRAL*********************************************************/
+
+// Pour afficher un message d'erreur puis quitter la fonction lorsqu'il y a un erreur dans la commande à parser 
+#define SYNTAX_ERROR(...) {\
+    fprintf(stderr, __VA_ARGS__);\
+    return NULL;\
+}
+
+
+
+
+
+
+/****************************************************************************************************************************/
+
+
 /*********************************************************CreateRelation**************************************************/
 #define CRC CreateRelationCommand
 #define okToken(comm, tok) (nextToken((comm), (tok))!=ENDOFCOMMAND)
@@ -40,7 +57,7 @@ CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 	int tracker=0;
 
 	if(okToken(&comm,&tok) && tok.type==PAREN_OUVR){
-		while(okToken(&comm,&tok)){
+		while(okToken(&comm,&tok) && tok.type != PAREN_FERM){
 		    if(tracker == sizeTabs) {
 		        temp->colNames = realloc(temp->colNames, (sizeTabs+5)*sizeof(char*));
 		        temp->colTypes = realloc(temp->colTypes, (sizeTabs+5)*sizeof(ColType));
@@ -49,9 +66,9 @@ CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 		    
 			if (tok.type==NOM_VARIABLE){
 				temp->colNames[tracker]=strdup(tok.attr.sattr);
-			} else { SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à un nom de colonne\n"); }
+			} else { SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à un nom de colonne.\n"); }
 
-			if (okToken(&comm,&tok) &&tok.type==DEUX_POINTS){
+			if (okToken(&comm,&tok) && tok.type==DEUX_POINTS){
 				nextToken((&comm), (&tok));
 
 				ColType t;
@@ -70,20 +87,20 @@ CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 				case PAREN_FERM:
 					return temp;
 				default:
-					return NULL;
+					SYNTAX_ERROR("Erreur: Je m'attendais à un type\n");
 				}
 				temp->colTypes[tracker]=t;
 				temp->colNum=tracker;
 
-			}
+			} else { SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à deux points.\n"); }
 
-			if (okToken(&comm,&tok) && tok.type!=VIRGULE){
-				return NULL;
+			if (okToken(&comm,&tok) && tok.type!=VIRGULE && tok.type!=PAREN_FERM){
+				SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à une virgule ou à une parenthèse fermante\n");
 			}
 			tracker++;
 		}
 	}
-	return NULL;
+	SYNTAX_ERROR("Erreur dans la commande: Je m'attendais à une parenthèse ouvrante\n");
 }
 /***************************************************************************************************************************/
 
