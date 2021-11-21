@@ -27,6 +27,7 @@ static PageId readPageIdFromPageBuffer(uint8_t *buff, uint8_t first){
     PageId res;
     buff += PAGEID_SIZE*first;
     res.FileIdx = readInt32FromBuffer(buff, params.saveEndianness[0]);
+    res.PageIdx = buff[4];
     return res;
 }
 

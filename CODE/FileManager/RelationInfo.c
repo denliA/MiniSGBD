@@ -23,7 +23,10 @@ RelationInfo *RelationInfoInit(RelationInfo *rel, char *name, uint32_t nbCol, ch
     for(int i = 0; i<nbCol; i++) {
         rel->colOffset[i] = rel->size;
         // Pour garder les int et les float alignés en mémoire, on arrondit la taille d'un string au multiple de 4 supérieur.
-        rel->size += colTypes[i].type == T_INT ? sizeof(int32_t) : colTypes[i].type == T_FLOAT ? sizeof(float) : colTypes[i].stringSize + (4 - colTypes[i].stringSize%4);
+        rel->size += colTypes[i].type == T_INT ? sizeof(int32_t) : colTypes[i].type == T_FLOAT ? sizeof(float) : 
+                        colTypes[i].type == T_STRING 
+                            ? (colTypes[i].stringSize+1)%4 == 0 ? (colTypes[i].stringSize+1) : (colTypes[i].stringSize+1) + (4 - (colTypes[i].stringSize+1)%4)
+                            : 0; // TODO: générer proproment une erreur si le type n'est pas valide
     }
     
     unsigned int pageSize = params.pageSize;

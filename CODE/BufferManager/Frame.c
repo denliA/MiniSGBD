@@ -9,6 +9,8 @@ UnpFrame *insertUnpAfter(UnpFrame *origin, Frame *f) {
     new->prec = origin;
     new->next = origin->next;
     origin->next->prec = new;
+    origin->next = new;
+    return new;
 }
 
 
@@ -23,6 +25,7 @@ UnpFrame *initReplacementList(void) {
     UnpFrame *head = (UnpFrame *) calloc(1, sizeof(UnpFrame));
     head->next = head->prec = head;
     head->frame = NULL;
+    return head;
 }
 
 UnpFrame *lastElem(UnpFrame *list) {
