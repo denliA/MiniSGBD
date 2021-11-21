@@ -131,15 +131,15 @@ void ExecuteBatchInsert(BatchInsert *command){
 
 /*****************************************************INSERT*****************************************************************/
 Insert initInsert(char* command){
-    Insert holacmoi = (Insert) malloc(sizeof(Insert));
+    Insert holacmoi;
     struct command c = newCommand(command);
     struct token tok;
-    while( nextToken(command, &tok) != ENDOFCOMMAND) {
+    while( nextToken(c, &tok) != ENDOFCOMMAND) {
         if(tok.type==INTO){
-            nextToken(command,&tok);
+            nextToken(c,&tok);
             if(tok.type==NOM_VARIABLE){
                 //TODO traitement : appel chercheRelation
-                holacmoi.relation = findRelation(tok.sattr);
+                holacmoi.relation = findRelation(tok.attr.sattr);
             }
             else fprintf(stderr, "E: [Insertion] Commande invalide, pas de nom de relation\n");
         }
