@@ -62,7 +62,7 @@ typedef struct _BatchInsert{
 }BatchInsert;
 
 BatchInsert *initBatchInsert(char *command);
-void ExecuteBatchInsert(char *command);
+void ExecuteBatchInsert(BatchInsert *command);
 /***************************************************************************************************************/
 
 #endif

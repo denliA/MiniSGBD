@@ -95,31 +95,28 @@ BatchInsert *initBatchInsert(char *command){
 	temp->command = command;
 	struct command comm  = newCommand(command);
 	struct token tok;
-	while(nextToken(command, &tok) != ENDOFCOMMAND) {
-		if(nextToken(command, &tok) == NOM_VARIABLE){
-			if (strcomp(tok.attr,"BATCHINSERT")!=0){
+	while(nextToken(comm, &tok) != ENDOFCOMMAND) {
+		if(nextToken(comm, &tok) == NOM_VARIABLE){
+			if (strcmp(tok.attr.sattr,"BATCHINSERT")!=0){
 				fprintf(stderr,"Pas la commande BATCHINSERT");
 				return NULL;
 			}
 		}
-		if(nextToken(command, &tok) != INTO){
+		if(nextToken(comm, &tok) != INTO){
 			fprintf(stderr,"Commande mal tapee, il manque INTO");
 			return NULL;
 		}
-		if (nextToken(command, &tok) == NOM_VARIABLE){
-			temp->relationName = tok.attr;
+		if (nextToken(comm, &tok) == NOM_VARIABLE){
+			temp->relationName = strdup(tok.attr.sattr);
 		}
-		if (nextToken(command, &tok) != FROM){
-			temp->relationName = tok.attr;
-		}
-		if(nextToken(command, &tok) == NOM_VARIABLE){
-			if (strcomp(tok.attr,"FILE")!=0){
+		if (nextToken(comm, &tok) != FROM){
+			if (strcmp(tok.attr.sattr,"FILE")!=0){
 				fprintf(stderr,"Commande mal tapee, il manque FILE");
 				return NULL;
 			}
 		}
-		if (nextToken(command, &tok) == NOM_VARIABLE){
-			temp->fileName = tok.attr;
+		if (nextToken(comm, &tok) == NOM_VARIABLE){
+			temp->fileName = strdup(tok.attr.sattr);
 		}
 	};
 	return temp;
