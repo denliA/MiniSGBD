@@ -3,7 +3,7 @@
 
 #include "DiskManager/PageId.h"
 
-enum { T_INT, T_FLOAT, T_STRING };
+enum { T_INT=0x1000+1, T_FLOAT=0x1000+2, T_STRING=0x1000+3 };
 typedef struct _ColType {
     uint8_t type;
     uint32_t stringSize;
