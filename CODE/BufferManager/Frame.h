@@ -25,6 +25,7 @@ UnpFrame *lastElem(UnpFrame *list);
 UnpFrame *firstElem(UnpFrame *list);
 UnpFrame *insertUnpAfter(UnpFrame *origin, Frame *f);
 void delete_unp(UnpFrame *unp);
+void freeReplacementList(UnpFrame *list);
 
 #define isListEmpty(list) ( lastElem(list) == (list) )
 

@@ -69,7 +69,7 @@ int nextToken(struct command *com, struct token *tok) {
         if(endptr != start && isSep(*endptr) && res >= 0) {
             com->pos += endptr - &com->command[com->pos];
             tok->attr.iattr = res;
-            return tok->type = STRING_CONSTANT;
+            return tok->type = TYPE_STRING;
         }
     }
     

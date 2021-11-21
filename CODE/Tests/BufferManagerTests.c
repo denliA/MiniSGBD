@@ -8,7 +8,7 @@
 void TestBufferManager(PageId id, DBParams params){
     
     printf("\nTest du BufferManager :\n");
-    initBufferManager(params,1024);
+    initBufferManager(1024);
     
     printf("Test de lecture : \n");
     uint8_t *buffer;

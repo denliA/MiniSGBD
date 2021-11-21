@@ -4,10 +4,11 @@
 #include "DiskManager/PageId.h"
 #include "DiskManager/DBParams.h"
 
-void initBufferManager(DBParams params, uint32_t max_mem);
+void initBufferManager(uint32_t max_mem);
 uint8_t *GetPage(PageId pageId);
 void FreePage(PageId pageId, int valdirty);
 void FlushAll();
+void resetBufferManager(void);
 
 #endif
 

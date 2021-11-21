@@ -1,10 +1,3 @@
-/*
- * Catalog.h
- *
- *  Created on: 5 oct. 2021
- *      Author: denli
- */
-
 #ifndef CATALOG_H
 #define CATALOG_H
 #include "RelationInfo.h"
@@ -20,5 +13,6 @@ void FinishCatalog(void);
 void AddRelation(RelationInfo * rel);
 RelationInfo* findRelation(char nom[]);
 void resetCatalog(void);
+void printRelations(void);
 
 #endif

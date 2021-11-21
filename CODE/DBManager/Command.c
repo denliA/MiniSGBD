@@ -100,6 +100,7 @@ CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 	} else {
 	SYNTAX_ERROR("Erreur dans la commande: Je m'attendais à une parenthèse ouvrante, j'ai eu %d\n", tok.type);	
 	}
+	temp->colNum = tracker;
 	return temp;
 }
 /***************************************************************************************************************************/
@@ -175,5 +176,7 @@ void supprimerDB(void){
     resetDiskManager();
     //on vide le catalog
     resetCatalog();
+    //on vide le BufferManager
+    resetBufferManager();
 }
 /****************************************************************************************************************************/

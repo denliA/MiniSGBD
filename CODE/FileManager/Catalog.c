@@ -13,6 +13,12 @@ extern DBParams params;
 
 Catalog cat;
 
+
+/* Format de la sauvegarde dans Catalog.def :
+<NbRelations>
+    <NomRelation>\n<NbColonnes><HeaderFileIdX><HeaderPageIdx>
+        <NomColonne>\n<TypeColonne><TypeStringSize>
+*/
 void InitCatalog(void){
     FILE *file;
 
@@ -24,7 +30,7 @@ void InitCatalog(void){
     strcat(path, "Catalog.def");
     
     if(exists(path)) {
-        file = fopen(path, "w");
+        file = fopen(path, "r");
         if(file==NULL) {
             fprintf(stderr, "E: [Catalog] Can't open %s\n", params.DBPath);
             exit(-1);
@@ -37,11 +43,11 @@ void InitCatalog(void){
     }
     
     uint32_t relCount, readRels=0;
-    fread(&relCount, sizeof relCount, 1, file);
+    fread(&relCount, 4, 1, file);
     
     char *lname=NULL, **lnames;
-    uint32_t pageid_f;
-    uint8_t  pageid_p;
+    uint32_t pageid_f=42;
+    uint8_t  pageid_p=42;
     PageId pid;
     ColType *ltypes;
     uint32_t lnbCol;
@@ -52,23 +58,23 @@ void InitCatalog(void){
     cat.sizeMax = relCount + CAT_SIZE;
     
     while (!feof(file) && !ferror(file) && readRels < relCount) {
-        if(getline(&lname, &tmp_size, file)<=1 || fread(&lnbCol, 4, 1, file) <= 0 || fread(&pageid_f, 4, 1, file)<=0 || fread(&pageid_p, 1, 1, file) <= 0 ) {
-            fprintf(stderr, "E: [Catalog] Error while loading catalog from file (in relation n°%u). Bad file format.\n", readRels);
+        if(getline(&lname, &tmp_size, file)<=1 || (fread(&lnbCol, 4, 1, file)) <= 0 || (fread(&pageid_f, 4, 1, file))<=0 || (fread(&pageid_p, 1, 1, file)) <= 0 ) {
+            fprintf(stderr, "E: [Catalog] Error while loading catalog from file (in relation n°%u, line=\"%s\", nbcol=%u,fid=%u, pid=%u). Bad file format.\n", readRels, lname, lnbCol,  pageid_f, pageid_p);
             exit(-1);
         } else {
-            lname[tmp_size-1] = '\0';
+            lname[strlen(lname)-1] = '\0';
             pid.FileIdx = pageid_f;
             pid.PageIdx = pageid_p;
         }
         ltypes = (ColType *) malloc(sizeof(ColType)*lnbCol);
         lnames = (char **) calloc(lnbCol, sizeof(char *));
         for (uint32_t i=0; i<lnbCol; i++) {
-            if(getline(lnames+i, &tmp_size, file)<=1 || fread(&(ltypes[i].type), 1, 1, file) <= 0 || (ltypes[i].type == T_STRING && fread(&(ltypes[i].stringSize), 4, 1, file) <= 1)) {
+            if(getline(lnames+i, &tmp_size, file)<=1 || fread(&(ltypes[i].type), 4, 1, file) <= 0 || (ltypes[i].type == T_STRING && fread(&(ltypes[i].stringSize), 4, 1, file) <= 0)) {
                 fprintf(stderr, "E: [Catalog] Error while loading catalog from file (in relation n°%u, column n°%u. Bad file format.\n", readRels, i);
                 exit(-1);
-            } else lnames[i][tmp_size-1] = '\0';
+            } else lnames[i][strlen(lnames[i])-1] = '\0';
         }
-        RelationInfoInit(cat.tab, lname, lnbCol, lnames, ltypes, pid);
+        RelationInfoInit(cat.tab + readRels++, lname, lnbCol, lnames, ltypes, pid);
     }
     
 }
@@ -81,18 +87,22 @@ void FinishCatalog(void){
     strcat(path, "Catalog.def");
     
     FILE *file = fopen(path, "w");
-    fwrite(&(cat.cpt), 4, 1, file);
-    fprintf(file, "%s\n", cat.tab->name);
+    fwrite(&(cat.cpt), 4, 1, file); //TODO: utiliser endianness.c
     for(uint32_t rel=0; rel<cat.cpt; rel++) {
         fprintf(file, "%s\n", cat.tab[rel].name);
-        fwrite(&(cat.tab[rel].nbCol), 4, 1, file);
+        fwrite(&(cat.tab[rel].nbCol), 4, 1, file); //TODO: utiliser endianness.c
+        fwrite(&(cat.tab[rel].headerPage.FileIdx), 4, 1, file);
+        uint8_t tmp;
+        tmp = (cat.tab[rel].headerPage.PageIdx);
+        fwrite(&tmp, 1, 1, file);
         for (uint32_t col=0; col< cat.tab[rel].nbCol; col++) {
             fprintf(file, "%s\n", cat.tab[rel].colNames[col]);
-            fwrite(&(cat.tab[rel].colTypes[col].type), 1, 1, file);
-            if(cat.tab[rel].colTypes[col].type == T_STRING)
-                fwrite(&(cat.tab[rel].colTypes[col].stringSize), 4, 1, file);
+            fwrite(&(cat.tab[rel].colTypes[col].type), 4, 1, file); //TODO: utiliser endianness.c
+            if(cat.tab[rel].colTypes[col].type == T_STRING){
+                fwrite(&(cat.tab[rel].colTypes[col].stringSize), 4, 1, file); printf("%u-%u: %d\n",rel, col, cat.tab[rel].colTypes[col].stringSize);}
         }
     }
+    fclose(file);
 	free(cat.tab);
 }
 
@@ -101,10 +111,13 @@ void resetCatalog(){
     //on vide le catalog
     FinishCatalog();
     //on supprime le catalog
-    char* path = (char *) malloc( strlen(params.DBPath) + strlen("/Catalog.log") +1);
+    char* path = (char *) malloc( strlen(params.DBPath) + strlen("/Catalog.def") +1);
 	strcpy(path, params.DBPath);
-	strcat(path, "/Catalog.log");
-    remove(path);
+	strcat(path, "/Catalog.def");
+    if(exists(path) && remove(path)<0) {
+        perror("remove catalog.def");
+        exit(-1);
+    };
     free(path);
     //on reinitialise le catalog
     InitCatalog();
@@ -136,3 +149,8 @@ void AddRelation(RelationInfo * rel){
 	cat.cpt++;
 }
 
+void printRelations(void) {
+    for(int i=0; i<cat.cpt; i++) {
+        printRelationInfo(&cat.tab[i]);
+    }
+}

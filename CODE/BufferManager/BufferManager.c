@@ -8,6 +8,7 @@
 
 static Frame *findMRU(void); // stratégie MRU. Retourne la Frame contenant la page à décharger.
 static Frame *findLRU(void);
+extern DBParams params;
 
 //variable globale de buffer pool
 static Frame *frames;
@@ -91,7 +92,7 @@ void FlushAll(){
 }
 
 
-void initBufferManager(DBParams params, uint32_t memoire) {
+void initBufferManager(uint32_t memoire) {
     uint8_t *bpool;
     
     nframes = memoire / params.pageSize;
@@ -105,6 +106,12 @@ void initBufferManager(DBParams params, uint32_t memoire) {
     replacement_list = initReplacementList();
 }
 
+void resetBufferManager(void) {
+    uint32_t memoire = nframes * params.pageSize;
+    free(frames);
+    freeReplacementList(replacement_list);
+    initBufferManager(memoire);
+}
 
 Frame *findMRU() {
 

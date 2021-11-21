@@ -42,3 +42,26 @@ void RelationInfoFinish(RelationInfo* rel){
 	free(rel->colTypes);
 	free(rel->colOffset);
 }
+
+void printRelationInfo(RelationInfo *rel) {
+    printf("%s ", rel->name);
+    putchar('(');
+    for(int i=0; i<rel->nbCol;i++) {
+        printf("%s", rel->colNames[i]);
+        putchar(':');
+        switch(rel->colTypes[i].type) {
+        case T_INT: printf("int"); break;
+        case T_FLOAT: printf("float"); break;
+        case T_STRING:
+            printf("string");
+            printf("%d", rel->colTypes[i].stringSize);
+            break;
+        default:
+            printf("UNKNOWN");
+        }
+        if (i != rel->nbCol -1)
+            putchar(',');
+        else
+            puts(")"); 
+    }
+}

@@ -1,4 +1,4 @@
-CC=gcc -I CODE/
+CC=gcc -g -I CODE/
 
 
 all : MiniSGBD Tests

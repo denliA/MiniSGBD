@@ -19,7 +19,6 @@ int main(int argc, char **argv) {
     params.pageSize = 4096;
     params.maxPagesPerFile = 4;
     params.frameCount = 2;
-    initDiskManager();
 
     printf("Bonjour :)\n");
     //debut de la boucle de lecture de commandes
@@ -49,5 +48,7 @@ int main(int argc, char **argv) {
         ProcessCommand(commande);
         
     }while(strncmp(commande,"exit",4)!=0);
+    
+    FinishDBM();
     return 0;
 }

@@ -25,5 +25,6 @@ typedef struct _RelInfo{
 
 RelationInfo *RelationInfoInit(RelationInfo *rel, char *name, uint32_t nbCol, char **colNames, ColType *colTypesn, PageId h);
 void RelationInfoFinish(RelationInfo *);
+void printRelationInfo(RelationInfo *rel);
 
 #endif

@@ -3,13 +3,19 @@
 
 #include "DBManager.h"
 #include "BufferManager/BufferManager.h"
+#include "DiskManager/DiskManager.h"
 #include "Command.h"
+#include "FileManager/Catalog.h"
+#include "FileManager/RelationInfo.h"
+
 extern  Catalog cat;
 
 #define commeq(big, little) ( strncmp( (big), (little), strlen(little) ) == 0 ) 
 
 void InitDBM(void){
+    initDiskManager();
 	InitCatalog();
+	initBufferManager(4096*2); // deux pages
 }
 
 void FinishDBM(void){
@@ -33,6 +39,8 @@ void ProcessCommand(char* command){
 
     } else if (commeq(command, "SELECTMONO")) {
 
-    } else if (!commeq(command, "exit"));
+    } else if (commeq(command, "LIST RELATIONS")) {
+        printRelations();
+    } else if (!commeq(command, "exit"))
         printf("Erreur: commande \"%s\" inconnue\n", command);
 }

@@ -32,3 +32,12 @@ UnpFrame *lastElem(UnpFrame *list) {
 UnpFrame *firstElem(UnpFrame *list) {
     return list->next;
 }
+
+void freeReplacementList(UnpFrame *list) {
+    UnpFrame *tmp = list;
+    while(tmp->next != list) {
+        tmp = tmp->next;
+        free(tmp->prec);
+    }
+    free(tmp);
+}
