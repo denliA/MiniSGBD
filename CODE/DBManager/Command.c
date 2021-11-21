@@ -1,4 +1,3 @@
-#define CRC CreateRelationCommand
 
 #include <stdlib.h>
 
@@ -9,6 +8,9 @@
 #include "FileManager/Catalog.h"
 #include "Command.h"
 
+
+/*********************************************************CreateRelation**************************************************/
+#define CRC CreateRelationCommand
 #define okToken(comm, tok) (nextToken((comm), (tok))!=ENDOFCOMMAND)
 
 void ExecuteRelationCommand(CRC *command){
@@ -73,3 +75,81 @@ CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 	}
 	return NULL;
 }
+/***************************************************************************************************************************/
+
+
+
+
+/****************************************************BATCHINSERT************************************************************/
+#define NB 20
+
+BatchInsert *initBatchInsert(char *command){
+	char chaine[NB];
+	BatchInsert *temp = calloc(1,sizeof(BatchInsert));
+	temp->command = command;
+	struct command comm  = newCommand(command);
+	struct token tok;
+	while(nextToken(command, &tok) != ENDOFCOMMAND) {
+		if(nextToken(command, &tok) == NOM_VARIABLE){
+			if (strcomp(tok.attr,"BATCHINSERT")!=0){
+				fprintf(stderr,"Pas la commande BATCHINSERT");
+				return NULL;
+			}
+		}
+		if(nextToken(command, &tok) != INTO){
+			fprintf(stderr,"Commande mal tapee, il manque INTO");
+			return NULL;
+		}
+		if (nextToken(command, &tok) == NOM_VARIABLE){
+			temp->relationName = tok.attr;
+		}
+		if (nextToken(command, &tok) != FROM){
+			temp->relationName = tok.attr;
+		}
+		if(nextToken(command, &tok) == NOM_VARIABLE){
+			if (strcomp(tok.attr,"FILE")!=0){
+				fprintf(stderr,"Commande mal tapee, il manque FILE");
+				return NULL;
+			}
+		}
+		if (nextToken(command, &tok) == NOM_VARIABLE){
+			temp->fileName = tok.attr;
+		}
+	};
+	return temp;
+}
+
+void ExecuteBatchInsert(BatchInsert *command){
+	FILE* fich = fopen(command->fileName,"r");
+}
+/****************************************************************************************************************************/
+
+
+
+/*****************************************************INSERT*****************************************************************/
+Insert initInsert(char* command){
+    Insert holacmoi = (Insert) malloc(sizeof(Insert));
+    struct command c = newCommand(command);
+    struct token tok;
+    while( nextToken(command, &tok) != ENDOFCOMMAND) {
+        if(tok.type==INTO){
+            nextToken(command,&tok);
+            if(tok.type==NOM_VARIABLE){
+                //TODO traitement : appel chercheRelation
+                holacmoi.relation = findRelation(tok.sattr);
+            }
+            else fprintf(stderr, "E: [Insertion] Commande invalide, pas de nom de relation\n");
+        }
+    };
+}
+/***************************************************************************************************************************/
+
+
+/***********************************************************DROPDB**********************************************************/
+void supprimerDB(void){
+    //on vide toutes les pages en mémoire
+    resetDiskManager();
+    //on vide le catalog
+    resetCatalog();
+}
+/****************************************************************************************************************************/

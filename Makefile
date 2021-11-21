@@ -7,8 +7,8 @@ windows : MiniSGBD win_clean
 unix : clean
 
 
-MiniSGBD: bin main.o DiskManager.o FileList.o BufferManager.o Frame.o Record.o RelationInfo.o Catalog.o FileManager.o DBManager.o stringutil.o fileutil.o endianness.o CommandTokenizer.o CreateDropDBCommand.o
-	gcc -o bin/MiniSGBD bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Frame.o bin/main.o bin/Catalog.o bin/DBManager.o bin/FileManager.o bin/RelationInfo.o bin/Record.o bin/stringutil.o bin/fileutil.o bin/endianness.o bin/CreateDropDBCommand.o
+MiniSGBD: bin main.o DiskManager.o FileList.o BufferManager.o Frame.o Record.o RelationInfo.o Catalog.o FileManager.o DBManager.o stringutil.o fileutil.o endianness.o CommandTokenizer.o Command.o
+	gcc -o bin/MiniSGBD bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Frame.o bin/main.o bin/Catalog.o bin/DBManager.o bin/FileManager.o bin/RelationInfo.o bin/Record.o bin/stringutil.o bin/fileutil.o bin/endianness.o bin/Command.o
 
 Tests: bin Tests.o DiskManager.o FileList.o BufferManager.o Frame.o stringutil.o fileutil.o endianness.o
 	gcc -o bin/Tests bin/DiskManager.o bin/FileList.o bin/BufferManager.o bin/Frame.o bin/Tests.o bin/fileutil.o bin/stringutil.o bin/endianness.o
@@ -61,8 +61,8 @@ endianness.o:
 CommandTokenizer.o:
 	$(CC) -o bin/CommandTokenizer.o -c CODE/DBManager/CommandTokenizer.c
 
-CreateDropDBCommand.o:
-	$(CC) -o bin/CreateDropDBCommand.o -c CODE/DBManager/CreateDropDBCommand.c
+Command.o:
+	$(CC) -o bin/Command.o -c CODE/DBManager/Command.c
 
 clean:
 	rm -f bin/*.o
