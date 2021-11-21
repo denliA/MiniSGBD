@@ -74,30 +74,31 @@ static void unlinkDataPage(PageId page, PageId header, int from) {
     uint8_t *pageBuff = GetPage(page);
     PageId next = readPageIdFromPageBuffer(pageBuff, NEXT_PAGE);
     PageId prec = readPageIdFromPageBuffer(pageBuff, PREC_PAGE);
-    uint8_t *nextb = GetPage(next), *precb = GetPage(prec);
-    
-    writePageIdToPageBuffer(prec, nextb, equalPageId(next, header) ? (from == FREE_LIST ? LAST_FREE : LAST_FULL) : PREC_PAGE);
-    writePageIdToPageBuffer(next, precb, equalPageId(prec, header) ? from : NEXT_PAGE);
-    
-    FreePage(next, 1);
-    FreePage(prec, 1);
     FreePage(page, 1);
+    
+    uint8_t *nextb = GetPage(next)
+    writePageIdToPageBuffer(prec, nextb, equalPageId(next, header) ? (from == FREE_LIST ? LAST_FREE : LAST_FULL) : PREC_PAGE);
+    FreePage(next, 1);
+    
+    uint8_t *precb = GetPage(prec);
+    writePageIdToPageBuffer(next, precb, equalPageId(prec, header) ? from : NEXT_PAGE);
+    FreePage(prec, 1);
+    
 }
 
-static void insertDataPage(PageId page, PageId header, int where) {
+static void insertDataPage(PageId page, PageId header, int where) { // where == LAST_FREE OU where == LAST_FULL
     uint8_t *headerBuff = GetPage(header);
-    uint8_t *pageBuff = GetPage(page);
-    
     PageId last = readPageIdFromPageBuffer(headerBuff, where);
-    uint8_t *lastb = GetPage(last);
+    writePageIdToPageBuffer(page, headerBuff, where);
+    FreePage(header, 1);
     
+    uint8_t *pageBuff = GetPage(page);
     writePageIdToPageBuffer(header, pageBuff, NEXT_PAGE);
     writePageIdToPageBuffer(last, pageBuff, PREC_PAGE);
-    writePageIdToPageBuffer(page, headerBuff, where);
-    writePageIdToPageBuffer(page, lastb, equalPageId(last, header) ? (LAST_FREE?FREE_LIST:FULL_LIST) : NEXT_PAGE);
-    
-    FreePage(header, 1);
     FreePage(page, 1);
+    
+    uint8_t *lastb = GetPage(last);
+    writePageIdToPageBuffer(page, lastb, equalPageId(last, header) ? (where==LAST_FREE?FREE_LIST:FULL_LIST) : NEXT_PAGE);
     FreePage(last, 1);
 }
 
