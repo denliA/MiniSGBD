@@ -3,7 +3,6 @@
 
 #include "DBManager.h"
 #include "BufferManager/BufferManager.h"
-#include "CreateDropDBCommand.h"
 #include "Command.h"
 extern  Catalog cat;
 

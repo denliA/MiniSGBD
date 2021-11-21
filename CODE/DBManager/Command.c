@@ -1,8 +1,11 @@
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "BufferManager/BufferManager.h"
 #include "DiskManager/PageId.h"
+#include "DiskManager/DiskManager.h"
 #include "FileManager/RelationInfo.h"
 #include "FileManager/FileManager.h"
 #include "FileManager/Catalog.h"
