@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-static char specials[] = ",:*><=()";
+static char specials[] = ",:*><=() \t\n";
 
 #define strbegstr(big, little) ( strncmp( (big), (little), strlen(little) ) == 0 ) 
 #define isSep(chr) ( isblank(chr) || (chr) == '\0' || strchr(specials, (chr)) )
@@ -94,6 +94,7 @@ int nextToken(struct command *com, struct token *tok) {
             com->pos++;
             if (strchr(specials,com->command[com->pos])) {
                 tok->attr.sattr[i+1] = '\0';
+                printf("Hit a special %c with tok having attr %s\n", com->command[com->pos], tok->attr.sattr);
                 return tok->type = NOM_VARIABLE;
             }
         }

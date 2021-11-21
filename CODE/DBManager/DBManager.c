@@ -34,7 +34,8 @@ void ProcessCommand(char* command){
     } else if (commeq(command, "DROPDB")) {
         supprimerDB();
     } else if (commeq(command, "INSERT")) {
-        
+        Insert holactjrsmoi = initInsert(command+strlen("INSERT"));
+        if(holactjrsmoi.relation != NULL) Insertion(holactjrsmoi);
     } else if (commeq(command, "BATCHINSERT")) {
 
     } else if (commeq(command, "SELECTMONO")) {

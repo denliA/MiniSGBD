@@ -44,7 +44,7 @@ void supprimerDB(void);
 */
 typedef struct Insert{
     RelationInfo *relation;
-    Record aAjouter;
+    Record *aAjouter;
 }Insert;
 
 Insert initInsert(char* command);

@@ -53,12 +53,15 @@ static Record *parseTuple(RelationInfo *rel, struct command *comm) {
                 CONST_TYPE_ERROR(rel, i, type, T_INT);
             } break;
         case FLOAT_CONSTANT:
-            if((type=getTypeAtColumn(rel,i)) != T_FLOAT) {
+            if ((type=getTypeAtColumn(rel,i)) == T_INT) { // On doit convertir le int en float ici car setColumnTo(...) s'attendra à recevoir un float et non un int
+                tok.attr.fattr = (float) tok.attr.iattr;
+            }
+            if(type != T_FLOAT) {
                 RecordFinish(rec);
                 CONST_TYPE_ERROR(rel, i, type, T_FLOAT);
             } break;
         case STRING_CONSTANT:
-            if((type=getTypeAtColumn(rel,i)) != T_FLOAT) {
+            if((type=getTypeAtColumn(rel,i)) != T_STRING) {
                 RecordFinish(rec); CONST_TYPE_ERROR(rel, i, type, T_STRING);
             } else if (strlen(tok.attr.sattr) > rel->colTypes[i].stringSize) {
                 RecordFinish(rec);
@@ -70,10 +73,13 @@ static Record *parseTuple(RelationInfo *rel, struct command *comm) {
         
         setColumnTo(rec, i, &tok.attr);
         
-        if( i == rel->nbCol - 1 && nextToken(comm, &tok) != PAREN_FERM ) {
-            RecordFinish(rec); SYNTAX_ERROR("Erreur: Je m'attendais à une virgule après la colonne %d de %s\n", i, rel->name);
-        } else if ( tok.type != VIRGULE ) {
-            RecordFinish(rec); SYNTAX_ERROR("Erreur: %i records lus, parenthèse fermante manquante.\n", i+1);
+        nextToken(comm, &tok);
+        if (i == rel->nbCol-1) {
+            if( tok.type != PAREN_FERM ) {
+                RecordFinish(rec); SYNTAX_ERROR("Erreur: %i colonnes lues, parenthèse fermante manquante.\n", i+1);            
+            }
+        } else if (tok.type != VIRGULE) {
+            RecordFinish(rec); SYNTAX_ERROR("Erreur: Je m'attendais à une virgule après la colonne %d de %s. (n°token = %d)\n", i, rel->name, tok.type);        
         }
     }
     return rec;
@@ -218,10 +224,35 @@ Insert initInsert(char* command){
             if(tok.type==NOM_VARIABLE){
                 //TODO traitement : appel chercheRelation
                 holacmoi.relation = findRelation(tok.attr.sattr);
+                if(holacmoi.relation == NULL) { // Mauvais nom de relation
+                    fprintf(stderr, "E: [Insersion] La relation %s n'existe pas.\n", tok.attr.sattr);
+                    return holacmoi;
+                }
+            } else { // Pas de nom de relation
+                fprintf(stderr, "E: [Insertion] Commande invalide, pas de nom de relation\n");
+                holacmoi.relation = NULL; return holacmoi; // Pour indiquer qu'il y a eu une erreur
             }
-            else fprintf(stderr, "E: [Insertion] Commande invalide, pas de nom de relation\n");
+        } else { // pas de  INTO
+            fprintf(stderr, "E: [Insertion] Commande invalide, INSERT est suivi de INTO\n");
+            holacmoi.relation = NULL; return holacmoi;
         }
-    };
+        
+        Record *rec = parseTuple(holacmoi.relation, &c);
+        if (rec == NULL) { // Erreur dans le parsing du tuple
+            holacmoi.relation = NULL; return holacmoi; // pas besoin de print d'erreur ici, parseTuple() s'en occupe.
+        }
+        
+        holacmoi.aAjouter = rec;
+        if(nextToken(&c,&tok) != ENDOFCOMMAND) {
+            fprintf(stderr, "E: [Insertion] Commande invalide, je m'attendais à une fin de commande.\n");
+            holacmoi.relation = NULL; return holacmoi;
+        }
+        return holacmoi; 
+    }
+}
+
+void Insertion(Insert insertion) {
+    InsertRecordIntoRelation(insertion.relation, insertion.aAjouter);
 }
 /***************************************************************************************************************************/
 
@@ -236,3 +267,8 @@ void supprimerDB(void){
     resetBufferManager();
 }
 /****************************************************************************************************************************/
+
+
+//exemple;
+// CREATE RELATION S  (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int) 
+//INSERT INTO S (A, 2, AAA, 5.7, DF, 4,4) 
