@@ -47,6 +47,7 @@ uint8_t *GetPage(PageId pageId){
     if (replaced->dirty == 1)
         WritePage(replaced->pageId, replaced->buffer);
     
+    ReadPage(pageId, replaced->buffer);
     replaced->pageId = pageId;
     replaced->dirty = 0;
     replaced->pin_count = 1;
