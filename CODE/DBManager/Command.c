@@ -36,27 +36,27 @@
    
    La fonction effectue toutes les vérifications de syntaxe et de types.
 */
-static Record *parseTuple(RelationInfo *rel, struct command *comm) {
+static Record *parseTuple(RelationInfo *rel, struct command *comm, int parens) {
     struct token tok;
     Record *rec = malloc(sizeof(Record));
     RecordInit(rec, rel);
     
-    if(nextToken(comm, &tok) != PAREN_OUVR) {
+    if(parens && nextToken(comm, &tok) != PAREN_OUVR) {
         RecordFinish(rec); SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à un parenthèse ouvrante\n");
     }
     for(int i=0; i<rel->nbCol;i++) {
         int type;
         switch(nextToken(comm, &tok)) {
         case INT_CONSTANT:
-            if((type=getTypeAtColumn(rel, i)) != T_INT) {
+            if ((type=getTypeAtColumn(rel,i)) == T_FLOAT) { // On doit convertir le int en float ici car setColumnTo(...) s'attendra à recevoir un float et non un int
+                tok.attr.fattr = (float) tok.attr.iattr;
+            }
+            else if((type=getTypeAtColumn(rel, i)) != T_INT) {
                 RecordFinish(rec);
                 CONST_TYPE_ERROR(rel, i, type, T_INT);
             } break;
         case FLOAT_CONSTANT:
-            if ((type=getTypeAtColumn(rel,i)) == T_INT) { // On doit convertir le int en float ici car setColumnTo(...) s'attendra à recevoir un float et non un int
-                tok.attr.fattr = (float) tok.attr.iattr;
-            }
-            if(type != T_FLOAT) {
+            if((type=getTypeAtColumn(rel, i)) != T_FLOAT) {
                 RecordFinish(rec);
                 CONST_TYPE_ERROR(rel, i, type, T_FLOAT);
             } break;
@@ -75,7 +75,7 @@ static Record *parseTuple(RelationInfo *rel, struct command *comm) {
         
         nextToken(comm, &tok);
         if (i == rel->nbCol-1) {
-            if( tok.type != PAREN_FERM ) {
+            if( parens && tok.type != PAREN_FERM ) {
                 RecordFinish(rec); SYNTAX_ERROR("Erreur: %i colonnes lues, parenthèse fermante manquante.\n", i+1);            
             }
         } else if (tok.type != VIRGULE) {
@@ -179,7 +179,7 @@ BatchInsert *initBatchInsert(char *command){
 	temp->command = command;
 	struct command comm  = newCommand(command);
 	struct token tok;
-	while(nextToken(&comm, &tok) != ENDOFCOMMAND) {
+	{
 		if(nextToken(&comm, &tok) == NOM_VARIABLE){
 			if (strcmp(tok.attr.sattr,"BATCHINSERT")!=0){
 				fprintf(stderr,"Pas la commande BATCHINSERT");
@@ -187,27 +187,40 @@ BatchInsert *initBatchInsert(char *command){
 			}
 		}
 		if(nextToken(&comm, &tok) != INTO){
-			fprintf(stderr,"Commande mal tapee, il manque INTO");
+			fprintf(stderr,"Commande mal tapee, il manque INTO, tok=%d", tok.type);
 			return NULL;
 		}
 		if (nextToken(&comm, &tok) == NOM_VARIABLE){
-			temp->relationName = strdup(tok.attr.sattr);
+			temp->relation = findRelation(tok.attr.sattr);
+			if(temp->relation == NULL) {
+			    fprintf(stderr, "E: [Insertion] Commande invalide, pas de nom de relation\n");
+			    return NULL;
+			}
 		}
 		if (nextToken(&comm, &tok) != FROM){
-			if (strcmp(tok.attr.sattr,"FILE")!=0){
-				fprintf(stderr,"Commande mal tapee, il manque FILE");
-				return NULL;
-			}
+			fprintf(stderr,"Commande mal tapee, il manque FROM\n");
+			return NULL;
+		}
+		if(nextToken(&comm, &tok) != NOM_VARIABLE || strcmp(tok.attr.sattr, "FILE") != 0) {
+		    fprintf(stderr, "Commande mal tapee, il manque FILE: %d!=%d ou  %.100s != FILE\n", NOM_VARIABLE, tok.type, tok.attr.sattr);
+		    return NULL;
 		}
 		if (nextToken(&comm, &tok) == NOM_VARIABLE){
 			temp->fileName = strdup(tok.attr.sattr);
 		}
-	};
+	}
 	return temp;
 }
 
 void ExecuteBatchInsert(BatchInsert *command){
 	FILE* fich = fopen(command->fileName,"r");
+	char *res=NULL;
+	size_t taille;
+	while( getline(&res, &taille, fich) > 0) {
+	    struct command c = newCommand(res);
+	    Record *r = parseTuple(command->relation, &c, 0);
+	    if(r) InsertRecordIntoRelation(command->relation, r);
+	} 
 }
 /****************************************************************************************************************************/
 
@@ -237,7 +250,7 @@ Insert initInsert(char* command){
             holacmoi.relation = NULL; return holacmoi;
         }
         
-        Record *rec = parseTuple(holacmoi.relation, &c);
+        Record *rec = parseTuple(holacmoi.relation, &c, 1);
         if (rec == NULL) { // Erreur dans le parsing du tuple
             holacmoi.relation = NULL; return holacmoi; // pas besoin de print d'erreur ici, parseTuple() s'en occupe.
         }
@@ -268,7 +281,57 @@ void supprimerDB(void){
 }
 /****************************************************************************************************************************/
 
+/*************************************************************SELECTMONO*******************************************************/
+SelectCommand *CreateSelectCommand(char *command) {
+    SelectCommand *res;
+    RelationInfo *rel;
+    TabDeConditions tab;
+    
+    struct command comm = newCommand(command);
+    struct token tok;
+    
+    // SELECTMONO * FROM
+    if (nextToken(&comm, &tok) != ETOILE) {
+        SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à un * après le SELECTMONO\n");
+    } if (nextToken(&comm, &tok) != FROM) {
+        SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à un FROM après SELECTMONO *\n");
+    }
+    
+    // On lit la relation et on la cherche
+    if(nextToken(&comm, &tok) != NOM_VARIABLE) {
+        SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à un nom de relation.\n");
+    }
+    rel = findRelation(tok.attr.sattr);
+    if (rel == NULL) {
+        SYNTAX_ERROR("Erreur : Relation %s non trouvée. \n", tok.attr.sattr);
+    }
+    
+    if(nextToken(&comm, &tok) == ENDOFCOMMAND) {
+        res = malloc(sizeof(SelectCommand));
+        res->rel = rel;
+        initArray(res->conditions, 0);
+    } else if (tok.type == WHERE) {
+        return NULL; // TODO : gestion du WHERE 
+    } else {
+        SYNTAX_ERROR("Erreur: Je m'attendais à un WHERE\n");
+    }
+    
+}
+
+void ExecuteSelectCommand(SelectCommand *command) {
+    uint32_t s;
+    if(command->conditions.nelems == 0) {
+        Record *records = GetAllRecords(command->rel, &s);
+        for( int i=0; i<s;i++) {
+            printRecord(&records[i]);
+        }
+    }
+}
+/********************************************************************************************************************************/
 
 //exemple;
-// CREATE RELATION S  (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int) 
-//INSERT INTO S (A, 2, AAA, 5.7, DF, 4,4) 
+// CREATE RELATION S5  (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int) 
+//INSERT INTO S5 (A, 2, AAA, 5.7, DF, 4,4) 
+// CREATE RELATION S (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int, C8:int)
+// INSERT INTO S (a, 2, a, 2.5, a, 3, 3, 3)
+

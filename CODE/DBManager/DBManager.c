@@ -37,7 +37,8 @@ void ProcessCommand(char* command){
         Insert holactjrsmoi = initInsert(command+strlen("INSERT"));
         if(holactjrsmoi.relation != NULL) Insertion(holactjrsmoi);
     } else if (commeq(command, "BATCHINSERT")) {
-
+        BatchInsert *b= initBatchInsert(command);
+        if(b) ExecuteBatchInsert(b);
     } else if (commeq(command, "SELECTMONO")) {
 
     } else if (commeq(command, "LIST RELATIONS")) {
