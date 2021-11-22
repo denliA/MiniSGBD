@@ -58,8 +58,8 @@ static PageId addDataPage(RelationInfo *rel) {
     FreePage(rel->headerPage, 1);
     
     uint8_t *lastVideBuff = GetPage(lastVide);
-    writePageIdToPageBuffer(newPage, lastVideBuff, NEXT_PAGE);
-    PageId nextOfLastVideBuff = readPageIdFromPageBuffer(lastVideBuff, NEXT_PAGE); // Doit valoir rel->headerPage si tout va bien
+    PageId nextOfLastVideBuff = readPageIdFromPageBuffer(lastVideBuff, !equalPageId(lastVide,rel->headerPage) ? NEXT_PAGE: FREE_LIST); // Doit valoir rel->headerPage si tout va bien
+    writePageIdToPageBuffer(newPage, lastVideBuff, !equalPageId(lastVide, rel->headerPage) ? NEXT_PAGE: FREE_LIST); // si on fait ça avant de lire nextOFLast nextOfLast sera newPage :( 
     FreePage(lastVide, 1);
     
     uint8_t *newPageBuff = GetPage(newPage);
@@ -149,8 +149,8 @@ static uint32_t getRecordsInDataPage(RelationInfo *rel, PageId p, Record *list, 
                 list = (Record *) realloc(list, sizeof(Record)*((*size)+=2*rel->slotCount));
             }
             Rid rid; rid.pageId = p; rid.slotIdx = slot;
-            list[slot].relInfo = rel;
-            list[slot].rid = rid;
+            RecordInit(&list[*offset], rel);
+            list[*offset].rid = rid;
             readFromBuffer(list+((*offset)++), slots, slot*rel->size);
             readrecs++;
         }
@@ -175,6 +175,14 @@ Record *GetAllRecords(RelationInfo *rel, uint32_t *size) {
         getRecordsInDataPage(rel, next_full, list, size, &offset);
         next_full = readPageIdFromPageBuffer(pbuff, NEXT_PAGE);
         FreePage(old_full, 0);
+    }
+    PageId next_free = readPageIdFromPageBuffer(header, FREE_LIST);
+    while(!equalPageId(next_free, rel->headerPage)) {
+        PageId old_free = next_free;
+        uint8_t *pbuff = GetPage(next_free);
+        getRecordsInDataPage(rel, next_free, list, size, &offset);
+        next_free = readPageIdFromPageBuffer(pbuff, NEXT_PAGE);
+        FreePage(old_free, 0);
     }
     list = (Record *) realloc(list, sizeof(Record)*offset);
     *size = offset;

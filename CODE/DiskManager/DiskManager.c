@@ -108,7 +108,7 @@ int WritePage(PageId pi, const uint8_t *buffer) {
         return -1;
     }
 	char *file_name = getFilePath(params.DBPath, pi.FileIdx);
-    FILE *file = fopen(file_name, "w");
+    FILE *file = fopen(file_name, "r+"); // avec "w" le fichier est toujours écrasé :( avec "a" fseek ne marche plus... alors il faut utiliser "r+" 
     fseek(file, pi.PageIdx * params.pageSize, SEEK_SET);
     fwrite(buffer, sizeof(uint8_t), params.pageSize, file);
     fclose(file);

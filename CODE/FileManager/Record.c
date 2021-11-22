@@ -114,6 +114,8 @@ void printRecord(Record *r) {
             printf("%.*s", rel->colTypes[i].stringSize, (char*) val);
         } else
             printf("INVALID_COL%d_TYPE", i);
+        if(i!=rel->nbCol - 1)
+            printf(", ");
     }
     putchar('\n');
 }
