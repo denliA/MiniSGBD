@@ -86,6 +86,28 @@ static Record *parseTuple(RelationInfo *rel, struct command *comm, int parens) {
 }
 
 
+// Prend en entrée une commande qui commence juste après le where
+// Donne en sortie un tableau avec toutes les conditions
+TabDeConditions parseConditions(struct command *command) {
+    // TODO 
+}
+
+
+//Prend en entrée une condition, et l'évalue pour le record donné
+int evaluerCondition(Condition *c, Record *record) {
+    // TODO
+}
+
+// Retourne le résultat de l'évaluation d'un ensemble de conditions avec AND entre elles. Utilise evaluerCondition
+int evaluerAndConditions(TabDeConditions conditions, Record *record) {
+    //TODO
+}
+
+// Prend en entrée un tableau de reltions, et un tableau de conditions, et retourne un tableau de conditions respectant toutes les conditions
+// Utilise: evaluerAndConditions() 
+Record *filtrerRecords(Record *tous, TabDeConditions conditions) {
+
+}
 
 
 /****************************************************************************************************************************/
@@ -316,7 +338,7 @@ SelectCommand *CreateSelectCommand(char *command) {
         res->rel = rel;
         initArray(res->conditions, 0);
     } else if (tok.type == WHERE) {
-        return NULL; // TODO : gestion du WHERE 
+        return NULL; // TODO : gestion du WHERE en utilisant TabDeConditions parseConditions(command *com);
     } else {
         SYNTAX_ERROR("Erreur: Je m'attendais à un WHERE\n");
     }
@@ -330,6 +352,10 @@ void ExecuteSelectCommand(SelectCommand *command) {
         for( int i=0; i<s;i++) {
             printRecord(&records[i]);
         }
+    } else { 
+        // A FAIRE TODO
+        // // Utilise : Record *GetAllRecords(RelationInfo *rel, uint32_t *size) de FileManager.c qui prend en entrée une relation et retourne un tableau 
+        // Utilise : filtrerRecords défini plus haut dans ce fichier!
     }
 }
 /********************************************************************************************************************************/

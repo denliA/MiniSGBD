@@ -18,6 +18,18 @@ typedef struct _condition { // Structure représentant une comparaison dans le W
     int (*operateur)(union value val, union value colonne); // Fonction évaluant la condition
 } Condition;
 
+/* Exemple: Si on a dans le where "toto >= 15", dans une relation R (hehe:integer, toto:integer, nom:string5):
+    - rel vaudra 
+    - colonne sera égal à 1 (la position de toto dans la relation)
+    - val sera de type int et val.i vaudra 15
+    - operateur sera une fonction comparant deux floats, par exemple:
+    int floatsupeqfloat(union value val, union value colonne) {
+        return val.f >= colonne.f;
+    }
+
+Donc, pour faire le selectmono, il faut convertir chaque condition en structure condition puis faire une fonction qui évalue chaque condition
+*/
+
 #include "util/listutil.h"
 MAKEARRAYTYPE(TabDeConditions, Condition); // Crée un type tableau de taille variable de conditions
 /******fin CONDITIONS *************************************************************************/
