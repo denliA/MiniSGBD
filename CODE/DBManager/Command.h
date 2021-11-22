@@ -7,7 +7,22 @@
 #include "FileManager/RelationInfo.h"
 
 
+/**************************************GENERAL(utile dans plusieurs commandes)*********************************/
 
+/******CONDITIONS (utile dans SELECT, UPDATE et DELETE; toutes celle ou y a where )*******/
+union value { int32_t i; float f; char *s; }; // Union pour représenter une valeur de colonne dans un tuple
+
+typedef struct _condition { // Structure représentant une comparaison dans le WHERE;
+    int colonne;
+    union value val; // Constante qu'on compare à chaque tuple de l'instance
+    int (*operateur)(union value val, union value colonne); // Fonction évaluant la condition
+} Condition;
+
+#include "util/listutil.h"
+MAKEARRAYTYPE(TabDeConditions, Condition); // Crée un type tableau de taille variable de conditions
+/******fin CONDITIONS *************************************************************************/
+
+/**************************************************************************************************************/
 
 /*************************************************** CreateRelation ******************************************/
 typedef struct cRC{
@@ -58,11 +73,28 @@ void Insertion(Insert insertion);
 typedef struct _BatchInsert{
 	char *command;
 	char *fileName;
-	char *relationName;
+	RelationInfo *relation;
 }BatchInsert;
 
 BatchInsert *initBatchInsert(char *command);
 void ExecuteBatchInsert(BatchInsert *command);
 /***************************************************************************************************************/
+
+
+
+/************************************************SELECTMONO*************************************************/
+
+
+typedef struct _SelectCommand {
+    RelationInfo *rel;
+    TabDeConditions conditions; // Tableau de conditions à satisfaire
+} SelectCommand;
+
+
+SelectCommand *CreateSelectCommand(char *command);
+void ExecuteSelectCommand(SelectCommand *command);
+
+
+/*************************************************************************************************************/
 
 #endif

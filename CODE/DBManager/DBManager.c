@@ -40,7 +40,8 @@ void ProcessCommand(char* command){
         BatchInsert *b= initBatchInsert(command);
         if(b) ExecuteBatchInsert(b);
     } else if (commeq(command, "SELECTMONO")) {
-
+        SelectCommand *s = CreateSelectCommand(command+strlen("SELECTMONO"));
+        if(s->rel) ExecuteSelectCommand(s);
     } else if (commeq(command, "LIST RELATIONS")) {
         printRelations();
     } else if (!commeq(command, "exit"))
