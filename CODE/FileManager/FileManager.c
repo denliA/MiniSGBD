@@ -15,6 +15,7 @@
 #define NEXT_PAGE 1
 #define PREC_PAGE 0
 
+static void printHeapFileList(PageId headerPage);
 
 static void writePageIdToPageBuffer(PageId pageId, uint8_t* buff, int first){
 	buff += PAGEID_SIZE*first;
@@ -119,8 +120,11 @@ static Rid writeRecordToDataPage(RelationInfo *rel, Record *r, PageId p) {
     uint32_t free_slot;
     Rid rid;
     
+    //printf("Writing record to data page <%d, %d>...", p.FileIdx, p.PageIdx);
+    
     for(free_slot=0; free_slot < rel->slotCount; free_slot++) {
         if(!bytemap[free_slot]) {
+            //printf("Found slot %d! \n", free_slot);
             writeToBuffer(r, slots, free_slot*rel->size);
             if (free_slot == rel->slotCount-1) {
                 unlinkDataPage(p, rel->headerPage, FREE_LIST);
@@ -161,6 +165,8 @@ static uint32_t getRecordsInDataPage(RelationInfo *rel, PageId p, Record *list, 
 
 Rid InsertRecordIntoRelation(RelationInfo *rel, Record *rec) {
     PageId page = getFreePageId(rel);
+    //printf("[InsertRecordIntoRelation] Got free page: <%d,%d>. Showing HeapFileList state:\n", page.FileIdx, page.PageIdx);
+    //printHeapFileList(rel->headerPage);
     return writeRecordToDataPage(rel, rec, page);
 }
                                           
@@ -261,3 +267,54 @@ Record *GetNextRecord(ListRecordsIterator *iter) {
     return rec;
 }
 
+
+static void printHeapFileList(PageId headerPage) {
+    
+    uint8_t *headerBuffer = GetPage(headerPage);
+    PageId lastFreePage = readPageIdFromPageBuffer(headerBuffer, LAST_FREE);
+    PageId lastFullPage = readPageIdFromPageBuffer(headerBuffer, LAST_FULL);
+    PageId freeListPage = readPageIdFromPageBuffer(headerBuffer, FREE_LIST);
+    PageId fullListPage = readPageIdFromPageBuffer(headerBuffer, FULL_LIST);
+    FreePage(headerPage, 0);
+    
+    printf("HeaderPage: <%d, %d> [ FreeList = <%d, %d>, LastFree = <%d, %d>, FullList = <%d, %d>, LastFull = <%d, %d> ]\n",
+            headerPage.FileIdx, headerPage.PageIdx,
+            freeListPage.FileIdx, freeListPage.PageIdx, lastFreePage.FileIdx, lastFreePage.PageIdx,
+            fullListPage.FileIdx, fullListPage.PageIdx, lastFullPage.FileIdx, lastFullPage.PageIdx );
+    
+    printf("FreeList: <%d,%d> ", headerPage.FileIdx, headerPage.PageIdx);
+    for (PageId oldFree = headerPage; !equalPageId(freeListPage, headerPage); ) {
+        uint8_t *freePageBuffer = GetPage(freeListPage);
+        PageId prec = readPageIdFromPageBuffer(freePageBuffer, PREC_PAGE);
+        PageId next = readPageIdFromPageBuffer(freePageBuffer, NEXT_PAGE);
+        FreePage(freeListPage, 0);
+        if(!equalPageId(prec, oldFree)) {
+            printf("E: [printHeapFileList] current free page (<%d, %d>) prec (<%d,%d>) not equal to real prec(<%d, %d>).\n", 
+                freeListPage.FileIdx, freeListPage.PageIdx, prec.FileIdx, prec.PageIdx, oldFree.FileIdx, oldFree.PageIdx);
+            return;
+        } else {
+            printf(" --> <%d, %d> ", freeListPage.FileIdx, freeListPage.PageIdx);
+        }
+        oldFree = freeListPage;
+        freeListPage = next;
+        fflush(stdout);
+    } printf("\n");
+    
+    printf("FullList: <%d,%d> ", headerPage.FileIdx, headerPage.PageIdx);
+    for (PageId oldFull = headerPage; !equalPageId(fullListPage, headerPage); ) {
+        uint8_t *fullPageBuffer = GetPage(fullListPage);
+        PageId prec = readPageIdFromPageBuffer(fullPageBuffer, PREC_PAGE);
+        PageId next = readPageIdFromPageBuffer(fullPageBuffer, NEXT_PAGE);
+        FreePage(fullListPage, 0);
+        if(!equalPageId(prec, oldFull)) {
+            printf("E: [printHeapFileList] current full page (<%d, %d>) prec (<%d,%d>) not equal to real prec(<%d, %d>).\n", 
+                fullListPage.FileIdx, fullListPage.PageIdx, prec.FileIdx, prec.PageIdx, oldFull.FileIdx, oldFull.PageIdx);
+            return;
+        } else {
+            printf(" --> <%d, %d> ", fullListPage.FileIdx, fullListPage.PageIdx);
+        }
+        oldFull = fullListPage;
+        fullListPage = next;
+        fflush(stdout);
+    } printf("\n");
+}

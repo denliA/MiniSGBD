@@ -68,7 +68,7 @@ static Record *parseTuple(RelationInfo *rel, struct command *comm, int parens) {
                 SYNTAX_ERROR("Erreur sur la colonne %d, %s fait %ld caractères, mais %s(%d) est de type string%d\n", i, tok.attr.sattr, strlen(tok.attr.sattr), rel->colNames[i], i, rel->colTypes[i].stringSize);
             } break;
          default:
-            RecordFinish(rec); SYNTAX_ERROR("Erreur: Je m'attendais à une constante pour la colonne %d de %s\n", i, rel->name);
+            RecordFinish(rec); SYNTAX_ERROR("Erreur: Je m'attendais à une constante pour la colonne %d de %s, tok.type == %d\n", i, rel->name, tok.type);
         }
         
         setColumnTo(rec, i, &tok.attr);
@@ -216,10 +216,15 @@ void ExecuteBatchInsert(BatchInsert *command){
 	FILE* fich = fopen(command->fileName,"r");
 	char *res=NULL;
 	size_t taille;
+	int count = 1;
 	while( getline(&res, &taille, fich) > 0) {
 	    struct command c = newCommand(res);
 	    Record *r = parseTuple(command->relation, &c, 0);
-	    if(r) InsertRecordIntoRelation(command->relation, r);
+	    if(r)
+	        InsertRecordIntoRelation(command->relation, r);
+        else
+            printf("Erreur batchinsert %s into %s : je n'ai pas pu parser le tuple en ligne %d\n", command->fileName, command->relation->name, count);
+	    count++;
 	} 
 }
 /****************************************************************************************************************************/
@@ -332,6 +337,10 @@ void ExecuteSelectCommand(SelectCommand *command) {
 //exemple;
 // CREATE RELATION S5  (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int) 
 //INSERT INTO S5 (A, 2, AAA, 5.7, DF, 4,4) 
-// CREATE RELATION S (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int, C8:int)
-// INSERT INTO S (a, 2, a, 2.5, a, 3, 3, 3)
+/*
+DROPDB
+CREATE RELATION S (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int, C8:int)
+INSERT INTO S (a, 2, a, 2.5, a, 3, 3, 3)
+BATCHINSERT INTO S FROM FILE DB/S1.csv
+*/
 

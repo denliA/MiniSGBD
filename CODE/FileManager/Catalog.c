@@ -99,7 +99,7 @@ void FinishCatalog(void){
             fprintf(file, "%s\n", cat.tab[rel].colNames[col]);
             fwrite(&(cat.tab[rel].colTypes[col].type), 4, 1, file); //TODO: utiliser endianness.c
             if(cat.tab[rel].colTypes[col].type == T_STRING){
-                fwrite(&(cat.tab[rel].colTypes[col].stringSize), 4, 1, file); printf("%u-%u: %d\n",rel, col, cat.tab[rel].colTypes[col].stringSize);}
+                fwrite(&(cat.tab[rel].colTypes[col].stringSize), 4, 1, file); /*printf("%u-%u: %d\n",rel, col, cat.tab[rel].colTypes[col].stringSize);*/}
         }
     }
     fclose(file);
