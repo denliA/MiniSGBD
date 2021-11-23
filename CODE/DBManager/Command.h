@@ -7,7 +7,7 @@
 #include "FileManager/RelationInfo.h"
 
 
-/**************************************GENERAL(utile dans plusieurs commandes)*********************************/
+/***************************c***********GENERAL(utile dans plusieurs commandes)*********************************/
 
 /******CONDITIONS (utile dans SELECT, UPDATE et DELETE; toutes celle ou y a where )*******/
 union value { int32_t i; float f; char *s; }; // Union pour représenter une valeur de colonne dans un tuple

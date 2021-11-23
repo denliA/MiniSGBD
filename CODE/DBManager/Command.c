@@ -89,13 +89,33 @@ static Record *parseTuple(RelationInfo *rel, struct command *comm, int parens) {
 // Prend en entrée une commande qui commence juste après le where
 // Donne en sortie un tableau avec toutes les conditions
 TabDeConditions parseConditions(struct command *command) {
-    // TODO 
+
 }
 
 
 //Prend en entrée une condition, et l'évalue pour le record donné
 int evaluerCondition(Condition *c, Record *record) {
-    // TODO
+	union value valRec;
+	//valeur contenue à l'indice colonne dans le tuple
+	void *valueRecord = getAtColumn(record, c->colonne);;
+	//type de la valeur
+	int type = getTypeAtRecordColumn(record,c->colonne);
+	if (type == T_INT){
+		int* intValue = (int*)valueRecord;
+		valRec.i = *intValue;
+	}
+	else if(type == T_FLOAT){
+		float* floatValue = (float*)valueRecord;
+		valRec.f = *floatValue;
+	}
+	else if(type == T_STRING){
+		char** stringValue = (char**)valueRecord;
+		valRec.s = *stringValue;
+	}
+	//on evalue la condition
+	return c->operateur(c->val,valRec);
+
+
 }
 
 // Retourne le résultat de l'évaluation d'un ensemble de conditions avec AND entre elles. Utilise evaluerCondition
@@ -103,7 +123,7 @@ int evaluerAndConditions(TabDeConditions conditions, Record *record) {
     //TODO
 }
 
-// Prend en entrée un tableau de reltions, et un tableau de conditions, et retourne un tableau de conditions respectant toutes les conditions
+// Prend en entrée un tableau de reltions, et un tableau de conditions, et retourne un tableau de record respectant toutes les conditions
 // Utilise: evaluerAndConditions() 
 Record *filtrerRecords(Record *tous, TabDeConditions conditions) {
 
