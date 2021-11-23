@@ -26,7 +26,7 @@
     #include <io.h>
     typedef struct _stat MyStatStruct;
     #define mystat _stat
-    #define myaccess _access_s
+    #define myaccess _access
     #ifndef R_OK
     #define F_OK 0
     #define R_OK 1
@@ -90,12 +90,14 @@ long int fileSize(char *file) {
  * à partir de : https://stackoverflow.com/a/15947809
  ************************************************************************/
 int blockSize(char *file) {
-    if(!CANGETBLOCKSIZE)
+#if (!CANGETBLOCKSIZE)
         return DEFAULT_BLOCK_SIZE;
+#else
     // TODO : à remplacer par une utilisation de ioctl pour avoir la vraie taille physique.
     MyStatStruct buf;
     mystat(file, &buf);
-    return buf.st_blksize;  
+ return buf.st_blksize;
+#endif
 }
 /************************************************************************/
 

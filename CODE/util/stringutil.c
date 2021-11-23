@@ -24,7 +24,7 @@ StrTokens tokenize(const char *string, char *atomicSep) {
             first = last;
         }
         else if(strncmp(last, atomicSep, sepSize) == 0) {
-            tokens[size++] = strndup(first, last-first);
+            tokens[size++] = strndup2(first, last-first);
             last = first = last+sepSize;
         }
         else
@@ -50,7 +50,16 @@ void printTokens(StrTokens toks) {
     putchar(']'); putchar('\n');
 }
 
+char* strndup2(char* str, int i)
+{
+   char* t = malloc(i+1);
+   if(t)
+   {
+       strncpy(t, str, i);
+   }
 
+   return t;
+}
 /*int main(void) {
     char *test1 = "/path/to/my//file/";
     StrTokens toks = tokenize(test1, "/");

@@ -76,7 +76,7 @@ void InitCatalog(void){
         }
         RelationInfoInit(cat.tab + readRels++, lname, lnbCol, lnames, ltypes, pid);
     }
-    
+    fclose(file);
 }
 
 void FinishCatalog(void){
