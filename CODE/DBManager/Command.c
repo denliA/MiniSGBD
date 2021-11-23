@@ -9,13 +9,14 @@
 #include "FileManager/RelationInfo.h"
 #include "FileManager/FileManager.h"
 #include "FileManager/Catalog.h"
+#include "CommandTokenizer.h"
 #include "Command.h"
 
 
 
 /**********************************************************GÉNÉRAL*********************************************************/
 
-// Pour afficher un message d'erreur puis quitter la fonction lorsqu'il y a un erreur dans la commande à parser 
+// Pour afficher un message d'erreur puis quitter la fonction lorsqu'il y a un erreur dans la commande à parser
 #define SYNTAX_ERROR(...) {\
     fprintf(stderr, __VA_ARGS__);\
     return NULL;\
@@ -30,8 +31,8 @@
 #define typeToString(type) ( (type) == T_INT ? "integer" : (type) == T_FLOAT ?  "float" : (type) == T_STRING ? "stringX" : "INCONNU" ) 
 
 
-/* Entrées: - rel : la relation que représente le tuple. 
-            - command : commande commençant exactement au début du tuple, c'est à dire avec une parenthèse ouvrante 
+/* Entrées: - rel : la relation que représente le tuple.
+            - command : commande commençant exactement au début du tuple, c'est à dire avec une parenthèse ouvrante
    Sortie: record contenant le tuple représenté par command.
    
    La fonction effectue toutes les vérifications de syntaxe et de types.
@@ -76,10 +77,10 @@ static Record *parseTuple(RelationInfo *rel, struct command *comm, int parens) {
         nextToken(comm, &tok);
         if (i == rel->nbCol-1) {
             if( parens && tok.type != PAREN_FERM ) {
-                RecordFinish(rec); SYNTAX_ERROR("Erreur: %i colonnes lues, parenthèse fermante manquante.\n", i+1);            
+                RecordFinish(rec); SYNTAX_ERROR("Erreur: %i colonnes lues, parenthèse fermante manquante.\n", i+1);
             }
         } else if (tok.type != VIRGULE) {
-            RecordFinish(rec); SYNTAX_ERROR("Erreur: Je m'attendais à une virgule après la colonne %d de %s. (n°token = %d)\n", i, rel->name, tok.type);        
+            RecordFinish(rec); SYNTAX_ERROR("Erreur: Je m'attendais à une virgule après la colonne %d de %s. (n°token = %d)\n", i, rel->name, tok.type);
         }
     }
     return rec;
@@ -88,9 +89,61 @@ static Record *parseTuple(RelationInfo *rel, struct command *comm, int parens) {
 
 // Prend en entrée une commande qui commence juste après le where
 // Donne en sortie un tableau avec toutes les conditions
-TabDeConditions parseConditions(struct command *command) {
-    // TODO 
+TabDeConditions parseConditions(RelationInfo *rel,struct command *command) {
+   TabDeConditions tab;
+   initArray(tab,20);
+   //addElem(tab,
+
+   struct token tok;
+
+
+   while (nextToken(command,&tok)!=ENDOFCOMMAND){
+	  Condition cnd;
+	  if (tok.type==NOM_VARIABLE){ //
+		  cnd.colonne=getColumnIndex(rel, tok.attr);
+	  }
+	  int te = getTypeAtColumn(rel, cnd.colonne);
+	  nextToken(command,&tok);
+
+	  if ((tok.type>=OPEQ) && (tok.type<=OPNEQ)){
+
+		  switch(tok.type){
+
+		  	  case OPEQ:
+		  		  cnd.operateur= (te == T_INT ? ieq: (te==T_FLOAT ? feq : seq));
+		  		  break;
+		  	  case OPSUP:
+		  		  cnd.operateur= (te == T_INT ? isup: (te==T_FLOAT ? fsupeq : ssupeq));
+		  		  break;
+		  	  case OPINF:
+		  	  	  cnd.operateur= (te == T_INT ? iinf: (te==T_FLOAT ? finf : sinf));
+		  	  	  break;
+		  	  case OPSUPEQ:
+		  	  	  cnd.operateur= (te == T_INT ? isupeq: (te==T_FLOAT ? fsupeq : ssupeq));
+		  	  	  break;
+		  	  case OPINFEQ:
+		  		  cnd.operateur= (te == T_INT ? iinfeq: (te==T_FLOAT ? finfeq : sinfeq));
+		  		  break;
+		  	  case OPNEQ:
+		  		  cnd.operateur= (te == T_INT ? ineq:  (te==T_FLOAT ? fneq : sneq));
+		  		  break;
+		  }
+
+
+	  }else{
+		  return NULL;
+	  }
+
+	  nextToken(command,&tok);
+	  if (tok.type==te){
+		  cnd.val=tok.attr;
+	  }
+
+   }
+
 }
+
+int ieq()
 
 
 //Prend en entrée une condition, et l'évalue pour le record donné
@@ -182,7 +235,7 @@ CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 			tracker++;
 		}
 	} else {
-	SYNTAX_ERROR("Erreur dans la commande: Je m'attendais à une parenthèse ouvrante, j'ai eu %d\n", tok.type);	
+	SYNTAX_ERROR("Erreur dans la commande: Je m'attendais à une parenthèse ouvrante, j'ai eu %d\n", tok.type);
 	}
 	temp->colNum = tracker;
 	return temp;
@@ -352,12 +405,16 @@ void ExecuteSelectCommand(SelectCommand *command) {
         for( int i=0; i<s;i++) {
             printRecord(&records[i]);
         }
-    } else { 
+    } else {
+
         // A FAIRE TODO
-        // // Utilise : Record *GetAllRecords(RelationInfo *rel, uint32_t *size) de FileManager.c qui prend en entrée une relation et retourne un tableau 
+        // // Utilise : Record *GetAllRecords(RelationInfo *rel, uint32_t *size) de FileManager.c qui prend en entrée une relation et retourne un tableau
         // Utilise : filtrerRecords défini plus haut dans ce fichier!
     }
 }
+
+
+
 /********************************************************************************************************************************/
 
 //exemple;

@@ -74,3 +74,11 @@ void printRelationInfo(RelationInfo *rel) {
             puts(")"); 
     }
 }
+
+int getColumnIndex(RelationInfo *rel,char* name){
+	for(int i=0;i<rel->nbCol;i++){
+		if (!strcmp(name,rel->nbCol[i])){
+			return i;
+		}
+	}
+}
