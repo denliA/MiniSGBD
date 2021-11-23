@@ -27,5 +27,6 @@ RelationInfo *RelationInfoInit(RelationInfo *rel, char *name, uint32_t nbCol, ch
 void RelationInfoFinish(RelationInfo *);
 int getTypeAtColumn(RelationInfo *relInfo, int col);
 void printRelationInfo(RelationInfo *rel);
+int getColumnIndex(RelationInfo *rel,char* name);
 
 #endif
