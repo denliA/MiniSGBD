@@ -178,8 +178,18 @@ int evaluerAndConditions(TabDeConditions conditions, Record *record) {
 
 // Prend en entrée un tableau de reltions, et un tableau de conditions, et retourne un tableau de record respectant toutes les conditions
 // Utilise: evaluerAndConditions() 
-Record *filtrerRecords(Record *tous, TabDeConditions conditions) {
-
+TadDeRecords filtrerRecords(Record *tous, int tailleTous, TabDeConditions conditions) {
+    //initialiser le tableau de records respectant les conditions
+    TabDeRecords res;
+    initArray(res,10);
+    //parcourir les record dans tous : 
+    for(int i = 0; i<tailleTous, i++){
+        if(evaluerAndConditions(conditions,tous.tab[i]){
+            addElem(res,tous.tab[i]);
+        }
+    }
+    trim(res);
+    return res;
 }
 
 
