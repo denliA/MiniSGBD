@@ -170,7 +170,8 @@ Rid InsertRecordIntoRelation(RelationInfo *rel, Record *rec) {
     return writeRecordToDataPage(rel, rec, page);
 }
                                           
-Record *GetAllRecords(RelationInfo *rel, uint32_t *size) {
+TabDeRecords GetAllRecords(RelationInfo *rel) {
+    uint32_t localsize, *size = &localsize;
     uint8_t *header = GetPage(rel->headerPage);
     Record *list = (Record *) malloc(sizeof(Record)*(*size = 2*rel->slotCount));
     uint32_t offset = 0;
@@ -192,7 +193,11 @@ Record *GetAllRecords(RelationInfo *rel, uint32_t *size) {
     }
     list = (Record *) realloc(list, sizeof(Record)*offset);
     *size = offset;
-    return list;
+    TabDeRecords resultat;
+    resultat.tab = list;
+    resultat.nelems = resultat.maxelems = offset;
+    resultat.increment = 5;
+    return resultat;
 }
 
 

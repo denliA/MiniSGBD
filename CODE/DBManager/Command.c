@@ -162,29 +162,32 @@ int evaluerCondition(Condition *c, Record *record) {
 		valRec.f = *floatValue;
 	}
 	else if(type == T_STRING){
-		char** stringValue = (char**)valueRecord;
-		valRec.s = *stringValue;
+		char* stringValue = (char*)valueRecord;
+		valRec.s = stringValue;
 	}
 	//on evalue la condition
-	return c->operateur(c->val,valRec);
+	return c->operateur(valRec, c->val);
 
 
 }
 
 // Retourne le résultat de l'évaluation d'un ensemble de conditions avec AND entre elles. Utilise evaluerCondition
 int evaluerAndConditions(TabDeConditions conditions, Record *record) {
-    //TODO
+    for(int i=0; i<conditions.nelems;i++)
+        if(!evaluerCondition(&conditions.tab[i], record))
+            return 0;
+    return 1;
 }
 
 // Prend en entrée un tableau de reltions, et un tableau de conditions, et retourne un tableau de record respectant toutes les conditions
 // Utilise: evaluerAndConditions() 
-TadDeRecords filtrerRecords(Record *tous, int tailleTous, TabDeConditions conditions) {
+TabDeRecords filtrerRecords(TabDeRecords tous, TabDeConditions conditions) {
     //initialiser le tableau de records respectant les conditions
     TabDeRecords res;
     initArray(res,10);
     //parcourir les record dans tous : 
-    for(int i = 0; i<tailleTous, i++){
-        if(evaluerAndConditions(conditions,tous.tab[i]){
+    for(int i = 0; i<tous.nelems; i++){
+        if(evaluerAndConditions(conditions,&tous.tab[i])){
             addElem(res,tous.tab[i]);
         }
     }
@@ -429,17 +432,17 @@ SelectCommand *CreateSelectCommand(char *command) {
 }
 
 void ExecuteSelectCommand(SelectCommand *command) {
-    uint32_t s;
     if(command->conditions.nelems == 0) {
         Record *records = GetAllRecords(command->rel, &s);
         for( int i=0; i<s;i++) {
             printRecord(&records[i]);
         }
     } else {
-
-        // A FAIRE TODO
-        // // Utilise : Record *GetAllRecords(RelationInfo *rel, uint32_t *size) de FileManager.c qui prend en entrée une relation et retourne un tableau
-        // Utilise : filtrerRecords défini plus haut dans ce fichier!
+        TabDeRecords records = GetAllRecords(command->rel);
+        TabDeRecords resultat = filtrerRecords(records, command->conditions);
+        for (int i=0; i<resultat.nelems;i++)
+            printRecord(&resultat.tab[i]);
+            printf("Total records=%ld\n", resultat.nelems);
     }
 }
 
