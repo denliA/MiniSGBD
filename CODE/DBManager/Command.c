@@ -446,7 +446,12 @@ SelectCommand *CreateSelectCommand(char *command) {
         res->rel = rel;
         initArray(res->conditions, 0);
     } else if (tok.type == WHERE) {
-        return NULL; // TODO : gestion du WHERE en utilisant TabDeConditions parseConditions(command *com);
+        res = malloc(sizeof(SelectCommand));
+        res->rel = rel;
+        res->conditions = parseConditions(rel, &comm);
+        if (res->conditions.tab == NULL)
+            return NULL;
+        return res;
     } else {
         SYNTAX_ERROR("Erreur: Je m'attendais à un WHERE\n");
     }
@@ -455,10 +460,16 @@ SelectCommand *CreateSelectCommand(char *command) {
 
 void ExecuteSelectCommand(SelectCommand *command) {
     if(command->conditions.nelems == 0) {
-        Record *records = GetAllRecords(command->rel, &s);
-        for( int i=0; i<s;i++) {
-            printRecord(&records[i]);
-        }
+        /*TabDeRecords records = GetAllRecords(command->rel);
+        for( int i=0; i<records.nelems;i++) {
+            printRecord(&records.tab[i]);
+        }*/
+        ListRecordsIterator *iter = GetListRecordsIterator(command->rel);
+        Record *r;
+        int i=0;
+        for (r = GetNextRecord(iter); r; r = GetNextRecord(iter), i++)
+            printRecord(r);
+        printf("Total records=%d\n", i);
     } else {
         TabDeRecords records = GetAllRecords(command->rel);
         TabDeRecords resultat = filtrerRecords(records, command->conditions);
@@ -480,5 +491,7 @@ DROPDB
 CREATE RELATION S (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int, C8:int)
 INSERT INTO S (a, 2, a, 2.5, a, 3, 3, 3)
 BATCHINSERT INTO S FROM FILE DB/S1.csv
+SELECTMONO * FROM S WHERE C4 = 598.5 AND C7 > 9 
+
 */
 
