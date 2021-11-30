@@ -41,10 +41,9 @@ int main(int argc, char **argv) {
         }
         
         //getline 
-        printf("Tapez votre commande (exit pour quitter)");
+        printf("MiniSGBD>>");
         nb_char_commande = getline(&commande,&nb_char_max,stdin);
         commande[strlen(commande)-1]='\0'; // On supprime l'avant dernier caractère qui est un retour à la ligne.
-        printf("Commande : %s \n",commande);
         ProcessCommand(commande);
         
     }while(strncmp(commande,"exit",4)!=0);
