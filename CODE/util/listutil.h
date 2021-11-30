@@ -19,9 +19,10 @@ Utilisation : Si on veut par exemple manipuler un tableau d'objets de type int
 
 
 #define MAKEARRAYTYPE(name, type) typedef struct name { type *tab;  size_t nelems; size_t maxelems; size_t increment;} name;
-#define initArray(array, def_increment) { array.nelems = 0; array.tab = malloc( (sizeof array.tab[0]) * def_increment); array.maxelems = array.increment = def_increment; }
-#define addElem(array, elem) { if(array.nelems >= array.maxelems) { array.tab = realloc((sizeof array[0])*(array.maxelems += array.increment)); } array.tab[nelems++] = elem; }
-#define deleteArray(array) { free(array.tab); }
+#define initArray(array, def_increment) { (array).nelems = 0; (array).tab = malloc( (sizeof (array).tab[0]) * def_increment); (array).maxelems = (array).increment = def_increment; }
+#define addElem(array, elem) { if((array).nelems >= (array).maxelems) { (array).tab = realloc((array).tab,(sizeof (array).tab[0])*((array).maxelems += (array).increment)); } (array).tab[((array).nelems)++] = elem; }
+#define deleteArray(array) { free((array).tab); }
+#define trim(array) { (array).tab = realloc((array).tab, (array).nelems*sizeof (array).tab[0]); (array).maxelems = (array).nelems; }
 
 
 

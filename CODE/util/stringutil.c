@@ -50,7 +50,7 @@ void printTokens(StrTokens toks) {
     putchar(']'); putchar('\n');
 }
 
-char* strndup2(char* str, int i)
+char* strndup2(const char *str, int i)
 {
    char* t = malloc(i+1);
    if(t)
