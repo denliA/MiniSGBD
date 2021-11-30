@@ -34,10 +34,9 @@ int nextToken(struct command *com, struct token *tok) {
         case '>':  case '<':
             if(com->command[com->pos+1] == '=') {
                 com->pos+=2;
-                return tok->type = com->command[com->pos] == '>' ? OPSUPEQ : OPINFEQ;
+                return tok->type = com->command[(com->pos)-2] == '>' ? OPSUPEQ : OPINFEQ;
             }
-            com->pos++;
-            return tok->type = com->command[com->pos] == '>' ? OPSUP : OPINF;
+            return tok->type = com->command[(com->pos)++] == '>' ? OPSUP : OPINF;
     }
     if(strbegstr(com->command+com->pos, "WHERE")) {
         com->pos += strlen("WHERE");
