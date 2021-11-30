@@ -28,6 +28,6 @@ Record *GetNextRecord(ListRecordsIterator *iterator);
 
 
 Rid InsertRecordIntoRelation(RelationInfo *rel, Record *rec);
-Record *GetAllRecords(RelationInfo *rel, uint32_t *size);
+TabDeRecords GetAllRecords(RelationInfo *rel);
 
 #endif

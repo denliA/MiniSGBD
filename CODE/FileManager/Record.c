@@ -59,6 +59,7 @@ void readFromBuffer(Record *rec, uint8_t *buff, uint32_t pos) {
                 buff+=4; ptr+=4;
             } else if(types[i].type == T_STRING) {
                 memmove(ptr, buff, types[i].stringSize);
+                ((uint8_t*)ptr)[types[i].stringSize] = '\0';
                 buff+= (types[i].stringSize + (4-types[i].stringSize%4));
                 ptr+= (types[i].stringSize + (4-types[i].stringSize%4));
             } else {

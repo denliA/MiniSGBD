@@ -201,6 +201,7 @@ ListRecordsIterator *GetListRecordsIterator(RelationInfo *rel) {
     iter->rel = rel;
     uint8_t *header = GetPage(rel->headerPage);
     PageId nextFull = readPageIdFromPageBuffer(header, FULL_LIST), nextFree;
+    FreePage(rel->headerPage, 0);
     if (!equalPageId(nextFull, rel->headerPage)) {
         setRecIterState(iter, FULL_LIST, nextFull, GetPage(nextFull), -1);
     } else if (!equalPageId(nextFree = readPageIdFromPageBuffer(header, FREE_LIST), rel->headerPage)) {
@@ -215,7 +216,7 @@ static void incrementIter(ListRecordsIterator *iter) {
     
     if(iter->currentList == FULL_LIST) {
         if (iter->currentSlot < iter->rel->slotCount) {
-            iter->currentSlot++;
+            //iter->currentSlot++;
             return;
         } else {
             PageId next = readPageIdFromPageBuffer(iter->buffer, NEXT_PAGE);
@@ -260,7 +261,8 @@ Record *GetNextRecord(ListRecordsIterator *iter) {
     if(iter->currentList == -1)
         return NULL;
     rec = (Record *) malloc(sizeof(Record));
-    readFromBuffer(rec, iter->buffer, 2*PAGEID_SIZE + iter->currentSlot * iter->rel->size);
+    RecordInit(rec, iter->rel);
+    readFromBuffer(rec, iter->buffer, 2*PAGEID_SIZE + + iter->rel->slotCount + iter->currentSlot * iter->rel->size);
     rec->relInfo = iter->rel;
     rec->rid.pageId = iter->currentPage;
     rec->rid.slotIdx = iter->currentSlot;

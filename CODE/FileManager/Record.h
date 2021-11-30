@@ -9,6 +9,8 @@ typedef struct _Record{
     Rid rid;
 }Record;
 
+#include "util/listutil.h"
+MAKEARRAYTYPE(TabDeRecords, Record);
 
 void RecordInit(Record* rec, RelationInfo *rel);
 void RecordFinish(Record *);

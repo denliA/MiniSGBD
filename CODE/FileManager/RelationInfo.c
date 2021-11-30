@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "RelationInfo.h"
 #include "DiskManager/DBParams.h"
 
@@ -33,7 +34,7 @@ RelationInfo *RelationInfoInit(RelationInfo *rel, char *name, uint32_t nbCol, ch
     pageSize -= 2*PAGEID_SIZE;
     
     rel->slotCount = pageSize / (rel->size + 1);
-    rel->byteBufOff = 2 * PAGEID_SIZE + rel->slotCount * rel->size;
+    rel->byteBufOff = 2 * PAGEID_SIZE;
     return rel;
 }
 
@@ -77,8 +78,9 @@ void printRelationInfo(RelationInfo *rel) {
 
 int getColumnIndex(RelationInfo *rel,char* name){
 	for(int i=0;i<rel->nbCol;i++){
-		if (!strcmp(name,rel->nbCol[i])){
+		if (!strcmp(name,rel->colNames[i])){
 			return i;
 		}
 	}
+	return -1;
 }
