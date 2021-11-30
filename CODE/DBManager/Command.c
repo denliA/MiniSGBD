@@ -31,6 +31,28 @@
 #define typeToString(type) ( (type) == T_INT ? "integer" : (type) == T_FLOAT ?  "float" : (type) == T_STRING ? "stringX" : "INCONNU" ) 
 
 
+/*****FONCTIONS OPERATEURS*******/
+static int ieq(union value v1, union value v2) { return v1.i == v2.i; }
+static int ineq(union value v1, union value v2) { return v1.i != v2.i; }
+static int isup(union value v1, union value v2) { return v1.i > v2.i; }
+static int isupeq(union value v1, union value v2) { return v1.i >= v2.i; }
+static int iinf(union value v1, union value v2) { return v1.i < v2.i; }
+static int iinfeq(union value v1, union value v2) { return v1.i <= v2.i; }
+static int feq(union value v1, union value v2) { return v1.f == v2.f; }
+static int fneq(union value v1, union value v2) { return v1.f != v2.f; }
+static int fsup(union value v1, union value v2) { return v1.f > v2.f; }
+static int fsupeq(union value v1, union value v2) { return v1.f >= v2.f; }
+static int finf(union value v1, union value v2) { return v1.f < v2.f; }
+static int finfeq(union value v1, union value v2) { return v1.f <= v2.f; }
+static int seq(union value v1, union value v2) { return strcmp(v1.s, v2.s) == 0; }
+static int sneq(union value v1, union value v2) { return strcmp(v1.s, v2.s) != 0; }
+static int ssup(union value v1, union value v2) { return strcmp(v1.s, v2.s) > 0; }
+static int ssupeq(union value v1, union value v2) { return strcmp(v1.s, v2.s) >= 0; }
+static int stinf(union value v1, union value v2) { return strcmp(v1.s, v2.s) < 0; }
+static int sinfeq(union value v1, union value v2) { return strcmp(v1.s, v2.s) <= 0; }
+/********************************/
+
+
 /* Entrées: - rel : la relation que représente le tuple.
             - command : commande commençant exactement au début du tuple, c'est à dire avec une parenthèse ouvrante
    Sortie: record contenant le tuple représenté par command.
