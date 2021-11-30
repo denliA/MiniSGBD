@@ -153,19 +153,38 @@ TabDeConditions parseConditions(RelationInfo *rel,struct command *command) {
 
 
 	  }else{
-		  return NULL;
+		  deleteArray(tab);
+		  tab.tab = NULL;
+		  return tab;
 	  }
 
 	  nextToken(command,&tok);
-	  if (tok.type==te){
-		  cnd.val=tok.attr;
+	  if (tok.type==INT_CONSTANT && te == T_INT){
+		  cnd.val.i = tok.attr.iattr;
+		  //cnd.val=tok.attr;
+	  } else if (tok.type == INT_CONSTANT && te == T_FLOAT) {
+	    cnd.val.f = (float) tok.attr.iattr;
+	  } else if (tok.type == FLOAT_CONSTANT && te == T_FLOAT) {
+	    cnd.val.f = tok.attr.fattr;
+	  } else if (tok.type == STRING_CONSTANT && te == T_STRING) {
+	    cnd.val.s = strdup(tok.attr.sattr); // LEAK TODO
+	    printf("J'ai dupliqué %s, et seq = %p et cnd.operateur = %p\n", cnd.val.s, seq, cnd.operateur);
+	  } else {
+	    //Erreur 
+	    ; // TODO
 	  }
-
+      addElem(tab, cnd);
+      
+      if(nextToken(command, &tok) == AND) {
+        ;
+      } else if (tok.type == ENDOFCOMMAND) break;
+      else {
+        // Erreur TODO
+      }
    }
-
+    return tab;
 }
 
-int ieq()
 
 
 //Prend en entrée une condition, et l'évalue pour le record donné
