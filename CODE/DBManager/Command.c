@@ -122,7 +122,7 @@ TabDeConditions parseConditions(RelationInfo *rel,struct command *command) {
    while (nextToken(command,&tok)!=ENDOFCOMMAND){
 	  Condition cnd;
 	  if (tok.type==NOM_VARIABLE){ //
-		  cnd.colonne=getColumnIndex(rel, tok.attr);
+		  cnd.colonne=getColumnIndex(rel, tok.attr.sattr);
 	  }
 	  int te = getTypeAtColumn(rel, cnd.colonne);
 	  nextToken(command,&tok);
@@ -135,10 +135,10 @@ TabDeConditions parseConditions(RelationInfo *rel,struct command *command) {
 		  		  cnd.operateur= (te == T_INT ? ieq: (te==T_FLOAT ? feq : seq));
 		  		  break;
 		  	  case OPSUP:
-		  		  cnd.operateur= (te == T_INT ? isup: (te==T_FLOAT ? fsupeq : ssupeq));
+		  		  cnd.operateur= (te == T_INT ? isup: (te==T_FLOAT ? fsup : ssup));
 		  		  break;
 		  	  case OPINF:
-		  	  	  cnd.operateur= (te == T_INT ? iinf: (te==T_FLOAT ? finf : sinf));
+		  	  	  cnd.operateur= (te == T_INT ? iinf: (te==T_FLOAT ? finf : stinf));
 		  	  	  break;
 		  	  case OPSUPEQ:
 		  	  	  cnd.operateur= (te == T_INT ? isupeq: (te==T_FLOAT ? fsupeq : ssupeq));
