@@ -17,14 +17,14 @@
 /**********************************************************GÉNÉRAL*********************************************************/
 
 // Pour afficher un message d'erreur puis quitter la fonction lorsqu'il y a un erreur dans la commande à parser
-#define SYNTAX_ERROR(...) {\
+#define SYNTAX_ERROR(ret, ...) {\
     fprintf(stderr, __VA_ARGS__);\
-    return NULL;\
+    return ret;\
 }
 
 // Lorsque l'utiliateur donne une valeur du mauvais type
-#define CONST_TYPE_ERROR(rel, ncol, good, bad) {\
-    SYNTAX_ERROR("Erreur: La colonne %d de %s est de type %s, mais j'ai eu un %s.\n", (ncol), (rel)->name, typeToString(good), typeToString(bad)); \
+#define CONST_TYPE_ERROR(ret, rel, ncol, good, bad) {\
+    SYNTAX_ERROR(ret, "Erreur: La colonne %d de %s est de type %s, mais j'ai eu un %s.\n", (ncol), (rel)->name, typeToString(good), typeToString(bad)); \
 }
 
 // Pour print le type d'une colonne donnée.
@@ -65,7 +65,7 @@ static Record *parseTuple(RelationInfo *rel, struct command *comm, int parens) {
     RecordInit(rec, rel);
     
     if(parens && nextToken(comm, &tok) != PAREN_OUVR) {
-        RecordFinish(rec); SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à un parenthèse ouvrante\n");
+        RecordFinish(rec); SYNTAX_ERROR(NULL,"Erreur de syntaxe: Je m'attendais à un parenthèse ouvrante\n");
     }
     for(int i=0; i<rel->nbCol;i++) {
         int type;
@@ -76,22 +76,22 @@ static Record *parseTuple(RelationInfo *rel, struct command *comm, int parens) {
             }
             else if((type=getTypeAtColumn(rel, i)) != T_INT) {
                 RecordFinish(rec);
-                CONST_TYPE_ERROR(rel, i, type, T_INT);
+                CONST_TYPE_ERROR(NULL,rel, i, type, T_INT);
             } break;
         case FLOAT_CONSTANT:
             if((type=getTypeAtColumn(rel, i)) != T_FLOAT) {
                 RecordFinish(rec);
-                CONST_TYPE_ERROR(rel, i, type, T_FLOAT);
+                CONST_TYPE_ERROR(NULL,rel, i, type, T_FLOAT);
             } break;
         case STRING_CONSTANT:
             if((type=getTypeAtColumn(rel,i)) != T_STRING) {
-                RecordFinish(rec); CONST_TYPE_ERROR(rel, i, type, T_STRING);
+                RecordFinish(rec); CONST_TYPE_ERROR(NULL,rel, i, type, T_STRING);
             } else if (strlen(tok.attr.sattr) > rel->colTypes[i].stringSize) {
                 RecordFinish(rec);
-                SYNTAX_ERROR("Erreur sur la colonne %d, %s fait %ld caractères, mais %s(%d) est de type string%d\n", i, tok.attr.sattr, strlen(tok.attr.sattr), rel->colNames[i], i, rel->colTypes[i].stringSize);
+                SYNTAX_ERROR(NULL,"Erreur sur la colonne %d, %s fait %zu caractères, mais %s(%d) est de type string%d\n", i, tok.attr.sattr, strlen(tok.attr.sattr), rel->colNames[i], i, rel->colTypes[i].stringSize);
             } break;
          default:
-            RecordFinish(rec); SYNTAX_ERROR("Erreur: Je m'attendais à une constante pour la colonne %d de %s, tok.type == %d\n", i, rel->name, tok.type);
+            RecordFinish(rec); SYNTAX_ERROR(NULL,"Erreur: Je m'attendais à une constante pour la colonne %d de %s, tok.type == %d\n", i, rel->name, tok.type);
         }
         
         setColumnTo(rec, i, &tok.attr);
@@ -99,10 +99,10 @@ static Record *parseTuple(RelationInfo *rel, struct command *comm, int parens) {
         nextToken(comm, &tok);
         if (i == rel->nbCol-1) {
             if( parens && tok.type != PAREN_FERM ) {
-                RecordFinish(rec); SYNTAX_ERROR("Erreur: %i colonnes lues, parenthèse fermante manquante.\n", i+1);
+                RecordFinish(rec); SYNTAX_ERROR(NULL,"Erreur: %i colonnes lues, parenthèse fermante manquante.\n", i+1);
             }
         } else if (tok.type != VIRGULE) {
-            RecordFinish(rec); SYNTAX_ERROR("Erreur: Je m'attendais à une virgule après la colonne %d de %s. (n°token = %d)\n", i, rel->name, tok.type);
+            RecordFinish(rec); SYNTAX_ERROR(NULL,"Erreur: Je m'attendais à une virgule après la colonne %d de %s. (n°token = %d)\n", i, rel->name, tok.type);
         }
     }
     return rec;
@@ -262,7 +262,7 @@ CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 	if (okToken(&comm,&tok) && (tok.type==NOM_VARIABLE)){
 				temp->relName=strdup(tok.attr.sattr);
 	} else{
-		SYNTAX_ERROR("Erreur dans la commande: Je m'attendais à un nom de relaton.\n");
+		SYNTAX_ERROR(NULL,"Erreur dans la commande: Je m'attendais à un nom de relaton.\n");
 	}
 
 	int tracker=0;
@@ -277,7 +277,7 @@ CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 		    
 			if (tok.type==NOM_VARIABLE){
 				temp->colNames[tracker]=strdup(tok.attr.sattr);
-			} else { SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à un nom de colonne.\n"); }
+			} else { SYNTAX_ERROR(NULL,"Erreur de syntaxe: Je m'attendais à un nom de colonne.\n"); }
 
 			if (okToken(&comm,&tok) && tok.type==DEUX_POINTS){
 				nextToken((&comm), (&tok));
@@ -296,20 +296,22 @@ CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 					t.stringSize=tok.attr.iattr;
 					break;
 				default:
-					SYNTAX_ERROR("Erreur: Je m'attendais à un type\n");
+					SYNTAX_ERROR(NULL,"Erreur: Je m'attendais à un type\n");
 				}
 				temp->colTypes[tracker]=t;
 				temp->colNum=tracker;
 
-			} else { SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à deux points.\n"); }
-
-			if (okToken(&comm,&tok) && tok.type!=VIRGULE && tok.type!=PAREN_FERM){
-				SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à une virgule ou à une parenthèse fermante\n");
+			} else { SYNTAX_ERROR(NULL,"Erreur de syntaxe: Je m'attendais à deux points.\n"); }
+            nextToken(&comm,&tok);
+            if (tok.type == PAREN_FERM) {
+                tracker++; break;
+            } else if (tok.type!=VIRGULE){
+				SYNTAX_ERROR(NULL,"Erreur de syntaxe: Je m'attendais à une virgule ou à une parenthèse fermante\n");
 			}
 			tracker++;
 		}
 	} else {
-	SYNTAX_ERROR("Erreur dans la commande: Je m'attendais à une parenthèse ouvrante, j'ai eu %d\n", tok.type);
+	SYNTAX_ERROR(NULL,"Erreur dans la commande: Je m'attendais à une parenthèse ouvrante, j'ai eu %d\n", tok.type);
 	}
 	temp->colNum = tracker;
 	return temp;
@@ -446,18 +448,18 @@ SelectCommand *CreateSelectCommand(char *command) {
     
     // SELECTMONO * FROM
     if (nextToken(&comm, &tok) != ETOILE) {
-        SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à un * après le SELECTMONO\n");
+        SYNTAX_ERROR(NULL,"Erreur de syntaxe: Je m'attendais à un * après le SELECTMONO\n");
     } if (nextToken(&comm, &tok) != FROM) {
-        SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à un FROM après SELECTMONO *\n");
+        SYNTAX_ERROR(NULL,"Erreur de syntaxe: Je m'attendais à un FROM après SELECTMONO *\n");
     }
     
     // On lit la relation et on la cherche
     if(nextToken(&comm, &tok) != NOM_VARIABLE) {
-        SYNTAX_ERROR("Erreur de syntaxe: Je m'attendais à un nom de relation.\n");
+        SYNTAX_ERROR(NULL,"Erreur de syntaxe: Je m'attendais à un nom de relation.\n");
     }
     rel = findRelation(tok.attr.sattr);
     if (rel == NULL) {
-        SYNTAX_ERROR("Erreur : Relation %s non trouvée. \n", tok.attr.sattr);
+        SYNTAX_ERROR(NULL,"Erreur : Relation %s non trouvée. \n", tok.attr.sattr);
     }
     
     if(nextToken(&comm, &tok) == ENDOFCOMMAND) {
@@ -472,7 +474,7 @@ SelectCommand *CreateSelectCommand(char *command) {
             return NULL;
         return res;
     } else {
-        SYNTAX_ERROR("Erreur: Je m'attendais à un WHERE\n");
+        SYNTAX_ERROR(NULL,"Erreur: Je m'attendais à un WHERE\n");
     }
     
 }
@@ -494,7 +496,7 @@ void ExecuteSelectCommand(SelectCommand *command) {
         TabDeRecords resultat = filtrerRecords(records, command->conditions);
         for (int i=0; i<resultat.nelems;i++)
             printRecord(&resultat.tab[i]);
-            printf("Total records=%ld\n", resultat.nelems);
+            printf("Total records=%zu\n", resultat.nelems);
     }
 }
 
@@ -508,8 +510,9 @@ void ExecuteSelectCommand(SelectCommand *command) {
 /*
 DROPDB
 CREATE RELATION S (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int, C8:int)
-INSERT INTO S (a, 2, a, 2.5, a, 3, 3, 3)
 BATCHINSERT INTO S FROM FILE DB/S1.csv
+SELECTMONO * FROM S
+INSERT INTO S (a, 2, a, 2.5, a, 3, 3, 3)
 SELECTMONO * FROM S WHERE C4 = 598.5 AND C7 > 9 
 
 */
