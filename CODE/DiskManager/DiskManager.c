@@ -31,7 +31,7 @@ void initDiskManager(void) {
         params.saveEndianness[1] = getFloatEnd();
     }
     
-    atexit(endDiskManager);
+    //atexit(endDiskManager);
 }
 
 void resetDiskManager(void){
