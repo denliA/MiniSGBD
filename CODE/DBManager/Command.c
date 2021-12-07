@@ -594,7 +594,7 @@ void ExecuteUpdateCommand(UpdateCommand *command);
 
 
 /*************************************************************JOIN*****************************************************************/
-//Page nested loop
+//Page-oriented nested loop join
 void join(RelationInfo *R,RelationInfo *S,Condition2 *c){
 	PageIterator *pageiterR = GetPageIterator(R); // On initialise l'itérateur de pages sur R
 	PageIterator *pageiterS; //On prépare un itérateur de pages sur S
