@@ -28,7 +28,7 @@ typedef struct _PageIterator {
     RelationInfo *rel;
     int8_t currentList;
     PageId currentPage;
-    uint8_t *pageBuffer
+    uint8_t *pageBuffer;
 } PageIterator;
 
 typedef struct _RecordsOnPageIterator {
@@ -61,9 +61,6 @@ while (buffer_de_page != NULL) {
     GetNextPage(pageiter);
 }
 */
-
-//************************************************************************************
-
 
 PageId createHeaderPage(void);
 Rid InsertRecordIntoRelation(RelationInfo *rel, Record *rec);
