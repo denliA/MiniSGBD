@@ -26,8 +26,8 @@ Record *GetNextRecord(ListRecordsIterator *iterator);
 
 
 Rid InsertRecordIntoRelation(RelationInfo *rel, Record *rec);
-void DeleteRecordFromRelation(RelationInfo *rel, Rid rid)
-void UpdateRecord(Record *record)
+void DeleteRecordFromRelation(RelationInfo *rel, Rid rid);
+void UpdateRecord(Record *record);
 TabDeRecords GetAllRecords(RelationInfo *rel);
 
 void printHeapFileList(PageId headerPage);

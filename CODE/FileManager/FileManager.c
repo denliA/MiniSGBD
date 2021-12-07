@@ -208,9 +208,9 @@ void DeleteRecordFromRelation(RelationInfo *rel, Rid rid) {
 void UpdateRecord(Record *record) {
     uint8_t *recordPageBuffer = GetPage(record->rid.pageId);
     uint8_t *slotByte = record->relInfo->byteBufOff + recordPageBuffer;
-    uint8_t *recordSlot = record->relInfo->firstSlotOff + record->relInfo->size*record->rid.slotIdx;
+    uint8_t *recordSlot = record->relInfo->firstSlotOff + record->relInfo->size*record->rid.slotIdx + recordPageBuffer;
     if(*slotByte == 0) {
-        printf("E: [UpdateRecord] Attempting to update empty slot. (Relation=%s, Rid = <<%d, %d>, %d>)\n", record->relInfo->relName, record->rid.pageId.FileIdx, record->rid.pageId.PageIdx, record->rid.slotIdx);
+        printf("E: [UpdateRecord] Attempting to update empty slot. (Relation=%s, Rid = <<%d, %d>, %d>)\n", record->relInfo->name, record->rid.pageId.FileIdx, record->rid.pageId.PageIdx, record->rid.slotIdx);
         exit(-1);
     }
     writeToBuffer(record, recordSlot, 0);
