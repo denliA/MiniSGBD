@@ -34,7 +34,8 @@ RelationInfo *RelationInfoInit(RelationInfo *rel, char *name, uint32_t nbCol, ch
     pageSize -= 2*PAGEID_SIZE;
     
     rel->slotCount = pageSize / (rel->size + 1);
-    rel->byteBufOff = 2 * PAGEID_SIZE;
+    rel->byteBufOff = 2 * PAGEID_SIZE + 1; // +1 pour stocker un booléen indiquant si la page est dans la la liste des pages remplies ou celle des pages vides
+    rel->firstSlotOff = rel->byteBufOff + rel->slotCount;
     return rel;
 }
 

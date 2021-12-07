@@ -1,6 +1,4 @@
-#ifndef FILEMANAGER_H
-#define FILEMANAGER_H
-#include "DiskManager/PageId.h"
+#ifndef FILEMANAGER_Hcd 
 #include "RelationInfo.h"
 #include "Record.h"
 #include "Rid.h"
@@ -28,6 +26,10 @@ Record *GetNextRecord(ListRecordsIterator *iterator);
 
 
 Rid InsertRecordIntoRelation(RelationInfo *rel, Record *rec);
+void DeleteRecordFromRelation(RelationInfo *rel, Rid rid)
+void UpdateRecord(Record *record)
 TabDeRecords GetAllRecords(RelationInfo *rel);
+
+void printHeapFileList(PageId headerPage);
 
 #endif

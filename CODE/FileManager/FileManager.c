@@ -15,7 +15,7 @@
 #define NEXT_PAGE 1
 #define PREC_PAGE 0
 
-static void printHeapFileList(PageId headerPage);
+static void insertDataPage(PageId page, PageId header, int where);
 
 static void writePageIdToPageBuffer(PageId pageId, uint8_t* buff, int first){
 	buff += PAGEID_SIZE*first;
@@ -30,6 +30,15 @@ static PageId readPageIdFromPageBuffer(uint8_t *buff, uint8_t first){
     res.FileIdx = readInt32FromBuffer(buff, params.saveEndianness[0]);
     res.PageIdx = buff[4];
     return res;
+}
+
+
+// Fonctions pour marquer (juste après les deux pageId's pointants vers prec et next) si on est sur la liste des pages vides ou celle des pages remplies
+static int onWhatList(uint8_t *buff) {
+    return buff[PAGEID_SIZE*2];
+}
+static void markOnList(uint8_t *buff, int whatList) {
+    buff[PAGEID_SIZE*2] = whatList;
 }
 
 
@@ -53,7 +62,7 @@ PageId createHeaderPage(void){
 static PageId addDataPage(RelationInfo *rel) {
     PageId newPage = AllocPage();
    
-    uint8_t *headerBuff = GetPage(rel->headerPage);
+    /*uint8_t *headerBuff = GetPage(rel->headerPage);
     PageId lastVide = readPageIdFromPageBuffer(headerBuff, LAST_FREE);
     writePageIdToPageBuffer(newPage, headerBuff, LAST_FREE);
     FreePage(rel->headerPage, 1);
@@ -66,8 +75,10 @@ static PageId addDataPage(RelationInfo *rel) {
     uint8_t *newPageBuff = GetPage(newPage);
     writePageIdToPageBuffer(lastVide, newPageBuff, PREC_PAGE);
     writePageIdToPageBuffer(nextOfLastVideBuff, newPageBuff, NEXT_PAGE);
-    FreePage(newPage, 1);
+    markOnList(newPageBuff, FREE_LIST);
+    FreePage(newPage, 1);*/
     
+    insertDataPage(newPage, rel->headerPage, LAST_FREE);
     return newPage;
 }
 
@@ -97,6 +108,7 @@ static void insertDataPage(PageId page, PageId header, int where) { // where == 
     uint8_t *pageBuff = GetPage(page);
     writePageIdToPageBuffer(header, pageBuff, NEXT_PAGE);
     writePageIdToPageBuffer(last, pageBuff, PREC_PAGE);
+    markOnList(pageBuff, where);
     FreePage(page, 1);
     
     uint8_t *lastb = GetPage(last);
@@ -115,7 +127,7 @@ static PageId getFreePageId(RelationInfo *rel) {
 
 static Rid writeRecordToDataPage(RelationInfo *rel, Record *r, PageId p) {
     uint8_t *buff = GetPage(p);
-    uint8_t *bytemap = 2*PAGEID_SIZE + buff;
+    uint8_t *bytemap = rel->byteBufOff + buff;
     uint8_t *slots = bytemap + rel->slotCount;
     uint32_t free_slot;
     Rid rid;
@@ -126,7 +138,14 @@ static Rid writeRecordToDataPage(RelationInfo *rel, Record *r, PageId p) {
         if(!bytemap[free_slot]) {
             //printf("Found slot %d! \n", free_slot);
             writeToBuffer(r, slots, free_slot*rel->size);
-            if (free_slot == rel->slotCount-1) {
+            int remplie = free_slot == rel->slotCount-1;
+            if(!remplie) {
+                remplie = 1;
+                for(int next_free=free_slot+1; next_free < rel->slotCount; next_free++)
+                    if(!bytemap[next_free]) 
+                        { remplie = 0; break; }
+            }
+            if (remplie) {
                 unlinkDataPage(p, rel->headerPage, FREE_LIST);
                 insertDataPage(p, rel->headerPage, LAST_FULL);
             }
@@ -145,7 +164,7 @@ static Rid writeRecordToDataPage(RelationInfo *rel, Record *r, PageId p) {
 static uint32_t getRecordsInDataPage(RelationInfo *rel, PageId p, Record *list, uint32_t *size, uint32_t *offset) {
     uint32_t readrecs = 0;
     uint8_t *pb = GetPage(p);
-    uint8_t *bytemap = pb + 2*PAGEID_SIZE;
+    uint8_t *bytemap = pb + rel->byteBufOff;
     uint8_t *slots = bytemap + rel->slotCount;
     for (uint32_t slot = 0; slot < rel->slotCount; slot++) {
         if (bytemap[slot]) {
@@ -168,6 +187,34 @@ Rid InsertRecordIntoRelation(RelationInfo *rel, Record *rec) {
     //printf("[InsertRecordIntoRelation] Got free page: <%d,%d>. Showing HeapFileList state:\n", page.FileIdx, page.PageIdx);
     //printHeapFileList(rel->headerPage);
     return writeRecordToDataPage(rel, rec, page);
+}
+
+void DeleteRecordFromRelation(RelationInfo *rel, Rid rid) {
+    uint8_t *recordPage = GetPage(rid.pageId);
+    uint8_t *slotByte = recordPage + rel->byteBufOff + rid.slotIdx;
+    if(*slotByte == 0) {
+        printf("E: [DeleteRecordFromRelation] Attempting to delete free slot (Rid = <<%d, %d>, %d>)\n", rid.pageId.FileIdx, rid.pageId.PageIdx, rid.slotIdx);
+        exit(-1);
+    }
+    *slotByte = 0;
+    int whatList = onWhatList(recordPage);
+    FreePage(rid.pageId, 1);
+    if(whatList == FULL_LIST) {
+        unlinkDataPage(rid.pageId, rel->headerPage, FULL_LIST);
+        insertDataPage(rid.pageId, rel->headerPage, FREE_LIST);
+    }
+}
+
+void UpdateRecord(Record *record) {
+    uint8_t *recordPageBuffer = GetPage(record->rid.pageId);
+    uint8_t *slotByte = record->relInfo->byteBufOff + recordPageBuffer;
+    uint8_t *recordSlot = record->relInfo->firstSlotOff + record->relInfo->size*record->rid.slotIdx;
+    if(*slotByte == 0) {
+        printf("E: [UpdateRecord] Attempting to update empty slot. (Relation=%s, Rid = <<%d, %d>, %d>)\n", record->relInfo->relName, record->rid.pageId.FileIdx, record->rid.pageId.PageIdx, record->rid.slotIdx);
+        exit(-1);
+    }
+    writeToBuffer(record, recordSlot, 0);
+    FreePage(record->rid.pageId, 1);
 }
                                           
 TabDeRecords GetAllRecords(RelationInfo *rel) {
@@ -267,7 +314,7 @@ Record *GetNextRecord(ListRecordsIterator *iter) {
         return NULL;
     rec = (Record *) malloc(sizeof(Record));
     RecordInit(rec, iter->rel);
-    readFromBuffer(rec, iter->buffer, 2*PAGEID_SIZE + + iter->rel->slotCount + iter->currentSlot * iter->rel->size);
+    readFromBuffer(rec, iter->buffer, iter->rel->firstSlotOff + iter->currentSlot * iter->rel->size);
     rec->relInfo = iter->rel;
     rec->rid.pageId = iter->currentPage;
     rec->rid.slotIdx = iter->currentSlot;
@@ -275,7 +322,7 @@ Record *GetNextRecord(ListRecordsIterator *iter) {
 }
 
 
-static void printHeapFileList(PageId headerPage) {
+void printHeapFileList(PageId headerPage) {
     
     uint8_t *headerBuffer = GetPage(headerPage);
     PageId lastFreePage = readPageIdFromPageBuffer(headerBuffer, LAST_FREE);
