@@ -182,6 +182,8 @@ static uint32_t getRecordsInDataPage(RelationInfo *rel, PageId p, Record **list,
     return readrecs;
 }
 
+
+
 Rid InsertRecordIntoRelation(RelationInfo *rel, Record *rec) {
     PageId page = getFreePageId(rel);
     //printf("[InsertRecordIntoRelation] Got free page: <%d,%d>. Showing HeapFileList state:\n", page.FileIdx, page.PageIdx);

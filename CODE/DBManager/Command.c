@@ -511,6 +511,8 @@ void ExecuteSelectCommand(SelectCommand *command) {
         for (int i=0; i<resultat.nelems;i++)
             printRecord(&resultat.tab[i]);
         printf("Total records=%zu\n", resultat.nelems);
+        deleteArray(records);
+        deleteArray(resultat);
     }
 }
 
