@@ -368,6 +368,10 @@ void ExecuteBatchInsert(BatchInsert *command){
 	char *res=NULL;
 	size_t taille;
 	int count = 1;
+	if(fich==NULL) {
+	    fprintf(stderr, "Erreur dans BATCHINSERT: Le fichier %s n'a pas pu être ouvert\n", command->fileName);
+	    return;
+	}
 	while( getline(&res, &taille, fich) > 0) {
 	    struct command c = newCommand(res);
 	    Record *r = parseTuple(command->relation, &c, 0);
@@ -403,6 +407,11 @@ Insert initInsert(char* command){
             }
         } else { // pas de  INTO
             fprintf(stderr, "E: [Insertion] Commande invalide, INSERT est suivi de INTO\n");
+            holacmoi.relation = NULL; return holacmoi;
+        }
+        
+        if(nextToken(&c, &tok) != RECORD) {
+            fprintf(stderr, "E: [Insersion] Commande invalide, Utilisation: INSERT INTO nomRelation RECORD tuple\n");
             holacmoi.relation = NULL; return holacmoi;
         }
         
@@ -524,6 +533,19 @@ void ExecuteDeleteCommand(DeleteCommand *command) {
 
 /**********************************************************************************************************************************/
 
+
+/*************************************************************UPDATE*****************************************************************/
+
+
+// Fonctions utiles : FileManager.c:UpdateRecord(Record *rec)
+UpdateCommand *CreateUpdateCommand(char *command) {
+
+}
+
+void ExecuteUpdateCommand(UpdateCommand *command);
+
+/************************************************************************************************************************************/
+
 //exemple;
 // CREATE RELATION S5  (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int) 
 //INSERT INTO S5 (A, 2, AAA, 5.7, DF, 4,4) 
@@ -532,7 +554,7 @@ DROPDB
 CREATE RELATION S (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int, C8:int)
 BATCHINSERT INTO S FROM FILE DB/S1.csv
 SELECTMONO * FROM S
-INSERT INTO S (a, 2, a, 2.5, a, 3, 3, 3)
+INSERT INTO S RECORD (a, 2, a, 2.5, a, 3, 3, 3)
 SELECTMONO * FROM S WHERE C4 = 598.5 AND C7 > 9 
 DELETE FROM S WHERE C4 = 598.5 AND C7 > 9
 
