@@ -33,6 +33,10 @@ int nextToken(struct command *com, struct token *tok) {
         case '*':  com->pos++; return tok->type = ETOILE;
         case '=':  com->pos++; return tok->type = OPEQ;
         case '>':  case '<':
+            if(com->command[com->pos+1] == '>' && com->command[com->pos] == '<') {
+                com->pos+=2;
+                return tok->type = OPNEQ;
+            }
             if(com->command[com->pos+1] == '=') {
                 com->pos+=2;
                 return tok->type = com->command[(com->pos)-2] == '>' ? OPSUPEQ : OPINFEQ;
