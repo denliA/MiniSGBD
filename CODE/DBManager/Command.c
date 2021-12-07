@@ -268,7 +268,7 @@ CRC *initCreateRelationCommand(char *com){ //return NULL s'il y a une erreur
 	int tracker=0;
 
 	if(okToken(&comm,&tok) && tok.type==PAREN_OUVR){
-		while(okToken(&comm,&tok) && tok.type != PAREN_FERM){
+		for( nextToken(&comm, &tok);;nextToken(&comm, &tok)){
 		    if(tracker == sizeTabs) {
 		        temp->colNames = realloc(temp->colNames, (sizeTabs+5)*sizeof(char*));
 		        temp->colTypes = realloc(temp->colTypes, (sizeTabs+5)*sizeof(ColType));

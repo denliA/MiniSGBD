@@ -81,7 +81,9 @@ int nextToken(struct command *com, struct token *tok) {
             tok->attr.fattr = dres;
             return tok->type = FLOAT_CONSTANT;
         }
-    } else if (endptr != com->command+com->pos && isSep(*endptr)) {
+    }
+    
+    if (endptr != com->command+com->pos && isSep(*endptr)) {
         com->pos+= endptr - &com->command[com->pos];
         tok->attr.iattr  = res;
         return tok->type = INT_CONSTANT;
