@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
         commande[strlen(commande)-1]='\0'; // On supprime l'avant dernier caractère qui est un retour à la ligne.
         ProcessCommand(commande);
         
-    }while(strncmp(commande,"exit",4)!=0);
+    }while(strncmp(commande,"EXIT",4)!=0);
     
     FinishDBM();
     return 0;

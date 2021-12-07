@@ -161,7 +161,7 @@ static Rid writeRecordToDataPage(RelationInfo *rel, Record *r, PageId p) {
     exit(-1);
 }
 
-static uint32_t getRecordsInDataPage(RelationInfo *rel, PageId p, Record *list, uint32_t *size, uint32_t *offset) {
+static uint32_t getRecordsInDataPage(RelationInfo *rel, PageId p, Record **list, uint32_t *size, uint32_t *offset) {
     uint32_t readrecs = 0;
     uint8_t *pb = GetPage(p);
     uint8_t *bytemap = pb + rel->byteBufOff;
@@ -169,12 +169,12 @@ static uint32_t getRecordsInDataPage(RelationInfo *rel, PageId p, Record *list, 
     for (uint32_t slot = 0; slot < rel->slotCount; slot++) {
         if (bytemap[slot]) {
             if(*offset == *size) {
-                list = (Record *) realloc(list, sizeof(Record)*((*size)+=2*rel->slotCount));
+                *list = (Record *) realloc(*list, sizeof(Record)*((*size)+=2*rel->slotCount));
             }
             Rid rid; rid.pageId = p; rid.slotIdx = slot;
-            RecordInit(&list[*offset], rel);
-            list[*offset].rid = rid;
-            readFromBuffer(list+((*offset)++), slots, slot*rel->size);
+            RecordInit(&(*list)[*offset], rel);
+            (*list)[*offset].rid = rid;
+            readFromBuffer((*list)+((*offset)++), slots, slot*rel->size);
             readrecs++;
         }
     }
@@ -226,7 +226,7 @@ TabDeRecords GetAllRecords(RelationInfo *rel) {
     while(!equalPageId(next_full, rel->headerPage)) {
         PageId old_full = next_full;
         uint8_t *pbuff = GetPage(next_full);
-        getRecordsInDataPage(rel, next_full, list, size, &offset);
+        getRecordsInDataPage(rel, next_full, &list, size, &offset);
         next_full = readPageIdFromPageBuffer(pbuff, NEXT_PAGE);
         FreePage(old_full, 0);
     }
@@ -234,7 +234,7 @@ TabDeRecords GetAllRecords(RelationInfo *rel) {
     while(!equalPageId(next_free, rel->headerPage)) {
         PageId old_free = next_free;
         uint8_t *pbuff = GetPage(next_free);
-        getRecordsInDataPage(rel, next_free, list, size, &offset);
+        getRecordsInDataPage(rel, next_free, &list, size, &offset);
         next_free = readPageIdFromPageBuffer(pbuff, NEXT_PAGE);
         FreePage(old_free, 0);
     }

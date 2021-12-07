@@ -48,6 +48,6 @@ void ProcessCommand(char* command){
     } else if (commeq(command, "DELETE")) {
         DeleteCommand *d = CreateDeleteCommand(command+strlen("DELETE"));
         if(d->rel) ExecuteDeleteCommand(d);
-    } else if (!commeq(command, "exit"))
+    } else if (!commeq(command, "EXIT"))
         printf("Erreur: commande \"%s\" inconnue\n", command);
 }

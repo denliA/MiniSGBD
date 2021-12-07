@@ -108,6 +108,9 @@ static Record *parseTuple(RelationInfo *rel, struct command *comm, int parens) {
     return rec;
 }
 
+static int parseSelectionConditions(struct command *com, SelectCommand *res) {
+    
+}
 
 // Prend en entrée une commande qui commence juste après le where
 // Donne en sortie un tableau avec toutes les conditions
@@ -168,7 +171,7 @@ TabDeConditions parseConditions(RelationInfo *rel,struct command *command) {
 	    cnd.val.f = tok.attr.fattr;
 	  } else if (tok.type == STRING_CONSTANT && te == T_STRING) {
 	    cnd.val.s = strdup(tok.attr.sattr); // LEAK TODO
-	    printf("J'ai dupliqué %s, et seq = %p et cnd.operateur = %p\n", cnd.val.s, seq, cnd.operateur);
+	    //printf("J'ai dupliqué %s, et seq = %p et cnd.operateur = %p\n", cnd.val.s, seq, cnd.operateur);
 	  } else {
 	    //Erreur 
 	    ; // TODO
