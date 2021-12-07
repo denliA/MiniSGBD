@@ -21,6 +21,7 @@ void InitDBM(void){
 void FinishDBM(void){
 	FinishCatalog();
 	FlushAll();
+    endDiskManager();
 }
 
 
