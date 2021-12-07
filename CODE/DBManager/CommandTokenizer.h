@@ -59,6 +59,6 @@ Types possiblement retournés : (qui seront à la fois dans la valeur de retour 
 int nextToken(struct command *com, struct token *tok);
 
 
-//TODO: RollBack(struct command *com); // Revient d'un token en arrière. (jsp si ça sera utile)
+void pushTokenBack(struct command *com); // Revient d'un token en arrière. (jsp si ça sera utile)
 
 #endif

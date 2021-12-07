@@ -15,6 +15,7 @@ struct command newCommand(char *command) {
     struct command nouv;
     nouv.command = command;
     nouv.pos = 0;
+    nouv.prevpos = -1;
     return nouv;
 };
 
@@ -102,4 +103,12 @@ int nextToken(struct command *com, struct token *tok) {
         fprintf(stderr, "Erreur dans la commande \"%s\", le nom \"%s...\" est trop long\n", com->command, tok->attr.sattr);
         return tok->type = INVALID_TOK;
     }
+}
+
+void pushTokenBack(struct command *com) {
+    if(com->prevpos == -1) {
+        fprintf(stderr, "W: [pushTokenBack] commande \"%s\" et pos=%d, quelque chose essaye de restaurer un token plus d'une fois\n", com->command, com->pos);
+    }
+    com->pos = com->prevpos;
+    com->prevpos = -1;
 }

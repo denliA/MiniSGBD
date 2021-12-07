@@ -438,6 +438,7 @@ void supprimerDB(void){
 /****************************************************************************************************************************/
 
 /*************************************************************SELECTMONO*******************************************************/
+/******************************************Utilisée pour les commandes SELECTMONO, UPDATE et DELETE***************************/
 SelectCommand *CreateSelectCommand(char *command) {
     SelectCommand *res;
     RelationInfo *rel;
@@ -446,11 +447,12 @@ SelectCommand *CreateSelectCommand(char *command) {
     struct command comm = newCommand(command);
     struct token tok;
     
-    // SELECTMONO * FROM
+    // SELECTMONO * FROM nomRelation OU DELETE FROM nomRelation OU UPDATE nomRelation
+    // Si on lit un *, on avance mais si on lit autre chose on revient d'un pas et on laisse le reste lire. Même chose pour si on lit un FROM
     if (nextToken(&comm, &tok) != ETOILE) {
-        SYNTAX_ERROR(NULL,"Erreur de syntaxe: Je m'attendais à un * après le SELECTMONO\n");
+        pushTokenBack(&comm);
     } if (nextToken(&comm, &tok) != FROM) {
-        SYNTAX_ERROR(NULL,"Erreur de syntaxe: Je m'attendais à un FROM après SELECTMONO *\n");
+        pushTokenBack(&comm);
     }
     
     // On lit la relation et on la cherche
@@ -496,13 +498,31 @@ void ExecuteSelectCommand(SelectCommand *command) {
         TabDeRecords resultat = filtrerRecords(records, command->conditions);
         for (int i=0; i<resultat.nelems;i++)
             printRecord(&resultat.tab[i]);
-            printf("Total records=%zu\n", resultat.nelems);
+        printf("Total records=%zu\n", resultat.nelems);
     }
 }
 
 
 
 /********************************************************************************************************************************/
+
+
+/***********************************************************DELETE*****************************************************************/
+
+// CreateDeleteCommand est juste CreateSelectCommand. Pas besoin de recoder!
+
+void ExecuteDeleteCommand(DeleteCommand *command) {
+    TabDeRecords records = GetAllRecords(command->rel);
+    TabDeRecords resultat = filtrerRecords(records, command->conditions);
+    for (int i=0; i<resultat.nelems; i++) {
+        DeleteRecordFromRelation(resultat.tab[i].relInfo, resultat.tab[i].rid);
+    }
+    printf("Total deleted records=%zu\n", resultat.nelems);
+    deleteArray(records);
+    deleteArray(resultat);
+}
+
+/**********************************************************************************************************************************/
 
 //exemple;
 // CREATE RELATION S5  (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int) 
@@ -514,6 +534,7 @@ BATCHINSERT INTO S FROM FILE DB/S1.csv
 SELECTMONO * FROM S
 INSERT INTO S (a, 2, a, 2.5, a, 3, 3, 3)
 SELECTMONO * FROM S WHERE C4 = 598.5 AND C7 > 9 
+DELETE FROM S WHERE C4 = 598.5 AND C7 > 9
 
 */
 

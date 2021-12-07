@@ -108,7 +108,7 @@ static void insertDataPage(PageId page, PageId header, int where) { // where == 
     uint8_t *pageBuff = GetPage(page);
     writePageIdToPageBuffer(header, pageBuff, NEXT_PAGE);
     writePageIdToPageBuffer(last, pageBuff, PREC_PAGE);
-    markOnList(pageBuff, where);
+    markOnList(pageBuff, where == LAST_FREE ? FREE_LIST : FULL_LIST);
     FreePage(page, 1);
     
     uint8_t *lastb = GetPage(last);
@@ -201,7 +201,7 @@ void DeleteRecordFromRelation(RelationInfo *rel, Rid rid) {
     FreePage(rid.pageId, 1);
     if(whatList == FULL_LIST) {
         unlinkDataPage(rid.pageId, rel->headerPage, FULL_LIST);
-        insertDataPage(rid.pageId, rel->headerPage, FREE_LIST);
+        insertDataPage(rid.pageId, rel->headerPage, LAST_FREE);
     }
 }
 

@@ -111,4 +111,12 @@ void ExecuteSelectCommand(SelectCommand *command);
 
 /*************************************************************************************************************/
 
+
+/**************************************************DELETE********************************************************/
+
+typedef SelectCommand DeleteCommand; // La commande delete est presque la même que la commande select, on a besoin des mêmes informations.
+
+#define CreateDeleteCommand CreateSelectCommand
+void ExecuteDeleteCommand(DeleteCommand *command);
+
 #endif

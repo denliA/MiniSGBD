@@ -45,6 +45,9 @@ void ProcessCommand(char* command){
         if(s->rel) ExecuteSelectCommand(s);
     } else if (commeq(command, "LIST RELATIONS")) {
         printRelations();
+    } else if (commeq(command, "DELETE")) {
+        DeleteCommand *d = CreateDeleteCommand(command+strlen("DELETE"));
+        if(d->rel) ExecuteDeleteCommand(d);
     } else if (!commeq(command, "exit"))
         printf("Erreur: commande \"%s\" inconnue\n", command);
 }
