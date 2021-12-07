@@ -43,7 +43,8 @@ uint8_t *GetNextPage(PageIterator *iter); // Retourne le buffer de la prochaine 
 RecordsOnPageIterator *GetRecordsOnPageIterator(RelationInfo *rel, uint8_t buffer);
 Record *GetNextRecordOnPage(RecordsOnPageIterator *iter);
 
-/************UTILISATION DES ITERATEURS SUR LES RECORDS ET SUR LES PAGES ************
+//************UTILISATION DES ITERATEURS SUR LES RECORDS ET SUR LES PAGES ************
+/*
 Exemple : Si on a une relation "RelationInfo *rel" et on veut itérer sur chacune des pages,
           et pour chaque page on itère sur chacun des records et on les print
 
@@ -59,8 +60,9 @@ while (buffer_de_page != NULL) {
     }
     GetNextPage(pageiter);
 }
+*/
 
-/************************************************************************************
+//************************************************************************************
 
 
 PageId createHeaderPage(void);

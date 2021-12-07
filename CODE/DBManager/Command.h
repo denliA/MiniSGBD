@@ -12,12 +12,17 @@
 /******CONDITIONS (utile dans SELECT, UPDATE et DELETE; toutes celle ou y a where )*******/
 union value { int32_t i; float f; char *s; }; // Union pour représenter une valeur de colonne dans un tuple
 
-typedef struct _condition { // Structure représentant une comparaison dans le WHERE;
+typedef struct _condition { // Structure représentant une comparaison dans le WHERE entre une colonne et une valeur;
     int colonne;
     union value val; // Constante qu'on compare à chaque tuple de l'instance
     int (*operateur)(union value val, union value colonne); // Fonction évaluant la condition
 } Condition;
 
+typedef struct _condition2 { // Structure représentant une comparaison dans le WHERE entre deux colonnes;
+    int colonne1;
+    int colonne2;
+    int (*operateur)(union value colonne1, union value colonne2); // Fonction évaluant la condition
+} Condition2;
 
 
 /* Exemple: Si on a dans le where "toto >= 15", dans une relation R (hehe:integer, toto:integer, nom:string5):
@@ -134,5 +139,8 @@ void ExecuteUpdateCommand(UpdateCommand *command);
 
 /************************************************************************************************************************************/
 
+/*************************************************************JOIN*****************************************************************/
+void join(RelationInfo *R,RelationInfo *S,Condition2 *c);
+/**********************************************************************************************************************************/
 
 #endif

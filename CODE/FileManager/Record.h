@@ -21,5 +21,6 @@ void setColumnTo(Record *r, int col, void *value);
 void *getAtColumn(Record *r, int col);
 
 void printRecord(Record *r);
+void printTwoRecords(Record *r, Record *s);
 
 #endif

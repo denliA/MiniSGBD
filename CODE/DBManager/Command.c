@@ -190,11 +190,11 @@ TabDeConditions parseConditions(RelationInfo *rel,struct command *command) {
 
 
 
-//Prend en entrée une condition, et l'évalue pour le record donné
+//Prend en entrée une condition (colonne comparé à valeur), et l'évalue pour le record donné
 int evaluerCondition(Condition *c, Record *record) {
 	union value valRec;
 	//valeur contenue à l'indice colonne dans le tuple
-	void *valueRecord = getAtColumn(record, c->colonne);;
+	void *valueRecord = getAtColumn(record, c->colonne);
 	//type de la valeur
 	int type = getTypeAtRecordColumn(record,c->colonne);
 	if (type == T_INT){
@@ -211,8 +211,49 @@ int evaluerCondition(Condition *c, Record *record) {
 	}
 	//on evalue la condition
 	return c->operateur(valRec, c->val);
+}
 
-
+//Prend en entrée une condition (colonne comparé à colonne), et l'évalue pour les deux records donnés
+int evaluerCondition2(Condition2 *c, Record *record1, Record *record2) {
+	union value valRec1;
+	union value valRec2;
+	//valeurs contenues à l'indice colonne dans le tuple
+	void *valueRecord1 = getAtColumn(record1, c->colonne1);
+	void *valueRecord2 = getAtColumn(record2, c->colonne2);
+	//types des valeurs
+	int type1 = getTypeAtRecordColumn(record1,c->colonne1);
+	int type2 = getTypeAtRecordColumn(record2,c->colonne2);
+	int* intValue;
+	float* floatValue;
+	char* stringValue;
+	//valeur de colonne1
+	if (type1 == T_INT){
+		intValue = (int*)valueRecord1;
+		valRec1.i = *intValue;
+	}
+	else if(type1 == T_FLOAT){
+		floatValue = (float*)valueRecord1;
+		valRec1.f = *floatValue;
+	}
+	else if(type1 == T_STRING){
+		stringValue = (char*)valueRecord1;
+		valRec1.s = stringValue;
+	}
+	//valeur de colonne2
+	if (type2 == T_INT){
+		intValue = (int*)valueRecord2;
+		valRec2.i = *intValue;
+	}
+	else if(type2 == T_FLOAT){
+		floatValue = (float*)valueRecord2;
+		valRec2.f = *floatValue;
+	}
+	else if(type2 == T_STRING){
+		stringValue = (char*)valueRecord2;
+		valRec2.s = stringValue;
+	}
+	//on evalue la condition
+	return c->operateur(valRec1, valRec2);
 }
 
 // Retourne le résultat de l'évaluation d'un ensemble de conditions avec AND entre elles. Utilise evaluerCondition
@@ -548,6 +589,49 @@ UpdateCommand *CreateUpdateCommand(char *command) {
 }
 
 void ExecuteUpdateCommand(UpdateCommand *command);
+
+/************************************************************************************************************************************/
+
+
+/*************************************************************JOIN*****************************************************************/
+//Page nested loop
+void join(RelationInfo *R,RelationInfo *S,Condition2 *c){
+	PageIterator *pageiterR = GetPageIterator(R); // On initialise l'itérateur de pages sur R
+	PageIterator *pageiterS; //On prépare un itérateur de pages sur S
+	RecordsOnPageIterator *recorditerR; // On prépare un itérateur de records sur une page
+	RecordsOnPageIterator *recorditerS; // On prépare un itérateur de records sur une page
+	uint8_t *buffer_de_pageR = GetNextPage(pageiterR); // GetNextPage nous retourne le buffer de la prochaine page disponible
+	uint8_t *buffer_de_pageS;
+	Record *recordR;
+	Record *recordS;
+	Record *res;
+	//Pour chaque page de R
+	while (buffer_de_pageR != NULL) {
+		recorditerR = GetRecordsOnPageIterator(R, buffer_de_pageR); // On initialise l'itérateur des records
+		Record *recordR = GetNextRecord(recorditerR); // retourne le prochian record dispo
+		while( recordR != NULL) {
+			//Pour chaque tuple de R on le compare à tous les tuple de S
+			//Pour chaque page de S
+			pageiterS = GetPageIterator(S);
+			*buffer_de_pageS = GetNextPage(pageiterS);
+			while (buffer_de_pageS != NULL) {
+						recorditerS = GetRecordsOnPageIterator(S, buffer_de_pageS); // On initialise l'itérateur des records
+						recordS = GetNextRecord(recorditerS); // retourne le prochain record dispo
+						while( recordS != NULL) {
+							//evaluer condition
+							if(evaluerCondition2(c, recordR, recordS)){
+								printTwoRecords(recordR,recordS);
+							}
+							recordS = GetNextRecord(recorditerS);
+						}
+						GetNextPage(pageiterS);
+					}
+			recordR = GetNextRecord(recorditerR);
+		}
+		GetNextPage(pageiterR);
+	}
+	return ;
+}
 
 /************************************************************************************************************************************/
 

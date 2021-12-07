@@ -103,6 +103,7 @@ void *getAtColumn(Record *r, int col) {
     if (r->relInfo->nbCol <= col || col < 0) { fprintf(stderr, "E: [setColumnTo] bad col(%d) with nbCols=%d\n", col, r->relInfo->nbCol); exit(EXIT_FAILURE); }
     return r->values + r->relInfo->colOffset[col];
 }
+
 void printRecord(Record *r) {
     RelationInfo *rel = r->relInfo;
     for(int i=0; i< rel->nbCol; i++) {
@@ -119,4 +120,40 @@ void printRecord(Record *r) {
             printf(" ; ");
     }
     putchar('\n');
+}
+
+void printTwoRecords(Record *r, Record *s) {
+	RelationInfo *rel1 = r->relInfo;
+	RelationInfo *rel2 = s->relInfo;
+	//print colonnes de r
+	for(int i=0; i< rel1->nbCol; i++) {
+		void *val1 = (r->values+rel1->colOffset[i]);
+		if (rel1->colTypes[i].type == T_INT){
+			printf("%d", *(int*)val1);
+		}else if (rel1->colTypes[i].type == T_FLOAT){
+			printf("%f", *(float*)val1);
+		}else if (rel1->colTypes[i].type == T_STRING) {
+			printf("%.*s", rel1->colTypes[i].stringSize, (char*) val1);
+		}else{
+			printf("INVALID_COL%d_TYPE", i);
+		}
+		printf(" ; ");
+	}
+	//print colonnes de s
+	for(int i=0; i< rel2->nbCol; i++) {
+		void *val2 = (s->values+rel2->colOffset[i]);
+		if (rel2->colTypes[i].type == T_INT){
+			printf("%d", *(int*)val2);
+		}else if (rel2->colTypes[i].type == T_FLOAT){
+			printf("%f", *(float*)val2);
+		}else if (rel2->colTypes[i].type == T_STRING) {
+			printf("%.*s", rel2->colTypes[i].stringSize, (char*) val2);
+		} else{
+			printf("INVALID_COL%d_TYPE", i);
+		}
+		//fin du tuple
+		if(i!=rel2->nbCol - 1)
+			printf(" ; ");
+	}
+	putchar('\n');
 }
