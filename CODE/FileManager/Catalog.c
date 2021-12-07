@@ -74,7 +74,7 @@ void InitCatalog(void){
                 exit(-1);
             } else lnames[i][strlen(lnames[i])-1] = '\0';
         }
-        RelationInfoInit(cat.tab + readRels++, lname, lnbCol, lnames, ltypes, pid);
+        RelationInfoInit(cat.tab + readRels++, strdup(lname), lnbCol, lnames, ltypes, pid);
     }
     fclose(file);
 }
@@ -85,7 +85,9 @@ void FinishCatalog(void){
     strcat(path, params.DBPath);
     strcat(path, "/");
     strcat(path, "Catalog.def");
-    
+    for(int i=0; i<cat.cpt; i++) {
+        //printf("Relation %d du catalog: %s\n", i+1,  cat.tab[i].name);
+    }
     FILE *file = fopen(path, "w");
     fwrite(&(cat.cpt), 4, 1, file); //TODO: utiliser endianness.c
     for(uint32_t rel=0; rel<cat.cpt; rel++) {

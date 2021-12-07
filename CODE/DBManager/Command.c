@@ -556,9 +556,12 @@ void ExecuteUpdateCommand(UpdateCommand *command);
 DROPDB
 CREATE RELATION S (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int, C8:int)
 BATCHINSERT INTO S FROM FILE DB/S1.csv
+CREATE RELATION S2 (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int, TOTO:int)
+BATCHINSERT INTO S2 FROM FILE DB/S1.csv
 SELECTMONO * FROM S
 INSERT INTO S RECORD (a, 2, a, 2.5, a, 3, 3, 3)
 SELECTMONO * FROM S WHERE C4 = 598.5 AND C7 > 9 
+SELECTMONO * FROM S2 WHERE C4 = 598.5 AND C7 > 9 
 DELETE FROM S WHERE C4 = 598.5 AND C7 > 9
 
 */

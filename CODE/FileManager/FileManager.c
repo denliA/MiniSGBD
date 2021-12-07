@@ -226,7 +226,9 @@ TabDeRecords GetAllRecords(RelationInfo *rel) {
     while(!equalPageId(next_full, rel->headerPage)) {
         PageId old_full = next_full;
         uint8_t *pbuff = GetPage(next_full);
+        Record *list2 = list;
         getRecordsInDataPage(rel, next_full, &list, size, &offset);
+        list2=list;
         next_full = readPageIdFromPageBuffer(pbuff, NEXT_PAGE);
         FreePage(old_full, 0);
     }
@@ -234,7 +236,9 @@ TabDeRecords GetAllRecords(RelationInfo *rel) {
     while(!equalPageId(next_free, rel->headerPage)) {
         PageId old_free = next_free;
         uint8_t *pbuff = GetPage(next_free);
+        Record *list2 = list;
         getRecordsInDataPage(rel, next_free, &list, size, &offset);
+        list = list2;
         next_free = readPageIdFromPageBuffer(pbuff, NEXT_PAGE);
         FreePage(old_free, 0);
     }
@@ -244,6 +248,7 @@ TabDeRecords GetAllRecords(RelationInfo *rel) {
     resultat.tab = list;
     resultat.nelems = resultat.maxelems = offset;
     resultat.increment = 5;
+    FreePage(rel->headerPage, 0);
     return resultat;
 }
 
