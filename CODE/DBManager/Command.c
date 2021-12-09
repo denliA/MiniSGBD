@@ -109,7 +109,7 @@ static Record *parseTuple(RelationInfo *rel, struct command *comm, int parens) {
 }
 
 static int parseSelectionConditions(struct command *com, SelectCommand *res) {
-    
+    return -1;
 }
 
 // Prend en entrée une commande qui commence juste après le where
@@ -435,7 +435,7 @@ Insert initInsert(char* command){
     Insert holacmoi;
     struct command c = newCommand(command);
     struct token tok;
-    while( nextToken(&c, &tok) != ENDOFCOMMAND) {
+    nextToken(&c, &tok); {
         if(tok.type==INTO){
             nextToken(&c,&tok);
             if(tok.type==NOM_VARIABLE){
@@ -521,6 +521,7 @@ SelectCommand *CreateSelectCommand(char *command) {
         res = malloc(sizeof(SelectCommand));
         res->rel = rel;
         initArray(res->conditions, 0);
+        return res; // ça marchait quand même sans ce return en O0 :v
     } else if (tok.type == WHERE) {
         res = malloc(sizeof(SelectCommand));
         res->rel = rel;
@@ -585,7 +586,7 @@ void ExecuteDeleteCommand(DeleteCommand *command) {
 
 // Fonctions utiles : FileManager.c:UpdateRecord(Record *rec)
 UpdateCommand *CreateUpdateCommand(char *command) {
-
+    return NULL;
 }
 
 void ExecuteUpdateCommand(UpdateCommand *command);

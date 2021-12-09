@@ -256,7 +256,6 @@ ListRecordsIterator *GetListRecordsIterator(RelationInfo *rel) {
     iter->rel = rel;
     uint8_t *header = GetPage(rel->headerPage);
     PageId nextFull = readPageIdFromPageBuffer(header, FULL_LIST), nextFree;
-    FreePage(rel->headerPage, 0);
     if (!equalPageId(nextFull, rel->headerPage)) {
         setRecIterState(iter, FULL_LIST, nextFull, GetPage(nextFull), -1);
     } else if (!equalPageId(nextFree = readPageIdFromPageBuffer(header, FREE_LIST), rel->headerPage)) {
@@ -264,6 +263,8 @@ ListRecordsIterator *GetListRecordsIterator(RelationInfo *rel) {
     } else {
         iter->currentList = -1;
     }
+    FreePage(rel->headerPage, 0);
+    return iter; // 08-12-2021 https://stackoverflow.com/questions/4644860/function-returns-value-without-return-statement
 }
 
 static void incrementIter(ListRecordsIterator *iter) {

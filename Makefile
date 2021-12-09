@@ -1,4 +1,4 @@
-CC=gcc -g -I CODE/
+CC=gcc -g -I CODE/ -Wreturn-type
 
 
 all : MiniSGBD Tests
