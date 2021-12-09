@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-static char specials[] = ",:*><=() \t\n";
+static char specials[] = ",:*><=(). \t\n";
 
 #define strbegstr(big, little) ( strncmp( (big), (little), strlen(little) ) == 0 ) 
 #define isSep(chr) ( isblank(chr) || (chr) == '\0' || strchr(specials, (chr)) )
@@ -31,6 +31,7 @@ int nextToken(struct command *com, struct token *tok) {
         case ',':  com->pos++; return tok->type = VIRGULE;
         case ':':  com->pos++; return tok->type = DEUX_POINTS;
         case '*':  com->pos++; return tok->type = ETOILE;
+        case '.':  com->pos++; return tok->type = POINT;
         case '=':  com->pos++; return tok->type = OPEQ;
         case '>':  case '<':
             if(com->command[com->pos+1] == '>' && com->command[com->pos] == '<') {
@@ -98,7 +99,7 @@ int nextToken(struct command *com, struct token *tok) {
         for (i=0; i<MAX_ATTR; i++) {
             tok->attr.sattr[i] = com->command[com->pos];
             com->pos++;
-            if (strchr(specials,com->command[com->pos])) {
+            if (strchr(specials,com->command[com->pos]) && strncmp(com->command+com->pos+1, "csv", 3)) {
                 tok->attr.sattr[i+1] = '\0';
                 return tok->type = NOM_VARIABLE;
             }

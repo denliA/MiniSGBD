@@ -50,6 +50,24 @@ static int ssup(union value v1, union value v2) { return strcmp(v1.s, v2.s) > 0;
 static int ssupeq(union value v1, union value v2) { return strcmp(v1.s, v2.s) >= 0; }
 static int stinf(union value v1, union value v2) { return strcmp(v1.s, v2.s) < 0; }
 static int sinfeq(union value v1, union value v2) { return strcmp(v1.s, v2.s) <= 0; }
+
+static int (*getOperateur(int token, int te))(union value, union value) {
+    switch(token) {
+	  	  case OPEQ:
+	  		  return (te == T_INT ? ieq: (te==T_FLOAT ? feq : seq));
+	  	  case OPSUP:
+	  		  return (te == T_INT ? isup: (te==T_FLOAT ? fsup : ssup));
+	  	  case OPINF:
+	  	  	  return (te == T_INT ? iinf: (te==T_FLOAT ? finf : stinf));
+	  	  case OPSUPEQ:
+	  	  	  return (te == T_INT ? isupeq: (te==T_FLOAT ? fsupeq : ssupeq));
+	  	  case OPINFEQ:
+	  		  return (te == T_INT ? iinfeq: (te==T_FLOAT ? finfeq : sinfeq));
+	  	  case OPNEQ:
+	  		  return  (te == T_INT ? ineq:  (te==T_FLOAT ? fneq : sneq));
+    }
+    return NULL;
+}
 /********************************/
 
 
@@ -595,6 +613,82 @@ void ExecuteUpdateCommand(UpdateCommand *command);
 
 
 /*************************************************************JOIN*****************************************************************/
+
+
+SelectJoinCommand *CreateSelectJoinCommand(char *command) {
+    struct command com = newCommand(command); 
+    struct token tok;
+    SelectJoinCommand *result;
+    char *nrel1, *nrel2;
+    RelationInfo *rel1, *rel2;
+    Condition2 c;
+    
+    if(nextToken(&com, &tok) != ETOILE)
+        SYNTAX_ERROR(NULL, "Erreur dans SELECTJOIN: Je m'attendais à '*'\n");
+    if(nextToken(&com, &tok) != FROM)
+        SYNTAX_ERROR(NULL, "Erreur dans SELECTMONO: Je m'attendais à 'FROM'\n");
+    
+    if (nextToken(&com, &tok) != NOM_VARIABLE) {
+        SYNTAX_ERROR(NULL, "Erreur dans SELECTJOIN: Je m'attendais à un nom de relation après '%.*s'\n", com.prevpos, command);
+    } else if ( (rel1=findRelation(nrel1=strdup(tok.attr.sattr))) == NULL ) {
+        fprintf(stderr, "Erreur dans SELECTJOIN: Relation %s non trouvée\n", nrel1); free(nrel1); return NULL;
+    }
+    
+    if(nextToken(&com, &tok) != VIRGULE) {
+        fprintf(stderr, "Erreur dans SELECTJOIN: Je m'attendais à une virgule après '%.*s'\n", com.prevpos, command); free(nrel1); return NULL;
+    }
+    
+    if (nextToken(&com, &tok) != NOM_VARIABLE) {
+        {free(nrel1); SYNTAX_ERROR(NULL, "Erreur dans SELECTJOIN: Je m'attendais à un nom de relation après '%.*s'\n", com.prevpos, command);}
+    } else if ( (rel2=findRelation(nrel2=strdup(tok.attr.sattr))) == NULL ) {
+        fprintf(stderr, "Erreur dans SELECTJOIN: Relation %s non trouvée\n", nrel2); free(nrel1); free(nrel2); return NULL;
+    }
+    
+    if (nextToken(&com, &tok) != WHERE) {
+        free(nrel1); free(nrel2); SYNTAX_ERROR(NULL, "Erreur dans SELECTJOIN: Je m'attendais à un nom de relation après '%.*s'\n", com.prevpos, command);
+    }
+    
+    if (nextToken(&com, &tok) != NOM_VARIABLE) {
+        free(nrel1); free(nrel2); SYNTAX_ERROR(NULL, "Erreur dans SELECTJOIN: Je m'attendais à un nom de relation après '%.*s'\n", com.prevpos, command);
+    } else if (strcmp(tok.attr.sattr, nrel1)){
+        fprintf(stderr, "Erreur dans SELECTJOIN: D'ou sort la relation %s ? \n", tok.attr.sattr);
+    } else if (nextToken(&com, &tok) != POINT) {
+        free(nrel1); free(nrel2); SYNTAX_ERROR(NULL, "Erreur dans SELECTJOIN: Je m'attendais à un point après '%.*s'\n", com.prevpos, command);
+    } else if (nextToken(&com, &tok) != NOM_VARIABLE) {
+        free(nrel1); free(nrel2); SYNTAX_ERROR(NULL, "Erreur dans SELECTJOIN: Je m'attendais à un nom de colonne après '%.*s'\n", com.prevpos, command);
+    } else if ( (c.colonne1=getColumnIndex(rel1, tok.attr.sattr)) == -1 ) {
+        fprintf(stderr, "Erreur dans SELECTJOIN: Aucune colonne de nom %s dans %s\n", tok.attr.sattr, rel1->name); free(nrel1); free(nrel2); return NULL;
+    }
+    
+    if(nextToken(&com, &tok) < OPEQ && tok.type > OPNEQ) {
+        fprintf(stderr, "Erreur dans SELECTJOIN: Je m'attendais à un opérateur de comparaison après '%.*s'\n", com.prevpos, command); free(nrel1); free(nrel2); return NULL;
+    } else {
+        c.operateur = getOperateur(tok.type, getTypeAtColumn(rel1, c.colonne1));
+    }
+    
+    if (nextToken(&com, &tok) != NOM_VARIABLE) {
+        free(nrel1); free(nrel2); SYNTAX_ERROR(NULL, "Erreur dans SELECTJOIN: Je m'attendais à un nom de relation après '%.*s'\n", com.prevpos, command);
+    } else if (strcmp(tok.attr.sattr, nrel2)){
+        fprintf(stderr, "Erreur dans SELECTJOIN: D'ou sort la relation %s ? \n", tok.attr.sattr);
+    } else if (nextToken(&com, &tok) != POINT) {
+        free(nrel1); free(nrel2); SYNTAX_ERROR(NULL, "Erreur dans SELECTJOIN: Je m'attendais à un point après '%.*s'\n", com.prevpos, command);
+    } else if (nextToken(&com, &tok) != NOM_VARIABLE) {
+        free(nrel1); free(nrel2); SYNTAX_ERROR(NULL, "Erreur dans SELECTJOIN: Je m'attendais à un nom de colonne après '%.*s'\n", com.prevpos, command);
+    } else if ( (c.colonne2=getColumnIndex(rel2, tok.attr.sattr)) == -1 ) {
+        fprintf(stderr, "Erreur dans SELECTJOIN: Aucune colonne de nom %s dans %s\n", tok.attr.sattr, rel2->name); free(nrel1); free(nrel2); return NULL;
+    } else if (getTypeAtColumn(rel2, c.colonne2) != getTypeAtColumn(rel1, c.colonne1)) {
+        fprintf(stderr, "Erreur dans SELECTJOIN: Les deux colonnes ne sont pas du même type!\n"); free(nrel1); free(nrel2); return NULL;
+    }
+    
+    result = malloc(sizeof(SelectJoinCommand));
+    result->C = c;
+    result->R = rel1;
+    result->S = rel2;
+    free(nrel1); free(nrel2);
+    return result;
+}
+
+
 //Page-oriented nested loop join
 void join(RelationInfo *R,RelationInfo *S,Condition2 *c){
 	PageIterator *pageiterR = GetPageIterator(R); // On initialise l'itérateur de pages sur R
@@ -654,6 +748,12 @@ DELETE FROM S WHERE C4 = 598.5 AND C7 > 9
 CREATE RELATION R2(C1:int, C2:string10, C3:float, C4:int, C5:int, C6:string3)
 BATCHINSERT INTO R2 FROM FILE DB/R2.csv
 SELECTMONO * FROM R2 WHERE C2 <> egwekjqwek
+
+CREATE RELATION  R1(C1:int, C2:string4, C3:int)
+BATCHINSERT INTO R1 FROM FILE DB/R1.csv
+
+SELECTJOIN * FROM R1,R2 WHERE R1.C1 = R2.C1
+SELECTJOIN * FROM R1,R2 WHERE R1.C3 = R2.C5
 
 */
 

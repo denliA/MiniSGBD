@@ -42,12 +42,15 @@ void ProcessCommand(char* command){
         if(b) ExecuteBatchInsert(b);
     } else if (commeq(command, "SELECTMONO")) {
         SelectCommand *s = CreateSelectCommand(command+strlen("SELECTMONO"));
-        if(s->rel) ExecuteSelectCommand(s);
+        if(s && s->rel) ExecuteSelectCommand(s);
     } else if (commeq(command, "LIST RELATIONS")) {
         printRelations();
     } else if (commeq(command, "DELETE")) {
         DeleteCommand *d = CreateDeleteCommand(command+strlen("DELETE"));
         if(d->rel) ExecuteDeleteCommand(d);
+    } else if (commeq(command, "SELECTJOIN")) {
+        SelectJoinCommand *sj = CreateSelectJoinCommand(command+strlen("SELECTJOIN"));
+        if(sj) join(sj->R, sj->S, &sj->C);
     } else if (!commeq(command, "EXIT"))
         printf("Erreur: commande \"%s\" inconnue\n", command);
 }

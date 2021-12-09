@@ -140,6 +140,13 @@ void ExecuteUpdateCommand(UpdateCommand *command);
 /************************************************************************************************************************************/
 
 /*************************************************************JOIN*****************************************************************/
+typedef struct _SelectJoinCommand {
+    RelationInfo *R;
+    RelationInfo *S;
+    Condition2 C;
+} SelectJoinCommand;
+
+SelectJoinCommand *CreateSelectJoinCommand(char *command);
 void join(RelationInfo *R,RelationInfo *S,Condition2 *c);
 /**********************************************************************************************************************************/
 
