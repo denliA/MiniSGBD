@@ -326,6 +326,86 @@ Record *GetNextRecord(ListRecordsIterator *iter) {
 }
 
 
+PageIterator GetPageIterator(RelationInfo *rel) {
+    PageIterator iter;
+    iter.rel = rel;
+    uint8_t *headerBuffer = GetPage(rel->headerPage);
+    PageId nextFull = readPageIdFromPageBuffer(headerBuffer, FULL_LIST), nextFree = readPageIdFromPageBuffer(headerBuffer, FREE_LIST);
+    FreePage(rel->headerPage, 0);
+    if (!equalPageId(nextFull, rel->headerPage)) {
+      iter.currentPage = nextFull;
+      iter.currentList = FULL_LIST;
+      iter.buffer = NULL;
+    } else if (!equalPageId(nextFree, rel->headerPage)) {
+        iter.currentPage = nextFree;
+        iter.currentList = FREE_LIST;
+        iter.buffer = NULL;
+    } else {
+        iter.currentList = -1;
+    }
+    return iter;
+}
+
+uint8_t *GetNextPage(PageIterator *iter) {
+    if(iter->currentList == -1)
+        return NULL;
+    PageId next;
+    if(iter->buffer) {
+        next = readPageIdFromPageBuffer(iter->buffer, NEXT_PAGE);
+        FreePage(iter->currentPage, 0);
+    } else { // Première fois
+        next = iter->currentPage;
+    }
+    if (equalPageId(next, iter->rel->headerPage)) { // Fin de la liste
+        if(iter->currentList == FULL_LIST) { // Fin de la liste des pleines, on passe aux non pleines
+            uint8_t *header = GetPage(iter->rel->headerPage);
+            PageId firstFree = readPageIdFromPageBuffer(header, FREE_LIST);
+            FreePage(iter->rel->headerPage, 0);
+            if(equalPageId(firstFree, iter->rel->headerPage)) { // il n'y a aucune non pleine, c'est fini
+                iter->currentList = -1;
+                return NULL;
+            }
+            iter->currentList = FREE_LIST;
+            iter->currentPage = firstFree;
+            iter->buffer = GetPage(firstFree);
+            return iter->buffer;
+        } else { // Fin de la liste de non pleines, c'est fini
+            iter->currentList = -1;
+            return NULL;
+        }
+    } else { // Il reste des pages dans la liste, on charge la prochaine et on la retourne
+        iter->buffer = GetPage(next);
+        iter->currentPage = next;
+        return iter->buffer;
+    }
+}
+
+RecordsOnPageIterator GetRecordsOnPageIterator(RelationInfo *rel, uint8_t *buffer) {
+    RecordsOnPageIterator iter;
+    iter.rel = rel;
+    iter.pageBuffer = buffer;
+    iter.currentSlot = -1;
+    iter.record = calloc(1, sizeof(Record));
+    RecordInit(iter.record, rel);
+    return iter;
+}
+
+Record *GetNextRecordOnPage(RecordsOnPageIterator *iter) {
+    iter->currentSlot++;
+    if(iter->currentSlot >= iter->rel->slotCount)
+        return NULL;
+    uint8_t *bytemap = iter->pageBuffer + iter->rel->byteBufOff;
+    while(iter->currentSlot < iter->rel->slotCount) {
+        if (bytemap[iter->currentSlot]) {
+            readFromBuffer(iter->record, iter->pageBuffer, iter->rel->firstSlotOff + iter->rel->size*iter->currentSlot);
+            return iter->record;
+        }
+        iter->currentSlot++;
+    }
+    RecordFinish(iter->record);
+    return NULL;
+}
+
 void printHeapFileList(PageId headerPage) {
     
     uint8_t *headerBuffer = GetPage(headerPage);

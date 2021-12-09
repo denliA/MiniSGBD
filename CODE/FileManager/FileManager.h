@@ -28,19 +28,20 @@ typedef struct _PageIterator {
     RelationInfo *rel;
     int8_t currentList;
     PageId currentPage;
-    uint8_t *pageBuffer;
+    uint8_t *buffer;
 } PageIterator;
 
 typedef struct _RecordsOnPageIterator {
     RelationInfo *rel;
     uint8_t *pageBuffer;
     int32_t currentSlot;
+    Record *record;
 } RecordsOnPageIterator;
 
-PageIterator *GetPageIterator(RelationInfo *rel); // Crée un itérateur sur les pages de la relation rel
+PageIterator GetPageIterator(RelationInfo *rel); // Crée un itérateur sur les pages de la relation rel
 uint8_t *GetNextPage(PageIterator *iter); // Retourne le buffer de la prochaine page, et NULL si il n'y en a plus
 
-RecordsOnPageIterator *GetRecordsOnPageIterator(RelationInfo *rel, uint8_t buffer);
+RecordsOnPageIterator GetRecordsOnPageIterator(RelationInfo *rel, uint8_t *buffer);
 Record *GetNextRecordOnPage(RecordsOnPageIterator *iter);
 
 //************UTILISATION DES ITERATEURS SUR LES RECORDS ET SUR LES PAGES ************

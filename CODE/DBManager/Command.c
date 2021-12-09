@@ -691,40 +691,43 @@ SelectJoinCommand *CreateSelectJoinCommand(char *command) {
 
 //Page-oriented nested loop join
 void join(RelationInfo *R,RelationInfo *S,Condition2 *c){
-	PageIterator *pageiterR = GetPageIterator(R); // On initialise l'itérateur de pages sur R
-	PageIterator *pageiterS; //On prépare un itérateur de pages sur S
-	RecordsOnPageIterator *recorditerR; // On prépare un itérateur de records sur une page
-	RecordsOnPageIterator *recorditerS; // On prépare un itérateur de records sur une page
-	uint8_t *buffer_de_pageR = GetNextPage(pageiterR); // GetNextPage nous retourne le buffer de la prochaine page disponible
+	PageIterator pageiterR = GetPageIterator(R); // On initialise l'itérateur de pages sur R
+	PageIterator pageiterS; //On prépare un itérateur de pages sur S
+	RecordsOnPageIterator recorditerR; // On prépare un itérateur de records sur une page
+	RecordsOnPageIterator recorditerS; // On prépare un itérateur de records sur une page
+	uint8_t *buffer_de_pageR = GetNextPage(&pageiterR); // GetNextPage nous retourne le buffer de la prochaine page disponible
 	uint8_t *buffer_de_pageS;
 	Record *recordR;
 	Record *recordS;
 	Record *res;
+	size_t compteur = 0;
 	//Pour chaque page de R
 	while (buffer_de_pageR != NULL) {
 		recorditerR = GetRecordsOnPageIterator(R, buffer_de_pageR); // On initialise l'itérateur des records
-		Record *recordR = GetNextRecord(recorditerR); // retourne le prochian record dispo
+		Record *recordR = GetNextRecordOnPage(&recorditerR); // retourne le prochian record dispo
 		while( recordR != NULL) {
 			//Pour chaque tuple de R on le compare à tous les tuple de S
 			//Pour chaque page de S
 			pageiterS = GetPageIterator(S);
-			*buffer_de_pageS = GetNextPage(pageiterS);
+			buffer_de_pageS = GetNextPage(&pageiterS);
 			while (buffer_de_pageS != NULL) {
 						recorditerS = GetRecordsOnPageIterator(S, buffer_de_pageS); // On initialise l'itérateur des records
-						recordS = GetNextRecord(recorditerS); // retourne le prochain record dispo
+						recordS = GetNextRecordOnPage(&recorditerS); // retourne le prochain record dispo
 						while( recordS != NULL) {
 							//evaluer condition
 							if(evaluerCondition2(c, recordR, recordS)){
 								printTwoRecords(recordR,recordS);
+								compteur++;
 							}
-							recordS = GetNextRecord(recorditerS);
+							recordS = GetNextRecordOnPage(&recorditerS);
 						}
-						GetNextPage(pageiterS);
+						buffer_de_pageS = GetNextPage(&pageiterS);
 					}
-			recordR = GetNextRecord(recorditerR);
+			recordR = GetNextRecordOnPage(&recorditerR);
 		}
-		GetNextPage(pageiterR);
+		buffer_de_pageR = GetNextPage(&pageiterR);
 	}
+	printf("Total records=%zu\n", compteur);
 	return ;
 }
 
