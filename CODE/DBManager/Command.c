@@ -71,6 +71,56 @@ static int (*getOperateur(int token, int te))(union value, union value) {
 /********************************/
 
 
+/* - Entrées: un token tok, et un type attedu parmi les types T_INT, T_FLOAT et T_STRING. 
+        !!!!!! la fonction ne vérifie pas si expectedType respecte son domaine de valeurs. c'est la responsabilité de ceux qui l'utilisent
+   - Sorties: true si tok est d'un type constante valide, et qui est compatible avec le type attendu 
+   Si le type de la constante n'est pas égal au type attendu mais qu'il est compatible, une converision est faite
+      par exemple si tok.type == INT_CONSTANT et que expectedType == STRING, tok.attr sera converti en string
+*/
+static int checkConstExpr(struct token *tok, struct command *comm, ColType expectedType) {
+    
+    switch(tok->type) {
+    case INT_CONSTANT:
+        if (expectedType.type == T_FLOAT) { // On doit convertir le int en float ici car setColumnTo(...) s'attendra à recevoir un float et non un int
+            tok->attr.fattr = (float) tok->attr.iattr;
+            tok->type = FLOAT_CONSTANT;
+        } else if (expectedType.type != T_INT) { // expectedType == T_STRING
+            if( comm->pos - comm->prevpos <= expectedType.stringSize )  {// Si l'écriture de ce int rentre dans le string
+                sprintf(tok->attr.sattr, "%.*s", comm->pos-comm->prevpos, comm->command + comm->prevpos); // on copie l'écriture
+                tok->type = STRING_CONSTANT;
+            } else { // Sinon c'est une erreur
+                fprintf(stderr, "Erreur: Je m'attendais à une constante string après %.*s, mais j'ai eu '%.*s'\n", comm->prevpos, comm->command, comm->pos-comm->prevpos, comm->command+comm->prevpos);
+                return 0;
+            }
+        }
+        return 1;
+    case FLOAT_CONSTANT:
+        if (expectedType.type == T_INT) {
+            fprintf(stderr, "Erreur: Je m'attendais à une constante int après %.*s, mais j'ai eu %f\n", comm->prevpos, comm->command, tok->attr.fattr);
+            return 0;
+        } else if (expectedType.type != T_FLOAT) { // T_STRING 
+            if( comm->pos - comm->prevpos <= expectedType.stringSize ) { // Si l'écriture de ce int rentre dans le string
+                sprintf(tok->attr.sattr, "%.*s", comm->pos-comm->prevpos, comm->command + comm->prevpos); // on copie l'écriture
+                tok->type = STRING_CONSTANT;
+            } else { // Sinon c'est une erreur
+                fprintf(stderr, "Erreur: Je m'attendais à une constante string après %.*s, mais j'ai eu '%.*s'\n", comm->prevpos, comm->command, comm->pos-comm->prevpos, comm->command+comm->prevpos);
+                return 0;
+            }
+        }
+        return 1;
+    case STRING_CONSTANT:
+        if (expectedType.type != T_STRING) {
+            fprintf(stderr, "Erreur: Je m'attendais à une constante numérique après %.*s, mais j'ai eu '%.*s'\n", comm->prevpos, comm->command, comm->pos-comm->prevpos, comm->command+comm->prevpos);
+            return 0;
+        }
+        return 1;
+    default:
+        fprintf(stderr, "Erreur: Je m'attendais à une constante après %.*s, mais j'ai eu '%.*s'\n", comm->prevpos, comm->command, comm->pos-comm->prevpos, comm->command+comm->prevpos);
+        return 0;
+    }
+}
+
+
 /* Entrées: - rel : la relation que représente le tuple.
             - command : commande commençant exactement au début du tuple, c'est à dire avec une parenthèse ouvrante
    Sortie: record contenant le tuple représenté par command.
@@ -126,8 +176,38 @@ static Record *parseTuple(RelationInfo *rel, struct command *comm, int parens) {
     return rec;
 }
 
-static int parseSelectionConditions(struct command *com, SelectCommand *res) {
-    return -1;
+
+static AssignmentList parseAssignementList(struct command *comm, RelationInfo *rel) {
+    AssignmentList liste; 
+    initArray(liste, rel->nbCol);
+    struct token tok;
+    
+    while(nextToken(comm, &tok) == NOM_VARIABLE) {
+        Assignment ass;
+        if ( (ass.colIndex = getColumnIndex(rel, tok.attr.sattr)) < 0 ) {
+            fprintf(stderr, "Erreur dans SET: Pas de colonne %s dans la relation %s\n", tok.attr.sattr, rel->name); deleteArray(liste); return liste;
+        }
+        if( nextToken(comm, &tok) != OPEQ ) {
+            fprintf(stderr, "Erreur dans SET: Je m'attendais à '=' après %.*s\n", comm->prevpos, comm->command); deleteArray(liste); return liste;
+        }
+        
+        nextToken(comm, &tok);
+        if (!checkConstExpr(&tok, comm, ass.colType=getFullTypeAtColumn(rel, ass.colIndex) ) ) {
+            deleteArray(liste); return liste;
+        }
+        if (tok.type == INT_CONSTANT || tok.type == FLOAT_CONSTANT) 
+            ass.val = *(union value *)&tok.attr;
+        else
+            {ass.val.s = strdup(tok.attr.sattr);}
+        addElem(liste, ass);
+        
+        if(nextToken(comm, &tok) != VIRGULE) {
+            break;
+        }
+    }
+    pushTokenBack(comm);
+    trim(liste);
+    return liste;
 }
 
 // Prend en entrée une commande qui commence juste après le where
@@ -599,17 +679,6 @@ void ExecuteDeleteCommand(DeleteCommand *command) {
 /**********************************************************************************************************************************/
 
 
-/*************************************************************UPDATE*****************************************************************/
-
-
-// Fonctions utiles : FileManager.c:UpdateRecord(Record *rec)
-UpdateCommand *CreateUpdateCommand(char *command) {
-    return NULL;
-}
-
-void ExecuteUpdateCommand(UpdateCommand *command);
-
-/************************************************************************************************************************************/
 
 
 /*************************************************************JOIN*****************************************************************/
@@ -733,30 +802,97 @@ void join(RelationInfo *R,RelationInfo *S,Condition2 *c){
 
 /************************************************************************************************************************************/
 
+
+/************************************************************UPDATE*****************************************************************/
+
+UpdateCommand *CreateUpdateCommand(char *command) {
+    UpdateCommand *res = NULL;
+    struct token tok;
+    struct command com = newCommand(command);
+    
+    SelectCommand selcom;
+    
+    if (nextToken(&com, &tok) != NOM_VARIABLE) {
+        SYNTAX_ERROR(NULL, "Erreur dans UPDATE: Je m'attendais à un nom de relation après %.*s\n", com.prevpos, com.command);
+    } else if ( (selcom.rel = findRelation(tok.attr.sattr)) == NULL ) {
+        SYNTAX_ERROR(NULL, "Erreur dans le UPDATE: La relation %s n'existe pas\n", tok.attr.sattr);
+    } else if (nextToken(&com, &tok) != SET) {
+        SYNTAX_ERROR(NULL, "Erreur dans le UPDATE: Je m'attendais à set après %.*s\n", com.prevpos, com.command);
+    }
+    
+    AssignmentList assliste = parseAssignementList(&com, selcom.rel);
+    if (assliste.nelems == -1) {
+        return NULL;
+    }
+    
+    if(nextToken(&com, &tok) == WHERE) {
+        selcom.conditions = parseConditions(selcom.rel, &com);
+        if(selcom.conditions.tab == NULL) {
+            deleteArray(assliste);
+            return NULL;
+        }
+    } else if (tok.type == ENDOFCOMMAND) {
+        initArray(selcom.conditions, 0);
+    } else {
+        SYNTAX_ERROR(NULL, "Erreur dans le UPDATE: Je m'attendais à WHERE après %.*s\n", com.prevpos, com.command);
+    }
+    
+    res = calloc(1, sizeof(UpdateCommand));
+    res->selection = selcom;
+    res->nouvVals = assliste;
+    return res;
+}
+
+
+void ExecuteUpdateCommand(UpdateCommand *command) {
+    TabDeRecords allrecords = GetAllRecords(command->selection.rel);
+    TabDeRecords bonsrecords = filtrerRecords(allrecords, command->selection.conditions);
+    for (int i=0; i<bonsrecords.nelems; i++) {
+        //printf("Old record: "); printRecord(&bonsrecords.tab[i]);
+        for (int j=0; j<command->nouvVals.nelems; j++) {
+            Assignment nouv = command->nouvVals.tab[j];
+            setColumnTo(&bonsrecords.tab[i], nouv.colIndex, nouv.colType.type == T_STRING ? (void*)nouv.val.s : (void*)&nouv.val);
+        }
+        UpdateRecord(&bonsrecords.tab[i]);
+        //printf("New record: "); printRecord(&bonsrecords.tab[i]);
+    }
+    printf("Total updated records:%zu\n", bonsrecords.nelems);
+    deleteArray(allrecords); deleteArray(bonsrecords);
+}
+
+/************************************************************************************************************************************/
 //exemple;
 // CREATE RELATION S5  (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int) 
 //INSERT INTO S5 (A, 2, AAA, 5.7, DF, 4,4) 
 /*
 DROPDB
-CREATE RELATION S (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int, C8:int)
-BATCHINSERT INTO S FROM FILE DB/S1.csv
+CREATE RELATION S1 (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int,C8:int)
+BATCHINSERT INTO S1 FROM FILE DB/S1.csv
 CREATE RELATION S2 (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int, TOTO:int)
 BATCHINSERT INTO S2 FROM FILE DB/S1.csv
-SELECTMONO * FROM S
+SELECTMONO * FROM S1
 INSERT INTO S RECORD (a, 2, a, 2.5, a, 3, 3, 3)
-SELECTMONO * FROM S WHERE C4 = 598.5 AND C7 > 9 
+SELECTMONO * FROM S1 WHERE C4=598.5 AND C7>9 
+SELECTMONO * FROM S1 WHERE C4=598.5 AND C7>=9 
 SELECTMONO * FROM S2 WHERE C4 = 598.5 AND C7 > 9 
-DELETE FROM S WHERE C4 = 598.5 AND C7 > 9
+DELETE FROM S1 WHERE C4 = 598.5 AND C7 > 9
 
-CREATE RELATION R2(C1:int, C2:string10, C3:float, C4:int, C5:int, C6:string3)
+CREATE RELATION R2 (C1:int,C2:string10,C3:float,C4:int,C5:int,C6:string3)
 BATCHINSERT INTO R2 FROM FILE DB/R2.csv
-SELECTMONO * FROM R2 WHERE C2 <> egwekjqwek
+SELECTMONO * FROM R2 WHERE C2<>egwekjqwek
 
-CREATE RELATION  R1(C1:int, C2:string4, C3:int)
+CREATE RELATION  R1 (C1:int,C2:string4,C3:int)
 BATCHINSERT INTO R1 FROM FILE DB/R1.csv
 
-SELECTJOIN * FROM R1,R2 WHERE R1.C1 = R2.C1
-SELECTJOIN * FROM R1,R2 WHERE R1.C3 = R2.C5
+SELECTJOIN * FROM R1,R2 WHERE R1.C1=R2.C1
+SELECTJOIN * FROM R1,R2 WHERE R1.C3=R2.C5
+
+SELECTJOIN * FROM R1,S WHERE R1.C1=S.C2
+SELECTJOIN * FROM R1,S WHERE R1.C2=S.C3
+SELECTJOIN * FROM R1,S WHERE R1.C3=S.C6
+
+CREATE RELATION T2 (C1:string3,C2:int,C3:int,C4:int,C5:string5)
+BATCHINSERT INTO T2 FROM FILE T2.csv
 
 */
 

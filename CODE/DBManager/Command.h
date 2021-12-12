@@ -129,9 +129,17 @@ void ExecuteDeleteCommand(DeleteCommand *command);
 
 
 /*************************************************************UPDATE*****************************************************************/
+typedef struct _Assignement {
+    int colIndex;
+    ColType colType;
+    union value val;
+} Assignment;
+
+MAKEARRAYTYPE(AssignmentList, Assignment);
+
 typedef struct _UpdateCommand {
     SelectCommand selection; // Pour la partie "nomRelation WHERE liste-de-conditions" de la commande
-    // etc
+    AssignmentList nouvVals;
 } UpdateCommand;
 
 UpdateCommand *CreateUpdateCommand(char *command);

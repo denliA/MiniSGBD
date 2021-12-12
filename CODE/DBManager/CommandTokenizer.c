@@ -50,6 +50,9 @@ int nextToken(struct command *com, struct token *tok) {
     } else if (strbegstr(com->command+com->pos, "FROM")) {
         com->pos+=strlen("FROM");
         return tok->type = FROM;
+    } else if (strbegstr(com->command+com->pos, "SET")) {
+        com->pos+=strlen("SET");
+        return tok->type = SET;
     } else if (strbegstr(com->command+com->pos, "AND")) {
         com->pos+= strlen("AND");
         return tok->type = AND;

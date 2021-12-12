@@ -12,6 +12,7 @@ void InitCatalog(void);
 void FinishCatalog(void);
 void AddRelation(RelationInfo * rel);
 RelationInfo* findRelation(char nom[]);
+int findRelationIndex(char nom[]);
 void resetCatalog(void);
 void printRelations(void);
 

@@ -27,6 +27,7 @@ typedef struct _RelInfo{
 RelationInfo *RelationInfoInit(RelationInfo *rel, char *name, uint32_t nbCol, char **colNames, ColType *colTypesn, PageId h);
 void RelationInfoFinish(RelationInfo *);
 int getTypeAtColumn(RelationInfo *relInfo, int col);
+ColType getFullTypeAtColumn(RelationInfo *relInfo, int col);
 void printRelationInfo(RelationInfo *rel);
 int getColumnIndex(RelationInfo *rel,char* name);
 

@@ -91,7 +91,7 @@ void setColumnTo(Record *r, int col, void *value) {
         break;
     case T_STRING:
         if(strnlen(value, r->relInfo->colTypes[col].stringSize + 1) > r->relInfo->colTypes[col].stringSize){
-            fprintf(stderr, "E: [setColumnTo] setting column %d of tuple <<%d, %d>, %d> of relation %s to too long string\n", col, r->rid.pageId.FileIdx, r->rid.pageId.PageIdx, r->rid.slotIdx, r->relInfo->name);
+            fprintf(stderr, "E: [setColumnTo] setting column %d of tuple <<%d, %d>, %d> of relation %s to too long string (%.*s)\n", col, r->rid.pageId.FileIdx, r->rid.pageId.PageIdx, r->rid.slotIdx, r->relInfo->name, r->relInfo->colTypes[col].stringSize, (char*)value);
             exit(EXIT_FAILURE);
         }
         strcpy(position, value);

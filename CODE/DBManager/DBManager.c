@@ -51,6 +51,9 @@ void ProcessCommand(char* command){
     } else if (commeq(command, "SELECTJOIN")) {
         SelectJoinCommand *sj = CreateSelectJoinCommand(command+strlen("SELECTJOIN"));
         if(sj) join(sj->R, sj->S, &sj->C);
+    } else if (commeq(command, "UPDATE")) {
+        UpdateCommand *upd = CreateUpdateCommand(command+strlen("UPDATE"));
+        if (upd) ExecuteUpdateCommand(upd);
     } else if (!commeq(command, "EXIT"))
         printf("Erreur: commande \"%s\" inconnue\n", command);
 }

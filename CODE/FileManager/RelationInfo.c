@@ -54,6 +54,14 @@ int getTypeAtColumn(RelationInfo *relInfo, int col) {
     return relInfo->colTypes[col].type;
 }
 
+ColType getFullTypeAtColumn(RelationInfo *relInfo, int col) {
+    if (!relInfo || relInfo->nbCol <= col || col < 0) {
+        fprintf(stderr, "E: [getFullTypeAtColumn] bad request. relInfo.name = %s, col=%d\n", relInfo->name, col);
+        exit(-1);
+    }
+    return relInfo->colTypes[col];
+}
+
 void printRelationInfo(RelationInfo *rel) {
     printf("%s ", rel->name);
     putchar('(');

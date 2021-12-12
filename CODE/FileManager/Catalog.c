@@ -135,6 +135,14 @@ RelationInfo* findRelation(char nom[]){
     return NULL;
 }
 
+int findRelationIndex(char nom[]){
+    //on va comparer le nom cherche au nom de chaque relation
+    for(uint32_t rel=0; rel<cat.cpt; rel++){
+        if(strcmp(cat.tab[rel].name, nom) == 0 ){ return rel;}
+    }
+    return -1;
+}
+
 void AddRelation(RelationInfo * rel){
 	//realloc si le tableau est rempli
 	if ((cat.cpt)>cat.sizeMax){
