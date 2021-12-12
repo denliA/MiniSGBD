@@ -15,5 +15,6 @@ RelationInfo* findRelation(char nom[]);
 int findRelationIndex(char nom[]);
 void resetCatalog(void);
 void printRelations(void);
+void dropRelation(int relationIndex);
 
 #endif

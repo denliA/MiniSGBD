@@ -45,6 +45,9 @@ void ProcessCommand(char* command){
         if(s && s->rel) ExecuteSelectCommand(s);
     } else if (commeq(command, "LIST RELATIONS")) {
         printRelations();
+    } else if (commeq(command, "DROP RELATION")) {
+        DropRelationCommand dr = CreateDropRelationCommand(command+strlen("DROP RELATION"));
+        ExecuteDropRelationCommand(dr);
     } else if (commeq(command, "DELETE")) {
         DeleteCommand *d = CreateDeleteCommand(command+strlen("DELETE"));
         if(d->rel) ExecuteDeleteCommand(d);

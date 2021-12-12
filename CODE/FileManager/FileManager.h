@@ -70,5 +70,6 @@ void UpdateRecord(Record *record);
 TabDeRecords GetAllRecords(RelationInfo *rel);
 
 void printHeapFileList(PageId headerPage);
+void deleteHeapFile(PageId headerPage);
 
 #endif

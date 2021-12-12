@@ -158,4 +158,11 @@ SelectJoinCommand *CreateSelectJoinCommand(char *command);
 void join(RelationInfo *R,RelationInfo *S,Condition2 *c);
 /**********************************************************************************************************************************/
 
+
+/*********************************************************DROP RELATION***********************************************************/
+typedef int DropRelationCommand;
+DropRelationCommand CreateDropRelationCommand(char *command);
+void ExecuteDropRelationCommand(DropRelationCommand command);
+/*********************************************************************************************************************************/
+
 #endif

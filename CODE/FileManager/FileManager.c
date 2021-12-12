@@ -456,3 +456,20 @@ void printHeapFileList(PageId headerPage) {
         fflush(stdout);
     } printf("\n");
 }
+
+/*Supprime toutes les pages d'une relation */
+void deleteHeapFile(PageId headerPage) {
+    uint8_t *headerBuffer = GetPage(headerPage);
+    PageId lists[2];
+    lists[0] = readPageIdFromPageBuffer(headerBuffer, FREE_LIST), lists[1] = readPageIdFromPageBuffer(headerBuffer,FULL_LIST);
+    FreePage(headerPage,0);
+    for(int i=0; i<2;i++) // la liste des dispos pour i=0 et la liste des pleines pour i=1
+        while (!equalPageId(lists[i], headerPage)) {
+            PageId previous = lists[i];
+            uint8_t *previousBuf = GetPage(previous);
+            lists[i] = readPageIdFromPageBuffer(previousBuf, NEXT_PAGE);
+            FreePage(previous,0);
+            DesallocPage(previous);
+        }
+    DesallocPage(headerPage);
+}

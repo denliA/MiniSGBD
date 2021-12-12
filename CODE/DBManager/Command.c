@@ -861,6 +861,28 @@ void ExecuteUpdateCommand(UpdateCommand *command) {
 }
 
 /************************************************************************************************************************************/
+
+/*********************************************************DROP RELATION***********************************************************/
+DropRelationCommand CreateDropRelationCommand(char *command) {
+    DropRelationCommand rel;
+    struct command com = newCommand(command);
+    struct token tok;
+    if (nextToken(&com, &tok) != NOM_VARIABLE) {
+        SYNTAX_ERROR(-1, "Erreur dans la commande \"%s\", il faut juste un nom de relation\n", command);
+    }
+    rel = findRelationIndex(tok.attr.sattr);
+    if(nextToken(&com, &tok) != ENDOFCOMMAND) {
+        SYNTAX_ERROR(-1, "Erreur, je m'attendais à la fin de la commande après %.*s\n", com.prevpos, com.command);
+    }
+    return rel;
+}
+void ExecuteDropRelationCommand(DropRelationCommand command) {
+    dropRelation(command);
+}
+
+/*********************************************************************************************************************************/
+
+
 //exemple;
 // CREATE RELATION S5  (C1:string2,C2:int,C3:string4,C4:float,C5:string5,C6:int,C7:int) 
 //INSERT INTO S5 (A, 2, AAA, 5.7, DF, 4,4) 

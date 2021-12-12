@@ -159,6 +159,20 @@ void AddRelation(RelationInfo * rel){
 	cat.cpt++;
 }
 
+void dropRelation(int relIndex) {
+    printf("Called dropRelation(%d)\n", relIndex);
+    if (relIndex == -1 || relIndex >= cat.cpt) { fprintf(stderr, "E: [dropRelation] relindex=%d, cat.cpt=%d\n", relIndex, cat.cpt); return; }
+    RelationInfo *rel = &cat.tab[relIndex];
+    printf("Deleting Relation at index %d (%s)\n", relIndex, rel->name);
+    void deleteHeapFile(PageId);
+    deleteHeapFile(rel->headerPage);
+    printf("Deleted heapFile\n");
+    RelationInfoFinish(rel);
+    for (int i=relIndex+1; i<cat.cpt; i++) cat.tab[i-1] = cat.tab[i];
+    cat.cpt--;
+    printf("Finihed relation");
+}
+
 void printRelations(void) {
     for(int i=0; i<cat.cpt; i++) {
         printRelationInfo(&cat.tab[i]);

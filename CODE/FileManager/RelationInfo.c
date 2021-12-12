@@ -40,9 +40,10 @@ RelationInfo *RelationInfoInit(RelationInfo *rel, char *name, uint32_t nbCol, ch
 }
 
 void RelationInfoFinish(RelationInfo* rel){
-	for (int i=0;i< rel->size;i++){
+	for (int i=0;i< rel->nbCol;i++){
 		free(rel->colNames[i]);
 	}
+	free(rel->colNames);
 	free(rel->name);
 	free(rel->colTypes);
 	free(rel->colOffset);
