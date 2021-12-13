@@ -2,6 +2,7 @@
 #define RELINFO_H
 
 #include "DiskManager/PageId.h"
+#include "IndexB+Tree.h"
 
 enum { T_INT=0x1000+1, T_FLOAT=0x1000+2, T_STRING=0x1000+3 };
 typedef struct _ColType {
@@ -21,7 +22,7 @@ typedef struct _RelInfo{
     uint32_t firstSlotOff;
     PageId headerPage;
     uint32_t slotCount;
-    
+    BPlusTree **indexes;
 } RelationInfo;
 
 RelationInfo *RelationInfoInit(RelationInfo *rel, char *name, uint32_t nbCol, char **colNames, ColType *colTypesn, PageId h);

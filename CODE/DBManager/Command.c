@@ -661,6 +661,43 @@ void ExecuteSelectCommand(SelectCommand *command) {
 /********************************************************************************************************************************/
 
 
+/************************************************SELECTINDEX****************************************************/
+
+
+CreateIndexCommand CreateCreateIndexCommand(char *command) {
+    struct command com = newCommand(command);
+    struct token tok;
+    CreateIndexCommand ci;
+    nextToken(&com, &tok); // ON
+    nextToken(&com, &tok); // Nom relation
+    ci.rel = findRelation(tok.attr.sattr);
+    nextToken(&com, &tok); // KEY
+    nextToken(&com, &tok); // = 
+    nextToken(&com, &tok); // clé
+    ci.column = tok.attr.iattr;
+    nextToken(&com, &tok); // ORDER
+    nextToken(&com, &tok); // = 
+    nextToken(&com, &tok); // ordre
+    ci.order = tok.attr.iattr;
+    return ci;
+}
+void ExecuteCreateIndexCommand(CreateIndexCommand ci) {
+    createIndex(ci.rel, ci.column, ci.order);
+}
+
+void ExecuteSelectIndexCommand(SelectCommand *command) {
+    // Ici on sait que command->conditions.nelems est exactement de 1 et que command->conditions.tab[0].operateur est l'opérateur '='
+    TabDeRecords records = getRecordsUsingIndex(command->rel, command->conditions.tab[0].colonne, command->conditions.tab[0].val.i);
+    for (int i=0; i<records.nelems; i++) {
+        printRecord(&records.tab[i]);
+    }
+    printf("Total records=%zu\n", records.nelems);
+    deleteArray(records);
+}
+
+/*****************************************************************************************************************/
+
+
 /***********************************************************DELETE*****************************************************************/
 
 // CreateDeleteCommand est juste CreateSelectCommand. Pas besoin de recoder!

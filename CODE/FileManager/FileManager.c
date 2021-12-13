@@ -473,3 +473,35 @@ void deleteHeapFile(PageId headerPage) {
         }
     DesallocPage(headerPage);
 }
+
+
+void createIndex(RelationInfo *rel, int column, int order) {
+    rel->indexes[column] = newBPlusNode(order);
+    ListRecordsIterator *iter = GetListRecordsIterator(rel);
+    Record *rec;
+    while ( rec = GetNextRecord(iter) ) {
+        int32_t key = *(int32_t*)getAtColumn(rec, column);
+        insertRID(&(rel->indexes[column]), rec->rid, key);
+    }
+}
+
+TabDeRecords getRecordsUsingIndex(RelationInfo *rel, int index_column, int32_t key) {
+    ListeDeRids rids = getEntryByKey(rel->indexes[index_column], key);
+    return getRecordsTabFromRIDList(rids, rel);
+}
+
+TabDeRecords getRecordsTabFromRIDList(ListeDeRids liste,RelationInfo *rel){
+    TabDeRecords records;
+    initArray(records, liste.nelems);
+    for(int i=0; i<liste.nelems; i++) {
+        Record rec;
+        RecordInit(&rec, rel);
+        rec.rid = liste.tab[i];
+        uint8_t *pageBuffer = GetPage(rec.rid.pageId);
+        uint8_t *slotAdress = pageBuffer + rel->firstSlotOff + rel->size*rec.rid.slotIdx;
+        readFromBuffer(&rec, slotAdress, 0);
+        addElem(records, rec);
+        FreePage(rec.rid.pageId, 1);
+    }
+    return records;
+}

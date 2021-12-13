@@ -2,6 +2,7 @@
 #include "RelationInfo.h"
 #include "Record.h"
 #include "Rid.h"
+#include "IndexB+Tree.h"
 
 typedef struct _ListRecordsIterator {
     RelationInfo *rel;
@@ -71,5 +72,9 @@ TabDeRecords GetAllRecords(RelationInfo *rel);
 
 void printHeapFileList(PageId headerPage);
 void deleteHeapFile(PageId headerPage);
+
+void createIndex(RelationInfo *rel, int column, int order);
+TabDeRecords getRecordsUsingIndex(RelationInfo *rel, int index_column, int32_t key);
+TabDeRecords getRecordsTabFromRIDList(ListeDeRids liste,RelationInfo *rel);
 
 #endif

@@ -18,6 +18,7 @@ RelationInfo *RelationInfoInit(RelationInfo *rel, char *name, uint32_t nbCol, ch
     rel->colNames=colNames;
     rel->colTypes = colTypes;
     rel->headerPage = headerPage;
+    rel->indexes = calloc(nbCol, sizeof(BPlusTree *));
     
     rel->size = 0;
     rel->colOffset = (uint32_t *) malloc( (sizeof *rel->colOffset) * nbCol );

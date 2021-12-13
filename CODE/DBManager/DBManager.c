@@ -57,6 +57,12 @@ void ProcessCommand(char* command){
     } else if (commeq(command, "UPDATE")) {
         UpdateCommand *upd = CreateUpdateCommand(command+strlen("UPDATE"));
         if (upd) ExecuteUpdateCommand(upd);
+    } else if (commeq(command, "CREATEINDEX")) {
+        CreateIndexCommand ci = CreateCreateIndexCommand(command+strlen("CREATEINDEX"));
+        ExecuteCreateIndexCommand(ci);
+    } else if (commeq(command, "SELECTINDEX")) {
+        SelectCommand *sc = CreateSelectCommand(command+strlen("SELECTINDEX"));
+        ExecuteSelectIndexCommand(sc);
     } else if (!commeq(command, "EXIT"))
         printf("Erreur: commande \"%s\" inconnue\n", command);
 }

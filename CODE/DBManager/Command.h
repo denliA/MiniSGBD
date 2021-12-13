@@ -117,6 +117,21 @@ void ExecuteSelectCommand(SelectCommand *command);
 /*************************************************************************************************************/
 
 
+/************************************************SELECTINDEX****************************************************/
+
+typedef struct _CreateIndexCommand {
+    RelationInfo *rel;
+    int column;
+    int order;
+} CreateIndexCommand;
+
+CreateIndexCommand CreateCreateIndexCommand(char *command);
+void ExecuteCreateIndexCommand(CreateIndexCommand ci);
+
+void ExecuteSelectIndexCommand(SelectCommand *command);
+
+/*****************************************************************************************************************/
+
 
 
 /**************************************************DELETE********************************************************/
