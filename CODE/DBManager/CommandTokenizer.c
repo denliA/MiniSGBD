@@ -44,7 +44,7 @@ int nextToken(struct command *com, struct token *tok) {
             }
             return tok->type = com->command[(com->pos)++] == '>' ? OPSUP : OPINF;
     }
-    if(strbegstr(com->command+com->pos, "WHERE")) {
+    if(strbegstr(com->command+com->pos, "WHERE")) { //TODO : vérifier qu'il y a un séparateur juste après pour ne pas confondre avec un string valide
         com->pos += strlen("WHERE");
         return tok->type = WHERE;
     } else if (strbegstr(com->command+com->pos, "FROM")) {
@@ -53,6 +53,12 @@ int nextToken(struct command *com, struct token *tok) {
     } else if (strbegstr(com->command+com->pos, "SET")) {
         com->pos+=strlen("SET");
         return tok->type = SET;
+    } else if (strbegstr(com->command+com->pos, "KEY")) {
+        com->pos+=strlen("KEY");
+        return tok->type = KEY;
+    } else if (strbegstr(com->command+com->pos, "ORDER")) {
+        com->pos+=strlen("ORDER");
+        return tok->type = ORDER;
     } else if (strbegstr(com->command+com->pos, "AND")) {
         com->pos+= strlen("AND");
         return tok->type = AND;

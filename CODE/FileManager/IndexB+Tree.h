@@ -29,7 +29,9 @@ void insertNode(BPlusTree *node, int32_t key, BPlusTree **root, BPlusTree *fathe
 BPlusTree *findEntryNode(BPlusTree *root, int32_t key);
 int32_t findEntryIndex(BPlusTree *node, int32_t key);
 void insertRID(BPlusTree **root, Rid rid, int32_t key);
+void deleteRID(BPlusTree **root, Rid rid, int32_t key);
 ListeDeRids getEntryByKey(BPlusTree *root, int32_t key);
+void printTree(BPlusTree *tree, int offset);
 /* Utile un jour ?
 int32_t deleteByKey(BPlusTree *racine, int32_t key); 
 */

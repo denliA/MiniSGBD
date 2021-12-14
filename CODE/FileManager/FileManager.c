@@ -188,7 +188,14 @@ Rid InsertRecordIntoRelation(RelationInfo *rel, Record *rec) {
     PageId page = getFreePageId(rel);
     //printf("[InsertRecordIntoRelation] Got free page: <%d,%d>. Showing HeapFileList state:\n", page.FileIdx, page.PageIdx);
     //printHeapFileList(rel->headerPage);
-    return writeRecordToDataPage(rel, rec, page);
+    Rid rid =  writeRecordToDataPage(rel, rec, page);
+    for (int i=0; i<rel->nbCol; i++) {
+        if (rel->indexes[i]) {
+            int32_t key = *(int32_t*)getAtColumn(rec, i);
+            insertRID(&rel->indexes[i], rid, key);
+        }
+    }
+    return rid;
 }
 
 void DeleteRecordFromRelation(RelationInfo *rel, Rid rid) {
@@ -197,6 +204,15 @@ void DeleteRecordFromRelation(RelationInfo *rel, Rid rid) {
     if(*slotByte == 0) {
         printf("E: [DeleteRecordFromRelation] Attempting to delete free slot (Rid = <<%d, %d>, %d>)\n", rid.pageId.FileIdx, rid.pageId.PageIdx, rid.slotIdx);
         exit(-1);
+    }
+    Record rec;
+    RecordInit(&rec, rel);
+    readFromBuffer(&rec, recordPage + rel->firstSlotOff + rel->size*rid.slotIdx, 0);
+    for (int i=0; i<rel->nbCol; i++) {
+        if (rel->indexes[i]) {
+            int32_t key = *(int32_t*)getAtColumn(&rec, i);
+            deleteRID(&rel->indexes[i], rid, key);
+        }
     }
     *slotByte = 0;
     int whatList = onWhatList(recordPage);
@@ -475,13 +491,20 @@ void deleteHeapFile(PageId headerPage) {
 }
 
 
-void createIndex(RelationInfo *rel, int column, int order) {
+void createIndex(RelationInfo *rel, int column, int32_t order) {
     rel->indexes[column] = newBPlusNode(order);
     ListRecordsIterator *iter = GetListRecordsIterator(rel);
     Record *rec;
+    int i=0;
     while ( rec = GetNextRecord(iter) ) {
         int32_t key = *(int32_t*)getAtColumn(rec, column);
+        //printf("Before Inserting Record With Key = %d\n", key);
+        // printTree(rel->indexes[column], 0); printf("\n");
         insertRID(&(rel->indexes[column]), rec->rid, key);
+        i++;
+        //printf("After Inserting Record With Key = %d\n", key);
+        //printTree(rel->indexes[column], 0);
+        //printf("\n\n");
     }
 }
 

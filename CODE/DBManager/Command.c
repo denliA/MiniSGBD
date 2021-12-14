@@ -674,7 +674,7 @@ CreateIndexCommand CreateCreateIndexCommand(char *command) {
     nextToken(&com, &tok); // KEY
     nextToken(&com, &tok); // = 
     nextToken(&com, &tok); // clé
-    ci.column = tok.attr.iattr;
+    ci.column = getColumnIndex(ci.rel, tok.attr.sattr);
     nextToken(&com, &tok); // ORDER
     nextToken(&com, &tok); // = 
     nextToken(&com, &tok); // ordre
@@ -952,6 +952,9 @@ SELECTJOIN * FROM R1,S WHERE R1.C3=S.C6
 
 CREATE RELATION T2 (C1:string3,C2:int,C3:int,C4:int,C5:string5)
 BATCHINSERT INTO T2 FROM FILE T2.csv
+
+CREATEINDEX ON TMP KEY=C2 ORDER=5
+CREATEINDEX ON S1 KEY=C2 ORDER=5
 
 */
 
