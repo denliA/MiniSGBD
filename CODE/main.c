@@ -49,5 +49,6 @@ int main(int argc, char **argv) {
     }while(strncmp(commande,"EXIT",4)!=0);
     
     FinishDBM();
+    free(commande);
     return 0;
 }
